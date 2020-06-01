@@ -9,16 +9,16 @@ echo $WEBPORT
 echo $DISPLAY
 
 # install all installed plugins
-/opt/scipion/scipion installp -p scipion-em-eman2 -j 12
-/opt/scipion/scipion installp -p scipion-em-xmipp -j 12
-/opt/scipion/scipion installb xmippBin_Debian -j 12
+#/opt/scipion/scipion installp -p scipion-em-eman2 -j 12
+#/opt/scipion/scipion installp -p scipion-em-xmipp -j 12
+#/opt/scipion/scipion installb xmippBin_Debian -j 12
 
-/opt/scipion/scipion installp -p scipion-em-chimera -j 12
-/opt/scipion/scipion installp -p scipion-em-empiar -j 12
-/opt/scipion/scipion installp -p scipion-em-gctf -j 12
-/opt/scipion/scipion installp -p scipion-em-gautomatch -j 12
-/opt/scipion/scipion installp -p scipion-em-motioncorr -j 12
-/opt/scipion/scipion installp -p scipion-em-relion -j 12
+#/opt/scipion/scipion installp -p scipion-em-chimera -j 12
+#/opt/scipion/scipion installp -p scipion-em-empiar -j 12
+#/opt/scipion/scipion installp -p scipion-em-gctf -j 12
+#/opt/scipion/scipion installp -p scipion-em-gautomatch -j 12
+#/opt/scipion/scipion installp -p scipion-em-motioncorr -j 12
+#/opt/scipion/scipion installp -p scipion-em-relion -j 12
 
 mkdir /home/scipionuser/.vnc
 echo $MYVNCPASSWORD
