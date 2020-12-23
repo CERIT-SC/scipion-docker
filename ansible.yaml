@@ -208,28 +208,28 @@
       group: "{{ scipion_user }}"
       state: directory
 
-  - name: Download SLURM package
-    get_url:
-      url: "http://ftpgrycap.i3m.upv.es/src/slurm-{{ slurm_version }}.tar.bz2"
-      dest: /tmp/slurm.tar.bz2
-  - name: Decompress SLURM package
-    command:
-      cmd: tar xjf slurm.tar.bz2
-      chdir: /tmp
-      creates: "/tmp/slurm-{{ slurm_version }}"
-  - name: Configure SLURM
-    command:
-      cmd: ./configure
-      chdir: "/tmp/slurm-{{ slurm_version }}"
-      creates: "/tmp/slurm-{{ slurm_version }}/config.log"
-  - name: Compile (make) SLURM
-    command:
-      cmd: make
-      chdir: "/tmp/slurm-{{ slurm_version }}"
-  - name: Install SLURM
-    command:
-      cmd: make install
-      chdir: "/tmp/slurm-{{ slurm_version }}"
+#··  - name: Download SLURM package
+#    get_url:
+#      url: "http://ftpgrycap.i3m.upv.es/src/slurm-{{ slurm_version }}.tar.bz2"
+#      dest: /tmp/slurm.tar.bz2
+#  - name: Decompress SLURM package
+#    command:
+#      cmd: tar xjf slurm.tar.bz2
+#      chdir: /tmp
+#      creates: "/tmp/slurm-{{ slurm_version }}"
+#  - name: Configure SLURM
+#    command:
+#      cmd: ./configure
+#      chdir: "/tmp/slurm-{{ slurm_version }}"
+#      creates: "/tmp/slurm-{{ slurm_version }}/config.log"
+#  - name: Compile (make) SLURM
+#    command:
+#      cmd: make
+#      chdir: "/tmp/slurm-{{ slurm_version }}"
+#  - name: Install SLURM
+#    command:
+#      cmd: make install
+#      chdir: "/tmp/slurm-{{ slurm_version }}"
 
   - name: Restart display-manager
     service:
