@@ -142,10 +142,6 @@ COPY plugin-list.txt ${S_USER_HOME}/
 
 COPY hosts.conf ${S_USER_HOME}/scipion3/config/
 
-USER scipionuser
-
-RUN for pl in $(cat ${S_USER_HOME}/plugin-list.txt); do ${S_USER_HOME}/scipion3/scipion3 installp --noBin -p $pl -j $(nproc); done
-
 # run docker-entrypoint.sh
 COPY docker-entrypoint-root.sh /
 COPY docker-entrypoint.sh /
