@@ -19,3 +19,9 @@ echo $MYVNCPASSWORD
 echo $MYVNCPASSWORD | vncpasswd -f > $S_USER_HOME/.vnc/passwd
 chmod 0600 $S_USER_HOME/.vnc/passwd
 /opt/websockify/run ${WEBPORT} --cert=/self.pem --ssl-only --web=/opt/noVNC --wrap-mode=ignore -- vncserver ${DISPLAY} -xstartup /tmp/xsession
+
+chown munge.munge /etc/munge/munge.key
+
+service munge start
+
+chown scipionuser.scipionuser /home/scipionuser/ScipionUserData

@@ -57,6 +57,8 @@ RUN apt update && apt install -y --no-install-recommends \
         make \
         bzip2
 
+RUN useradd --uid 1052 -M slurm
+
 # Clean apt
 RUN rm -rf /var/lib/apt/lists/*
 
@@ -135,6 +137,14 @@ ENV MYVNCPASSWORD abc
 ENV EDITOR=/usr/bin/pluma
 
 COPY self.pem /
+
+COPY plugin-list.txt ${S_USER_HOME}/
+
+COPY hosts.conf ${S_USER_HOME}/scipion3/config/
+
+USER scipionuser
+
+RUN for pl in $(cat ${S_USER_HOME}/plugin-list.txt); do ${S_USER_HOME}/scipion3/scipion3 installp --noBin -p $pl -j $(nproc); done
 
 # run docker-entrypoint.sh
 COPY docker-entrypoint-root.sh /
