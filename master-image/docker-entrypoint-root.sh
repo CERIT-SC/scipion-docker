@@ -14,5 +14,13 @@ echo -e "$USER_PASS\n$USER_PASS" | passwd $S_USER
 
 chown $S_USER:$S_USER $S_USER_HOME/scipion3/software/em
 
+chown munge.munge /etc/munge/munge.key
+
+service munge start
+
+chown $S_USER:$S_USER $S_USER_HOME/ScipionUserData
+
+chown $S_USER:$S_USER $S_USER_HOME/scipion3/config/hosts.conf
+
 su -c ./docker-entrypoint.sh $S_USER
 
