@@ -1,5 +1,6 @@
 
-FROM registry.gitlab.ics.muni.cz:443/eosc-synergy/scipion-docker/base-image:dev
+#FROM registry.gitlab.ics.muni.cz:443/eosc-synergy/scipion-docker/base-image:dev
+FROM ldelcano/scipion-base:slurm
 
 ARG TURBOVNC_VERSION=2.2.4
 ARG VIRTUALGL_VERSION=2.5.2
@@ -110,6 +111,10 @@ COPY plugin-list.txt ${S_USER_HOME}/
 RUN for pl in $(cat ${S_USER_HOME}/plugin-list.txt); do ${S_USER_HOME}/scipion3/scipion3 installp -p $pl -j $(nproc) --noBin; done
 
 COPY hosts.conf ${S_USER_HOME}/scipion3/config/
+
+# This is needed since we do not have binaries installed in master docker
+RUN mkdir ${S_USER_HOME}/scipion3/software/em/gctf-1.18
+RUN mkdir ${S_USER_HOME}/scipion3/software/em/motioncor2-1.4.0
 
 USER root
 #######################
