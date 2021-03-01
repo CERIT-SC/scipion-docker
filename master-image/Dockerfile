@@ -22,6 +22,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
 	xfce4 \
 	xauth \
 	xterm \
+	konsole \
 	pluma
 
 # libjpeg-turbo requirements

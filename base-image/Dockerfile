@@ -6,7 +6,7 @@
 #FROM nvidia/cudagl:10.1-runtime-ubuntu18.04
 
 # cannot compile xmipp using "runtime" image
-FROM nvidia/cudagl:10.1-devel-ubuntu18.04
+FROM nvidia/cudagl:10.2-devel-ubuntu18.04
 
 ARG S_USER=scipionuser
 ARG S_USER_HOME=/home/${S_USER}
