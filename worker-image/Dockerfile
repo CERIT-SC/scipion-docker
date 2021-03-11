@@ -1,6 +1,7 @@
 
 #FROM registry.gitlab.ics.muni.cz:443/eosc-synergy/scipion-docker/base-image:dev
-FROM ldelcano/scipion-base:slurm
+#FROM ldelcano/scipion-base:slurm
+FROM jhandl/scipion-base:v3
 
 ARG S_USER=scipionuser
 ARG S_USER_HOME=/home/${S_USER}

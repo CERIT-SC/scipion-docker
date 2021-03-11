@@ -7,6 +7,9 @@ S_USER_HOME=/home/${S_USER}
 
 ln -s ${S_USER_HOME}/ScipionUserData/data ${S_USER_HOME}/scipion3/data
 
+# run base-image's docker-entrypoint-base.sh
+/docker-entrypoint-base.sh
+
 export PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
 
 echo $USE_DISPLAY
