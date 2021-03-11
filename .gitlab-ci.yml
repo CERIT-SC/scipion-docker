@@ -71,4 +71,5 @@ build_worker_image:
   only:
     - master
     - dev
+    - onedata
 
