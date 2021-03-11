@@ -49,6 +49,7 @@ build_base_image:
   only:
     - master
     - dev
+    - onedata
 
 build_master_image:
   stage: build_node_image
@@ -60,6 +61,7 @@ build_master_image:
   only:
     - master
     - dev
+    - onedata
 
 build_worker_image:
   stage: build_node_image
