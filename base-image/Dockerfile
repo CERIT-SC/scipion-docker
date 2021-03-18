@@ -59,16 +59,19 @@ ENV CUDA_BIN "/usr/local/cuda/bin"
 
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 
-# data directory for mount NFS using docker volume
+# data directory for mount OneData using docker volume
 RUN mkdir /mnt/onedata && \
     chown -R ${S_USER}:${S_USER} /mnt/onedata
-RUN ln -s /mnt/onedata/scipion-docker-test ${S_USER_HOME}/ScipionUserData && \
+
+# prepare working directory
+RUN mkdir ${S_USER_HOME}/ScipionUserData && \
+    cd ${S_USER_HOME}/ScipionUserData && \
+    mkdir projects logs
+
+# link OneData to working directory
+RUN ln -s /mnt/onedata ${S_USER_HOME}/ScipionUserData/data && \
     chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/ScipionUserData
 
-# mount OneData
-#ENV ONEDATA_TOKEN MDAyMWxvY2F00aW9uIG9uZXpvbmUub25lZGF00YS5vcmcKMDA2YmlkZW500aWZpZXIgMi9ubWQvdXNyLTI4YWRmMmViZDY2NTczMDhkMTI4NTJjZWMwYzFmMDkwY2g2NTczL2FjdC9mYzRiYWYwODQzZjUxMWEzMjQ2YTU4YWFhNzU1NGM3YmNoZWFjZAowMDE4Y2lkIHNlcnZpY2UgPSBvcHctKgowMDJmc2lnbmF00dXJlILwbQY74hrfqu4DajWjNpXN8sV7fHz01ebs8OhO00HrLd01Cg
-#RUN modprobe fuse
-#RUN oneclient -H muni.onezone.onedata.org -t ${ONEDATA_TOKEN} /mnt/onedata
 
 COPY docker-entrypoint-base.sh /
 RUN chmod +x /docker-entrypoint-base.sh
