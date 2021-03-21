@@ -20,7 +20,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Run build action
-      uses: CERIT-SC/scipion-docker/actions/build-action
+      uses: CERIT-SC/scipion-docker/actions/build-action@master
       with:
         node_type: base-image
         build_stage: base
@@ -39,7 +39,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Run build action
-      uses: CERIT-SC/scipion-docker/actions/build-action
+      uses: CERIT-SC/scipion-docker/actions/build-action@master
       with:
         node_type: master-image
         build_stage: node
@@ -58,7 +58,7 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Run build action
-      uses: CERIT-SC/scipion-docker/actions/build-action
+      uses: CERIT-SC/scipion-docker/actions/build-action@master
       with:
         node_type: worker-image
         build_stage: node
