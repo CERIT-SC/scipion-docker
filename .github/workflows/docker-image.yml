@@ -16,6 +16,8 @@ jobs:
       with:
         ref: ${{ github.ref }}
 
+    - run: ls -la . && pwd
+    - run: ls -la .github/
     - name: Login to DockerHub
       uses: docker/login-action@v1
       with:
