@@ -15,11 +15,11 @@ runs:
   using: "composite"
   steps:
   - name: Replace tag for a base image with branch name
-    if: ${{ inputs.build_stage = "node" }}
+    if: inputs.build_stage == 'node'
     run: sed -i -E "s/^FROM\s+(.+):.+$/FROM \1:${{ inputs.branch }}/" ${{ inputs.node_type }}/Dockerfile
 
   - name: Add priv key for the MN
-    if: ${{ inputs.node_type = "master-image" }}
+    if: inputs.node_type == 'master-image'
     run: echo "$PRIV_KEY" > master-image/self.pem;
 
   - name: Build and push the base-image / MN-image / WN-image
@@ -34,7 +34,7 @@ runs:
       tags: ${{ secrets.DOCKERHUB_USERNAME }}/scipion-docker/${{ inputs.node_type }}:${{ inputs.branch }}
 
   - name: Build and tag the image for master branch also with the string "latest"
-    if: ${{ inputs.branch = "master" }}
+    if: inputs.branch == 'master'
     uses: docker/build-push-action@v2
     with:
       context: ${{ inputs.node_type }}/.
