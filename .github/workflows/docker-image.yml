@@ -17,7 +17,8 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-
+        
+    - run: echo ${GITHUB_REF}
     - uses: actions/checkout@v2
     - name: Run build action
       uses: ./.github/actions/build-action
