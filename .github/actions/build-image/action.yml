@@ -21,6 +21,7 @@ runs:
   - name: Replace tag for a base image with branch name
     shell: bash
     run: |
+            echo ${{ inputs.branch }}
             if [ ${{ inputs.build_stage }} = 'node' ]; then
                 sed -i -E "s/^FROM\s+(.+):.+$/FROM \1:${{ inputs.branch }}/" ${{ inputs.node_type }}/Dockerfile
             fi
