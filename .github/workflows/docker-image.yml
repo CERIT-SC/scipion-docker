@@ -29,7 +29,6 @@ jobs:
         node_type: base-image
         build_stage: base
         branch: ${{ github.ref }}
-        dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
 
   build-master-image:
     needs: build-base-image
@@ -50,7 +49,6 @@ jobs:
         node_type: master-image
         build_stage: node
         branch: ${{ github.ref }}
-        dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
 
   build-worker-image:
     needs: build-base-image
@@ -71,5 +69,4 @@ jobs:
         node_type: worker-image
         build_stage: node
         branch: ${{ github.ref }}
-        dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
 

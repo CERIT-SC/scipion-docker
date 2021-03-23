@@ -11,8 +11,9 @@ inputs:
     description: Inherit branch name from workflow
     required: true
   dockerhub_username:
-    description: secret
-    required: true
+    description: DockerHub username
+    required: false
+    default: jhandl
 
 runs:
   using: "composite"
