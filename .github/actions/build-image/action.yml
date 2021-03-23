@@ -10,6 +10,9 @@ inputs:
   branch:
     description: Inherit branch name from workflow
     required: true
+  dockerhub_username:
+    description: secret
+    required: true
 
 runs:
   using: "composite"
@@ -31,7 +34,7 @@ runs:
   - name: Build and push the base-image / MN-image / WN-image
     shell: bash
     run: |
-            IMAGE_TAG=${{ secrets.DOCKERHUB_USERNAME }}/scipion-docker/${{ inputs.node_type }}:${{ inputs.branch }}
+            IMAGE_TAG=${{ inputs.dockerhub_username }}/scipion-docker/${{ inputs.node_type }}:${{ inputs.branch }}
             
             docker pull $IMAGE_TAG || true
             docker build --cache-from $IMAGE_TAG -t $IMAGE_TAG ${{ inputs.node_type }}/.
@@ -51,7 +54,7 @@ runs:
     shell: bash
     run: |
            if [ ${{ inputs.branch }} = 'master' ]; then
-               IMAGE_TAG=${{ secrets.DOCKERHUB_USERNAME }}/scipion-docker/${{ inputs.node_type }}:latest
+               IMAGE_TAG=${{ inputs.dockerhub_username }}/scipion-docker/${{ inputs.node_type }}:latest
 
                docker build --pull -t $IMAGE_TAG ${{ inputs.node_type }}/.
                docker push $IMAGE_TAG
