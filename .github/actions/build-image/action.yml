@@ -17,35 +17,44 @@ runs:
   - name: Replace tag for a base image with branch name
     shell: bash
     run: |
-            if [ '${{ inputs.build_stage }}' = 'node' ]; then
+            if [ ${{ inputs.build_stage }} = 'node' ]; then
                 sed -i -E "s/^FROM\s+(.+):.+$/FROM \1:${{ inputs.branch }}/" ${{ inputs.node_type }}/Dockerfile
             fi
 
   - name: Add priv key for the MN
     shell: bash
-    if: inputs.node_type == 'master-image'
     run: |
-            if [ '${{ inputs.node_type }}' = 'master-image' ]; then
+            if [ ${{ inputs.node_type }} = 'master-image' ]; then
                 echo "$PRIV_KEY" > master-image/self.pem;
             fi
 
   - name: Build and push the base-image / MN-image / WN-image
+    shell: bash
+    run: |
+            IMAGE_TAG=${{ secrets.DOCKERHUB_USERNAME }}/scipion-docker/${{ inputs.node_type }}:${{ inputs.branch }}
+            
+            docker pull $IMAGE_TAG || true
+            docker build --cache-from $IMAGE_TAG -t $IMAGE_TAG ${{ inputs.node_type }}/.
+            docker push $IMAGE_TAG
+
     # TODO cache
     # docker pull ${CI_REGISTRY_IMAGE}/${NODE_TYPE}:${CI_COMMIT_REF_NAME} || true
     # docker build --cache-from ${CI_REGISTRY_IMAGE}/${NODE_TYPE}:${CI_COMMIT_REF_NAME} -t "${CI_REGISTRY_IMAGE}/${NODE_TYPE}:${CI_COMMIT_REF_NAME}" ${NODE_TYPE}/.
 
-    uses: docker/build-push-action@v2
-    with:
-      context: ${{ inputs.node_type }}/.
-      push: true
-      tags: ${{ secrets.DOCKERHUB_USERNAME }}/scipion-docker/${{ inputs.node_type }}:${{ inputs.branch }}
+    #    uses: docker/build-push-action@v2
+    #    with:
+    #      context: ${{ inputs.node_type }}/.
+    #      push: true
+    #      tags: ${{ secrets.DOCKERHUB_USERNAME }}/scipion-docker/${{ inputs.node_type }}:${{ inputs.branch }}
 
   - name: Build and tag the image for master branch also with the string "latest"
     shell: bash
     run: |
-           if [ '${{ inputs.branch }}' = 'master' ]; then
-               docker build --pull -t '${{ secrets.DOCKERHUB_USERNAME }}/scipion-docker/${{ inputs.node_type }}:latest' ${{ inputs.node_type }}/.
-               docker push '${{ secrets.DOCKERHUB_USERNAME }}/scipion-docker/${{ inputs.node_type }}:latest'
+           if [ ${{ inputs.branch }} = 'master' ]; then
+               IMAGE_TAG=${{ secrets.DOCKERHUB_USERNAME }}/scipion-docker/${{ inputs.node_type }}:latest
+
+               docker build --pull -t $IMAGE_TAG ${{ inputs.node_type }}/.
+               docker push $IMAGE_TAG
            fi
 
     #if: inputs.branch == 'master'
