@@ -17,10 +17,9 @@ jobs:
         ref: ${{ github.ref }}
 
     - name: Extract branch name
-      shell: bash
-      run: echo "::set-env name=BRANCH_NAME::$(echo $GITHUB_REF | cut -d'/' -f3)"
+      id: branch-name
+      uses: tj-actions/branch-names@v2.2
 
-    - run: tree -a .
     - name: Login to DockerHub
       uses: docker/login-action@v1
       with:
@@ -32,7 +31,7 @@ jobs:
       with:
         node_type: base-image
         build_stage: base
-        branch: ${BRANCH_NAME}
+        branch: ${{ steps.branch-name.outputs.current_branch }}
 
   build-master-image:
     needs: build-base-image
@@ -42,8 +41,8 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Extract branch name
-      shell: bash
-      run: echo "::set-env name=BRANCH_NAME::$(echo $GITHUB_REF | cut -d'/' -f3)"
+      id: branch-name
+      uses: tj-actions/branch-names@v2.2
 
     - name: Login to DockerHub
       uses: docker/login-action@v1
@@ -56,7 +55,7 @@ jobs:
       with:
         node_type: master-image
         build_stage: node
-        branch: ${BRANCH_NAME}
+        branch: ${{ steps.branch-name.outputs.current_branch }}
 
   build-worker-image:
     needs: build-base-image
@@ -66,8 +65,8 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Extract branch name
-      shell: bash
-      run: echo "::set-env name=BRANCH_NAME::$(echo $GITHUB_REF | cut -d'/' -f3)"
+      id: branch-name
+      uses: tj-actions/branch-names@v2.2
 
     - name: Login to DockerHub
       uses: docker/login-action@v1
@@ -80,5 +79,5 @@ jobs:
       with:
         node_type: worker-image
         build_stage: node
-        branch: ${BRANCH_NAME}
+        branch: ${{ steps.branch-name.outputs.current_branch }}
 
