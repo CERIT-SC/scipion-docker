@@ -19,6 +19,7 @@ runs:
            if [ '${{ inputs.build_stage }}' = 'node' ]; then
              sed -i -E "s/^FROM\s+(.+):.+$/FROM \1:${{ inputs.branch }}/" ${{ inputs.node_type }}/Dockerfile
            fi
+    shell: bash
 
   - name: Add priv key for the MN
     if: inputs.node_type == 'master-image'
