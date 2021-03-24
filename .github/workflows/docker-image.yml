@@ -29,7 +29,7 @@ jobs:
     - name: Run build action
       uses: ./.github/actions/build-image
       with:
-        node_type: base-image
+        node_type: scipion-base
         build_stage: base
         branch: ${{ steps.branch-name.outputs.current_branch }}
 
@@ -53,7 +53,7 @@ jobs:
     - name: Run build action
       uses: ./.github/actions/build-image
       with:
-        node_type: master-image
+        node_type: scipion-master
         build_stage: node
         branch: ${{ steps.branch-name.outputs.current_branch }}
 
@@ -77,7 +77,7 @@ jobs:
     - name: Run build action
       uses: ./.github/actions/build-image
       with:
-        node_type: worker-image
+        node_type: scipion-worker
         build_stage: node
         branch: ${{ steps.branch-name.outputs.current_branch }}
 

@@ -2,7 +2,7 @@ name: Build image
 
 inputs:
   node_type:
-    description: base-image / master-image / worker-image
+    description: scipion-base / scipion-master / scipion-worker
     required: true
   build_stage:
     description: base / node
@@ -13,7 +13,7 @@ inputs:
   dockerhub_username:
     description: DockerHub username
     required: false
-    default: jhandl
+    default: ceritsc
 
 runs:
   using: "composite"
@@ -21,22 +21,26 @@ runs:
   - name: Replace tag for a base image with branch name
     shell: bash
     run: |
-            echo ${{ inputs.branch }}
+            echo ${{ inputs.build_stage }}
             if [ ${{ inputs.build_stage }} = 'node' ]; then
+                echo "Debug info: sed"
+
                 sed -i -E "s/^FROM\s+(.+):.+$/FROM \1:${{ inputs.branch }}/" ${{ inputs.node_type }}/Dockerfile
             fi
 
   - name: Add priv key for the MN
     shell: bash
     run: |
-            if [ ${{ inputs.node_type }} = 'master-image' ]; then
+            if [ ${{ inputs.node_type }} = 'scipion-master' ]; then
+                echo "Debug info: priv key"
+
                 echo "$PRIV_KEY" > master-image/self.pem;
             fi
 
   - name: Build and push the base-image / MN-image / WN-image
     shell: bash
     run: |
-            IMAGE_TAG=${{ inputs.dockerhub_username }}/scipion-docker/${{ inputs.node_type }}:${{ inputs.branch }}
+            IMAGE_TAG=${{ inputs.dockerhub_username }}/${{ inputs.node_type }}:${{ inputs.branch }}
             
             docker pull $IMAGE_TAG || true
             docker build --cache-from $IMAGE_TAG -t $IMAGE_TAG ${{ inputs.node_type }}/.
@@ -56,7 +60,9 @@ runs:
     shell: bash
     run: |
            if [ ${{ inputs.branch }} = 'master' ]; then
-               IMAGE_TAG=${{ inputs.dockerhub_username }}/scipion-docker/${{ inputs.node_type }}:latest
+               echo "Debug info: master branch"
+
+               IMAGE_TAG=${{ inputs.dockerhub_username }}/${{ inputs.node_type }}:latest
 
                docker build --pull -t $IMAGE_TAG ${{ inputs.node_type }}/.
                docker push $IMAGE_TAG
