@@ -1,5 +1,5 @@
 
-FROM registry.gitlab.ics.muni.cz:443/eosc-synergy/scipion-docker/base-image:dev
+FROM ceritsc/scipion-base:dev
 
 ARG S_USER=scipionuser
 ARG S_USER_HOME=/home/${S_USER}
