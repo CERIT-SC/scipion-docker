@@ -36,7 +36,7 @@ runs:
             if [ ${{ inputs.node_type }} = 'scipion-master' ]; then
                 echo "Debug info: priv key"
 
-                echo ${{ inputs.priv_key }} > master-image/self.pem;
+                echo ${{ inputs.priv_key }} > scipion-master/self.pem;
             fi
 
   - name: Build and push the base-image / MN-image / WN-image
