@@ -31,6 +31,7 @@ jobs:
       with:
         node_type: scipion-base
         build_stage: base
+        priv_key: ${{ secrets.PRIV_KEY }}
         branch: ${{ steps.branch-name.outputs.current_branch }}
 
   build-master-image:
@@ -55,6 +56,7 @@ jobs:
       with:
         node_type: scipion-master
         build_stage: node
+        priv_key: ${{ secrets.PRIV_KEY }}
         branch: ${{ steps.branch-name.outputs.current_branch }}
 
   build-worker-image:
@@ -79,5 +81,6 @@ jobs:
       with:
         node_type: scipion-worker
         build_stage: node
+        priv_key: ${{ secrets.PRIV_KEY }}
         branch: ${{ steps.branch-name.outputs.current_branch }}
 

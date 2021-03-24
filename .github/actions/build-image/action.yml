@@ -10,6 +10,9 @@ inputs:
   branch:
     description: Inherit branch name from workflow
     required: true
+  priv_key:
+    description: key
+    required: true
   dockerhub_username:
     description: DockerHub username
     required: false
@@ -21,7 +24,6 @@ runs:
   - name: Replace tag for a base image with branch name
     shell: bash
     run: |
-            echo ${{ inputs.build_stage }}
             if [ ${{ inputs.build_stage }} = 'node' ]; then
                 echo "Debug info: sed"
 
@@ -34,7 +36,7 @@ runs:
             if [ ${{ inputs.node_type }} = 'scipion-master' ]; then
                 echo "Debug info: priv key"
 
-                echo "$PRIV_KEY" > master-image/self.pem;
+                echo ${{ inputs.priv_key }} > master-image/self.pem;
             fi
 
   - name: Build and push the base-image / MN-image / WN-image
