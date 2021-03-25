@@ -11,7 +11,7 @@ inputs:
     description: Inherit branch name from workflow
     required: true
   priv_key:
-    description: key
+    description: Key
     required: true
   dockerhub_username:
     description: DockerHub username
@@ -39,9 +39,10 @@ runs:
                 echo ${{ inputs.priv_key }} > scipion-master/self.pem;
             fi
 
-  - name: Build and push the base-image / MN-image / WN-image
+  - name: Build and push the scipion-base / scipion-master / scipion-worker
     shell: bash
     run: |
+            echo "Debug info: build image"
             IMAGE_TAG=${{ inputs.dockerhub_username }}/${{ inputs.node_type }}:${{ inputs.branch }}
             
             docker pull $IMAGE_TAG || true
