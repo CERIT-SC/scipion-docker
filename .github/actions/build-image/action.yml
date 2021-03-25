@@ -30,14 +30,14 @@ runs:
                 sed -i -E "s/^FROM\s+(.+):.+$/FROM \1:${{ inputs.branch }}/" ${{ inputs.node_type }}/Dockerfile
             fi
 
-  - name: Add priv key for the MN
-    shell: bash
-    run: |
-            if [ ${{ inputs.node_type }} = 'scipion-master' ]; then
-                echo "Debug info: priv key"
-
-                echo ${{ inputs.priv_key }} > scipion-master/self.pem;
-            fi
+#  - name: Add priv key for the MN
+#    shell: bash
+#    run: |
+#            if [ ${{ inputs.node_type }} = 'scipion-master' ]; then
+#                echo "Debug info: priv key"
+#
+#                echo ${{ inputs.priv_key }} > scipion-master/self.pem;
+#            fi
 
   - name: Build and push the scipion-base / scipion-master / scipion-worker
     shell: bash
