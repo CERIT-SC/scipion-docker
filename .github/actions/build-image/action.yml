@@ -49,16 +49,6 @@ runs:
             docker build --cache-from $IMAGE_TAG -t $IMAGE_TAG ${{ inputs.node_type }}/.
             docker push $IMAGE_TAG
 
-    # TODO cache
-    # docker pull ${CI_REGISTRY_IMAGE}/${NODE_TYPE}:${CI_COMMIT_REF_NAME} || true
-    # docker build --cache-from ${CI_REGISTRY_IMAGE}/${NODE_TYPE}:${CI_COMMIT_REF_NAME} -t "${CI_REGISTRY_IMAGE}/${NODE_TYPE}:${CI_COMMIT_REF_NAME}" ${NODE_TYPE}/.
-
-    #    uses: docker/build-push-action@v2
-    #    with:
-    #      context: ${{ inputs.node_type }}/.
-    #      push: true
-    #      tags: ${{ secrets.DOCKERHUB_USERNAME }}/scipion-docker/${{ inputs.node_type }}:${{ inputs.branch }}
-
   - name: Build and tag the image for master branch also with the string "latest"
     shell: bash
     run: |
@@ -70,12 +60,4 @@ runs:
                docker build --pull -t $IMAGE_TAG ${{ inputs.node_type }}/.
                docker push $IMAGE_TAG
            fi
-
-    #if: inputs.branch == 'master'
-    #uses: docker/build-push-action@v2
-    #with:
-    #  context: ${{ inputs.node_type }}/.
-    #  push: true
-    #  pull: true
-    #  tags: ${{ secrets.DOCKERHUB_USERNAME }}/scipion-docker/${{ inputs.node_type }}:latest
 
