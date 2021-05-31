@@ -1,11 +1,3 @@
-# noVNC + TurboVNC + VirtualGL
-# http://novnc.com
-# https://turbovnc.org
-# https://virtualgl.org
-
-#FROM nvidia/cudagl:10.1-runtime-ubuntu18.04
-
-# cannot compile xmipp using "runtime" image
 FROM nvidia/cudagl:10.2-devel-ubuntu18.04
 
 ARG S_USER=scipionuser
@@ -13,51 +5,37 @@ ARG S_USER_HOME=/home/${S_USER}
 
 RUN apt update && apt upgrade -y
 
-RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y \
-	tzdata
+RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y --no-install-recommends \
+        tzdata
+
+#RUN du -sh / || true
 
 # Install necessary packages
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
-	bash \
-	make \
-	curl \
-	wget \
-	openssh-client \
-	ca-certificates \
-	python3 \
-	bison \
-	flex \
-	git \
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+        bash \
+        make \
+        curl \
+        wget \
+        openssh-client \
+        ca-certificates \
+        python3 \
+        bison \
+        flex \
+        git \
         gettext
 # gettext - envsubst
 
-# bison, flex, ca-certificates, git ??
-
 # Required by Scipion
-RUN apt update && apt install -y \
-	libxv1 \
-	openjdk-8-jdk \
-	libfftw3-dev \
-	libtiff-dev
-
-# Install kubectl
 RUN apt update && apt install -y --no-install-recommends \
-        apt-transport-https \
-        ca-certificates \
-        curl
-RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-RUN echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
-RUN apt update && apt install -y --no-install-recommends \
-        kubectl
+        libxv1 \
+        openjdk-8-jdk \
+        libfftw3-dev \
+        libtiff-dev
 
 # Required by Scipion for conda installation
-RUN apt-get -y install sudo wget gcc g++ libopenmpi-dev mesa-utils openssh-client cmake libnss3 libfontconfig1 libxrender1 libxtst6 xterm libasound2 libglu1 libxcursor1 libdbus-1-3 libxkbcommon-x11-0 libhdf5-dev
+RUN apt-get -y install --no-install-recommends sudo wget gcc g++ libopenmpi-dev mesa-utils openssh-client cmake libnss3 libfontconfig1 libxrender1 libxtst6 xterm libasound2 libglu1 libxcursor1 libdbus-1-3 libxkbcommon-x11-0 libhdf5-dev
 
-# Install oneclient (OneData client)
-RUN curl -sS  http://get.onedata.org/oneclient.sh | bash
-
-# Clean apt
-RUN rm -rf /var/lib/apt/lists/*
+# TODO OneData
 
 # Create scipionuser
 RUN groupadd --gid 1042 ${S_USER} && \
@@ -72,22 +50,10 @@ ENV CUDA_BIN "/usr/local/cuda/bin"
 
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 
-# data directory for mount OneData using docker volume
-RUN mkdir /mnt/onedata && \
-    chown -R ${S_USER}:${S_USER} /mnt/onedata
-
 # prepare working directory
 RUN mkdir ${S_USER_HOME}/ScipionUserData && \
     cd ${S_USER_HOME}/ScipionUserData && \
     mkdir projects logs
-
-# link OneData to working directory
-#RUN ln -s /mnt/onedata ${S_USER_HOME}/ScipionUserData/data && \
-#    chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/ScipionUserData
-
-
-#COPY docker-entrypoint-base.sh /
-#RUN chmod +x /docker-entrypoint-base.sh
 
 USER ${S_USER}
 #######################
@@ -96,7 +62,6 @@ RUN ["/bin/bash", "-c", "echo $CUDA_HOME"]
 RUN ["/bin/bash", "-c", "echo $PATH"]
 
 RUN du -sh / || true
-
 
 # Install Scipion
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ${S_USER_HOME}/miniconda.sh
@@ -120,19 +85,27 @@ RUN ln -s ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/build ${S_USER_H
 
 RUN du -sh / || true
 
-
 # Disable conda auto activation
 RUN ${S_USER_HOME}/miniconda3/bin/conda config --set auto_activate_base false
 
+RUN ${S_USER_HOME}/scipion3/scipion3 installp -p scipion-em-xmipp -j $(nproc)
+
 USER root
+######################
 
-RUN mkdir /opt/k8s
-COPY res/depl-tool.yaml /opt/k8s/
-COPY res/hosts.conf ${S_USER_HOME}/scipion3/config/hosts.conf
-RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/hosts.conf
+RUN du -sh / || true
 
-USER ${S_USER}
-#######################
+RUN rm -rf ${S_USER_HOME}/scipion3/software/bindings
+RUN rm -rf ${S_USER_HOME}/scipion3/software/lib
+RUN rm -rf ${S_USER_HOME}/scipion3/software/tmp
 
-ENTRYPOINT ["bash"]
+RUN du -sh / || true
+
+# run docker-entrypoint.sh
+COPY docker-entrypoint-root.sh /
+COPY docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint-root.sh && \
+    chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint-root.sh"]
 

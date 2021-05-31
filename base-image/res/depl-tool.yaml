@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: scipion-tool-job-$TOOL_SUBST_NAME
+spec:
+  ttlSecondsAfterFinished: 30
+  template:
+    metadata:
+      labels:
+        name: scipion-tool-job-$TOOL_SUBST_NAME
+    spec:
+      containers:
+      - name: scipion-tool-job-$TOOL_SUBST_NAME
+        image: jhandl/scipion-tool:tool
+        env:
+        - name: ROOT_PASS
+          value: "abc"
+        - name: USER_PASS
+          value: "abc"
+        - name: TOOL_COMMAND
+          value: "$TOOL_SUBST_COMMAND"
+        volumeMounts:
+        - name: scipion-user-data
+          mountPath: /home/scipionuser/ScipionUserData
+      restartPolicy: Never
+      volumes:
+      - name: scipion-user-data
+        hostPath:
+          path: /home/jhandl/k8s-volume
+

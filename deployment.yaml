@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scipion-master
+spec:
+  selector:
+    matchLabels:
+      app: scipion-master
+  replicas: 1 # tells deployment to run 2 pods matching the template
+  template:
+    metadata:
+      labels:
+        app: scipion-master
+    spec:
+      containers:
+      - name: scipion-master
+        image: jhandl/scipion-mn:tool
+        ports:
+        - containerPort: 5904
+        env:
+        - name: ROOT_PASS
+          value: "abc"
+        - name: USER_PASS
+          value: "abc"
+        - name: USE_DISPLAY
+          value: "4"
+        volumeMounts:
+        - name: x-socket
+          mountPath: /tmp/.X11-unix/X0
+        - name: scipion-user-data
+          mountPath: /home/scipionuser/ScipionUserData
+      serviceAccountName: pod-reader-sa
+      volumes:
+      - name: x-socket
+        hostPath:
+          path: /tmp/.X11-unix/X0
+      - name: scipion-user-data
+        hostPath:
+          path: /home/jhandl/k8s-volume

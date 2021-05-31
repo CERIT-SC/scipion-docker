@@ -1,0 +1,56 @@
+
+--------------------
+Postup pro spusteni
+--------------------
+
+1. Build Masteru a Toolu
+base-image/build.sh
+tool-image/build.sh
+
+2. Import Masteru a Toolu z local docker registry do k8s
+base-image/import-to-k8s.sh
+base-image/import-to-k8s.sh
+
+3. Spusteni Masteru
+microk8s.kubectl apply -f deployment.yaml
+
+4. Pripojeni do VNC na adrese: https://keras.ics.muni.cz:30008/
+   (keras ma zatim pevne nastaveny port pomoci NodePort v k8s)
+
+5. Vytvoreni projektu ve Scipionu
+   (nemam data, neumim vytvorit projekt, tak to udelam spustenim testu - ten nejaky data stahne a vytvori projekt)
+/home/scipionuser/scipion3/scipion3 test xmipp3.tests.test_protocols_xmipp_mics.TestXmippCTFEstimation
+
+6. Otevreni Scipionu a testovani
+   (pri testovani se musi zaskrtnout "Use queue" na Yes a "Run mode" na Restart)
+
+
+-------------
+Dulezite soubory
+-------------
+
+/home/scipionuser/scipion3/hosts.conf
+
+# definice pro deployment jobu (k8s) spousteny souborem hosts.conf
+/opt/k8s/depl-tool.yaml
+
+# nejaky launcher toolu (dulezite jen pokud se bude resit zmensovani image tim, ze se promaze instalace scipion)
+/home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/scipion/__main__.py
+/home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/apps/pw_protocol_run.py
+
+-------------
+Info
+-------------
+
+Tasky obcas failnou. Podle Laury by to nemelo byt zpusobene nejakym time limitem na strane scipionu (viz Slack - "mu-cesnet").
+V hosts.conf nefunguje Cancel a Check.
+Nevim, kdo a jak nastavuje v hosts.conf promennou JOB_ID.
+Cancel se snazi zabit proces tasku/jobu. To se mu ale nepovede, protoze task/job bezi v k8s a ne jako proces v masteru.
+
+Vzorovy hosts.conf od Laury (pro Slurm):
+https://github.com/CERIT-SC/scipion-docker/blob/slurm/master-image/hosts.conf
+
+docs k hosts.conf:
+https://scipion-em.github.io/docs/docs/scipion-modes/host-configuration.html
+
+
