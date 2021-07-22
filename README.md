@@ -163,7 +163,7 @@ Note that you will now need to start the docker image with "**--runtime=nvidia**
 
 #### Re-pull the image before running the container
 ```bash
-docker pull ldelcano/scipion-master:slurm
+docker pull ldelcano/scipion-master
 ```
 #### Run
 
@@ -195,7 +195,7 @@ Both should print output containing information about your nVidia graphics card.
 
 #### Re-pull the image before running the container
 ```bash
-docker pull ldelcano/scipion-worker:slurm
+docker pull ldelcano/scipion-worker
 ```
 
 #### Run

@@ -1,6 +1,6 @@
 
 #FROM registry.gitlab.ics.muni.cz:443/eosc-synergy/scipion-docker/base-image:dev
-FROM ldelcano/scipion-worker:master
+FROM ldelcano/scipion-worker
 
 ARG TURBOVNC_VERSION=2.2.4
 ARG LIBJPEG_VERSION=1.5.2
@@ -12,7 +12,7 @@ ARG CRYOSPARC_VERSION=3.1.0
 
 ARG S_USER=scipionuser
 ARG S_USER_HOME=/home/${S_USER}
-ARG CRYOSPARC_LICENSE=a3dc0cc0-3181-11ea-84d0-8b3771c7f13b
+ARG CRYOSPARC_LICENSE=a0e74f16-3181-11ea-84b9-d7e876129116
 
 USER root
 #######################
