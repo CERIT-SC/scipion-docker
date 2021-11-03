@@ -1,19 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: scipion-master-root
+  name: scipion-master
+  namespace: scipion-ns
 spec:
   selector:
     matchLabels:
-      app: scipion-master-root
-  replicas: 1 # tells deployment to run 2 pods matching the template
+      app: scipion-master
+  replicas: 1
   template:
     metadata:
       labels:
-        app: scipion-master-root
+        app: scipion-master
     spec:
       containers:
-      - name: scipion-master-root
+      - name: scipion-master
         image: jhandl/scipion-mn:tool
         imagePullPolicy: Always
         ports:
@@ -25,23 +26,30 @@ spec:
           value: "abc"
         - name: USE_DISPLAY
           value: "6"
-#        volumeMounts:
+        volumeMounts:
 #        - name: x-socket
 #          mountPath: /tmp/.X11-unix/X0
 #        - name: scipion-user-data
 #          mountPath: /home/scipionuser/ScipionUserData
+        - mountPath: "/home/scipionuser/ScipionUserData"
+          name: scipion-user-data
 #        resources:
 #          limits:
-#          nvidia.com/gpu: 1
-#        securityContext:
-#          privileged: false
-#          runAsUser: 1000
-#          runAsGroup: 1000
+#            nvidia.com/gpu: 1 # dedicated GPU
+#            cerit.io/gpu-mem: 1 # shared GPU
+        securityContext:
+          privileged: false
+          runAsUser: 1000
+          runAsGroup: 1000
       serviceAccountName: pod-reader-sa
-#      volumes:
+      volumes:
 #      - name: x-socket
 #        hostPath:
 #          path: /tmp/.X11-unix/X0
 #      - name: scipion-user-data
 #        hostPath:
 #          path: /home/jhandl/k8s-volume
+##        emptyDir: {}
+       - name: scipion-user-data
+         persistentVolumeClaim:
+           claimName: scipion-test-volume
