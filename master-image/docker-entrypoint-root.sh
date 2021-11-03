@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+echo "docker-entrypoint-root.sh"
+
+
 S_USER=scipionuser
 S_USER_HOME=/home/${S_USER}
 
@@ -22,9 +25,9 @@ echo -e "$USER_PASS\n$USER_PASS" | passwd $S_USER
 
 chown $S_USER:$S_USER $S_USER_HOME/scipion3/software/em
 
-chown munge.munge /etc/munge/munge.key
+#chown munge.munge /etc/munge/munge.key
 
-service munge start
+#service munge start
 
 su -c ./docker-entrypoint.sh $S_USER
 

@@ -34,12 +34,14 @@ RUN apt update && apt install -y --no-install-recommends \
 
 # Required by Scipion for conda installation
 RUN apt-get -y install --no-install-recommends sudo wget gcc g++ libopenmpi-dev mesa-utils openssh-client cmake libnss3 libfontconfig1 libxrender1 libxtst6 xterm libasound2 libglu1 libxcursor1 libdbus-1-3 libxkbcommon-x11-0 libhdf5-dev
+# Another MPI requirements
+RUN apt install -y libopenmpi-dev libopenmpi2 openmpi-bin openmpi-common
 
 # TODO OneData
 
 # Create scipionuser
-RUN groupadd --gid 1042 ${S_USER} && \
-    useradd --uid 1042 --create-home --home-dir ${S_USER_HOME} -s /bin/bash -g ${S_USER} ${S_USER} && \
+RUN groupadd --gid 1000 ${S_USER} && \
+    useradd --uid 1000 --create-home --home-dir ${S_USER_HOME} -s /bin/bash -g ${S_USER} ${S_USER} && \
     usermod -aG sudo ${S_USER}
 
 RUN chown -R ${S_USER}:${S_USER} ${S_USER_HOME}
@@ -88,18 +90,22 @@ RUN du -sh / || true
 # Disable conda auto activation
 RUN ${S_USER_HOME}/miniconda3/bin/conda config --set auto_activate_base false
 
-RUN ${S_USER_HOME}/scipion3/scipion3 installp -p scipion-em-xmipp -j $(nproc)
+
+ARG SD_PLUGIN
+ARG SD_BIN
+
+RUN if [ ! -z "$SD_PLUGIN" ]; then \
+        if [ -z "$SD_BIN" ]; then \
+            ${S_USER_HOME}/scipion3/scipion3 installp -p "$SD_PLUGIN" -j $(nproc); \
+        else \
+            ${S_USER_HOME}/scipion3/scipion3 installp -p "$SD_PLUGIN" --noBin -j $(nproc); \
+            ${S_USER_HOME}/scipion3/scipion3 installb "$SD_BIN" -j $(nproc); \
+        fi; \
+    fi
+
 
 USER root
 ######################
-
-RUN du -sh / || true
-
-RUN rm -rf ${S_USER_HOME}/scipion3/software/bindings
-RUN rm -rf ${S_USER_HOME}/scipion3/software/lib
-RUN rm -rf ${S_USER_HOME}/scipion3/software/tmp
-
-RUN du -sh / || true
 
 # run docker-entrypoint.sh
 COPY docker-entrypoint-root.sh /
@@ -107,5 +113,12 @@ COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint-root.sh && \
     chmod +x /docker-entrypoint.sh
 
-ENTRYPOINT ["/docker-entrypoint-root.sh"]
 
+RUN apt update && apt install -y --no-install-recommends iputils-ping strace
+
+#USER root
+USER $S_USER
+
+RUN export string="\ \ \ \ \ \ \ \ print(\"debugovacivypiszacatek-\" + str(self.getInputMicrographs()) + \"-debugovacivypiskonec\")" && sed -i "570 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/xmipp3/protocols/protocol_extract_particles_pairs.py
+#ENTRYPOINT ["/docker-entrypoint-root.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

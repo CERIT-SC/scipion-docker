@@ -10,6 +10,6 @@ spec:
     app: scipion-master-root
   ports:
   - protocol: TCP
-    port: 5906
-    targetPort: 5906
-    nodePort: 30006
+    port: 5907
+    targetPort: 5907
+    nodePort: 30007

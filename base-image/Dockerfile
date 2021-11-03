@@ -51,7 +51,10 @@ RUN apt update && apt install -y --no-install-recommends \
         kubectl
 
 # Required by Scipion for conda installation
-RUN apt-get -y install sudo wget gcc g++ libopenmpi-dev mesa-utils openssh-client cmake libnss3 libfontconfig1 libxrender1 libxtst6 xterm libasound2 libglu1 libxcursor1 libdbus-1-3 libxkbcommon-x11-0 libhdf5-dev
+RUN apt install -y sudo wget gcc g++ libopenmpi-dev mesa-utils openssh-client cmake libnss3 libfontconfig1 libxrender1 libxtst6 xterm libasound2 libglu1 libxcursor1 libdbus-1-3 libxkbcommon-x11-0 libhdf5-dev
+# Another MPI requirements
+RUN apt install -y libopenmpi-dev libopenmpi2 openmpi-bin openmpi-common
+
 
 # Install oneclient (OneData client)
 RUN curl -sS  http://get.onedata.org/oneclient.sh | bash
@@ -60,8 +63,8 @@ RUN curl -sS  http://get.onedata.org/oneclient.sh | bash
 RUN rm -rf /var/lib/apt/lists/*
 
 # Create scipionuser
-RUN groupadd --gid 1042 ${S_USER} && \
-    useradd --uid 1042 --create-home --home-dir ${S_USER_HOME} -s /bin/bash -g ${S_USER} ${S_USER} && \
+RUN groupadd --gid 1000 ${S_USER} && \
+    useradd --uid 1000 --create-home --home-dir ${S_USER_HOME} -s /bin/bash -g ${S_USER} ${S_USER} && \
     usermod -aG sudo ${S_USER}
 
 RUN chown -R ${S_USER}:${S_USER} ${S_USER_HOME}
@@ -79,7 +82,8 @@ RUN mkdir /mnt/onedata && \
 # prepare working directory
 RUN mkdir ${S_USER_HOME}/ScipionUserData && \
     cd ${S_USER_HOME}/ScipionUserData && \
-    mkdir projects logs
+    mkdir projects logs && \
+    chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/ScipionUserData
 
 # link OneData to working directory
 #RUN ln -s /mnt/onedata ${S_USER_HOME}/ScipionUserData/data && \

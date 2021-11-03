@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Disable screensaver
+#xset s off -dpms
+
+# Start xfce4
+xfce4-session

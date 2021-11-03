@@ -113,7 +113,7 @@ USER ${S_USER}
 COPY plugin-list.txt ${S_USER_HOME}/
 RUN for pl in $(cat ${S_USER_HOME}/plugin-list.txt); do ${S_USER_HOME}/scipion3/scipion3 installp -p $pl -j $(nproc) --noBin; done
 
-COPY hosts.conf ${S_USER_HOME}/scipion3/config/
+#COPY hosts.conf ${S_USER_HOME}/scipion3/config/
 
 # This is needed since we do not have binaries installed in master docker
 RUN mkdir ${S_USER_HOME}/scipion3/software/em/gctf-1.18
@@ -133,15 +133,21 @@ permitted-security-types = TLSVnc, TLSOtp, TLSPlain, TLSNone, X509Vnc, X509Otp, 
 ADD res/turbovncserver.conf /etc/turbovncserver.conf
 
 # Prepare environment
+# Create X11 dir
 RUN mkdir /tmp/.X11-unix || true
 RUN chmod -R ugo+rwx /tmp/.X11-unix
 
+# Copy basic xfce4 configuration
 COPY xfce4 ${S_USER_HOME}/.config/xfce4/
 RUN chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/.config/xfce4
 
-RUN echo '#!/bin/sh\n\
-xfce4-session \
-' >/tmp/xsession; chmod +x /tmp/xsession
+# Set screensaver to blank
+COPY res/.xscreensaver ${S_USER_HOME}/
+RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/.xscreensaver
+
+# Copy xsession file
+COPY res/xsession /tmp/
+RUN chmod +x /tmp/xsession
 
 ENV MYVNCPASSWORD abc
 ENV EDITOR=/usr/bin/pluma
@@ -156,5 +162,15 @@ COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint-root.sh && \
     chmod +x /docker-entrypoint.sh
 
-ENTRYPOINT ["/docker-entrypoint-root.sh"]
+RUN apt update && apt install -y --no-install-recommends iputils-ping traceroute cuda-samples-10-2
+
+RUN cd /usr/local/cuda/samples/0_Simple/vectorAdd && make
+
+USER $S_USER
+#USER root
+
+RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_TOOL'] = protocol.getClassPlugin().getName()" && sed -i "131 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+#ENTRYPOINT ["/docker-entrypoint-root.sh"]
 

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scipion-master-call
+spec:
+  selector:
+    matchLabels:
+      app: scipion-master-call
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: scipion-master-call
+    spec:
+      containers:
+      - name: scipion-master-call
+        image: jhandl/scipion-mn:call
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5907
+        env:
+        - name: ROOT_PASS
+          value: "abc"
+        - name: USER_PASS
+          value: "abc"
+        - name: USE_DISPLAY
+          value: "7"
+        volumeMounts:
+        - name: x-socket
+          mountPath: /tmp/.X11-unix/X0
+        - name: scipion-user-data
+          mountPath: /home/scipionuser/ScipionUserData
+#        resources:
+#          limits:
+#          nvidia.com/gpu: 1
+#        securityContext:
+#          privileged: false
+#          runAsUser: 1000
+#          runAsGroup: 1000
+      serviceAccountName: pod-reader-sa
+      volumes:
+      - name: x-socket
+        hostPath:
+          path: /tmp/.X11-unix/X0
+      - name: scipion-user-data
+        hostPath:
+          path: /home/jhandl/k8s-volume

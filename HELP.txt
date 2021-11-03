@@ -4,12 +4,12 @@ Postup pro spusteni
 --------------------
 
 1. Build Masteru a Toolu
-base-image/build.sh
+master-image/build.sh
 tool-image/build.sh
 
 2. Import Masteru a Toolu z local docker registry do k8s
-base-image/import-to-k8s.sh
-base-image/import-to-k8s.sh
+master-image/import-to-k8s.sh
+tool-image/import-to-k8s.sh
 
 3. Spusteni Masteru
 microk8s.kubectl apply -f deployment.yaml
@@ -53,4 +53,5 @@ https://github.com/CERIT-SC/scipion-docker/blob/slurm/master-image/hosts.conf
 docs k hosts.conf:
 https://scipion-em.github.io/docs/docs/scipion-modes/host-configuration.html
 
-
+Eman test
+scipion3 tests eman2.tests.test_protocols_eman.TestEmanTiltValidate
