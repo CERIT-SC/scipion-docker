@@ -14,6 +14,7 @@ ARG S_USER_HOME=/home/${S_USER}
 RUN apt update && apt upgrade -y
 
 RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y \
+        apt-utils \
 	tzdata
 
 # Install necessary packages

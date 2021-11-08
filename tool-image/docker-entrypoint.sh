@@ -26,6 +26,6 @@ export PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/loca
 #	touch ${S_USER_HOME}/ScipionUserData/fail.txt
 #fi
 #
-sleep 999999
+#sleep 999999
 
 ${S_USER_HOME}/scipion3/scipion3 run $TOOL_COMMAND
