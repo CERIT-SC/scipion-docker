@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: scipion-master
-  namespace: scipion-ns
+  namespace: handl-ns
 spec:
   selector:
     matchLabels:
@@ -14,6 +14,14 @@ spec:
         app: scipion-master
     spec:
       containers:
+# Conatiner that removes old tool containers
+#      - name: garbage-collector
+#        image: jhandl/scipion-gc:latest
+#        imagePullPolicy: Always
+#        securityContext:
+#          privileged: false
+#          runAsUser: 1000
+#          runAsGroup: 1000
       - name: scipion-master
         image: jhandl/scipion-mn:tool
         imagePullPolicy: Always
