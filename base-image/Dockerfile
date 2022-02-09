@@ -91,8 +91,8 @@ RUN mkdir ${S_USER_HOME}/ScipionUserData && \
 #    chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/ScipionUserData
 
 
-#COPY docker-entrypoint-base.sh /
-#RUN chmod +x /docker-entrypoint-base.sh
+COPY docker-entrypoint-base.sh /
+RUN chmod +x /docker-entrypoint-base.sh
 
 USER ${S_USER}
 #######################
@@ -131,8 +131,6 @@ RUN ${S_USER_HOME}/miniconda3/bin/conda config --set auto_activate_base false
 
 USER root
 
-RUN mkdir /opt/k8s
-COPY res/depl-tool.yaml /opt/k8s/
 COPY res/hosts.conf ${S_USER_HOME}/scipion3/config/hosts.conf
 RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/hosts.conf
 

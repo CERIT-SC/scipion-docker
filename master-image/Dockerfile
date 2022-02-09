@@ -52,14 +52,14 @@ RUN apt update && apt install -y --no-install-recommends \
 #        libmunge-dev
 
 # Slurm requirements
-RUN apt update && apt install -y --no-install-recommends \
-        libmunge2 \
-        libpq5 \
-        munge \
-        libmunge-dev \
-        gcc \
-        make \
-        bzip2
+#RUN apt update && apt install -y --no-install-recommends \
+#        libmunge2 \
+#        libpq5 \
+#        munge \
+#        libmunge-dev \
+#        gcc \
+#        make \
+#        bzip2
 
 RUN useradd --uid 1052 -M slurm
 
@@ -86,13 +86,13 @@ RUN curl -fsSL https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz |
     cd /opt/websockify && make
 
 # Install Slurm client
-RUN cd /tmp && \
-    curl -fsSL -o slurm.tar.bz2 http://ftpgrycap.i3m.upv.es/src/slurm-${SLURM_VERSION}.tar.bz2 && \
-    tar -xjf slurm.tar.bz2 && \
-    cd slurm-${SLURM_VERSION} && \
-    ./configure && \
-    make && \
-    make install
+#RUN cd /tmp && \
+#    curl -fsSL -o slurm.tar.bz2 http://ftpgrycap.i3m.upv.es/src/slurm-${SLURM_VERSION}.tar.bz2 && \
+#    tar -xjf slurm.tar.bz2 && \
+#    cd slurm-${SLURM_VERSION} && \
+#    ./configure && \
+#    make && \
+#    make install
 
 # Create Scipion icon
 RUN mkdir ${S_USER_HOME}/Desktop || true
@@ -150,8 +150,6 @@ RUN chmod +x /tmp/xsession
 ENV MYVNCPASSWORD abc
 ENV EDITOR=/usr/bin/pluma
 
-COPY self.pem /
-
 COPY plugin-list.txt ${S_USER_HOME}/
 
 # run docker-entrypoint.sh
@@ -160,9 +158,15 @@ COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint-root.sh && \
     chmod +x /docker-entrypoint.sh
 
-RUN apt update && apt install -y --no-install-recommends iputils-ping traceroute cuda-samples-10-2
+RUN apt update && apt install -y --no-install-recommends iputils-ping traceroute cuda-samples-10-2 strace
 
 RUN cd /usr/local/cuda/samples/0_Simple/vectorAdd && make
+
+RUN mkdir /opt/k8s
+COPY res/depl-tool.yaml /opt/k8s/
+COPY res/job-watchdog.sh /opt/k8s/
+RUN chmod +x /opt/k8s/job-watchdog.sh
+RUN chown -R ${S_USER}:${S_USER} /opt
 
 USER $S_USER
 #USER root

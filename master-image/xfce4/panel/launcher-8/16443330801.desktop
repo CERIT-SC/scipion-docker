@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Exec=/home/scipionuser/scipion3/scipion3
+Icon=/home/scipionuser/scipion3/scipion_logo.png
+StartupNotify=false
+Terminal=true
+Categories=Utility;X-XFCE;X-Xfce-Toplevel;
+OnlyShowIn=XFCE;
+Name=Scipion
+Comment=Scipion
+X-XFCE-Source=file:///usr/share/applications/xfce4-run.desktop
+Path=/home/scipionuser/

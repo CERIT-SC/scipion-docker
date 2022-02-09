@@ -1,11 +1,12 @@
-#apiVersion: batch/v1
-#kind: Job
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
+#apiVersion: apps/v1
+#kind: Deployment
 metadata:
   name: scipion-tool-job-$TOOL_SUBST_NAME-$SUBMIT_PID
 spec:
   ttlSecondsAfterFinished: 30
+  backoffLimit: 0
   template:
     metadata:
       labels:
