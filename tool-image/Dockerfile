@@ -73,17 +73,27 @@ RUN ["/bin/bash", "-ci" , "python3 -m pip install scipion-installer"]
 RUN ["/bin/bash", "-ci" , "cd ${S_USER_HOME} && python3 -m scipioninstaller ${S_USER_HOME}/scipion3 -noAsk -noXmipp -j $(nproc)"]
 
 # Install xmipp without native compilation flags
-RUN ["/bin/bash", "-c" , "${S_USER_HOME}/scipion3/scipion3 installp -p scipion-em-xmipp -j $(nproc) --noBin"]
-RUN mkdir ${S_USER_HOME}/scipion3/software/em || true
-RUN wget http://scipion.cnb.csic.es/downloads/scipion/software/em/xmippSrc-v3.20.07.tgz -O ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07.tgz
-RUN tar xfz ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07.tgz -C ${S_USER_HOME}/scipion3/software/em/
-RUN ["/bin/bash", "-c" , "cd ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07 && ${S_USER_HOME}/scipion3/scipion3 run ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp noAsk config"]
-RUN sed -i 's/-mtune=native -march=native //g' ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp.conf
-RUN sed -i 's/CUDA=True/CUDA=False/g' ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp.conf
-RUN ["/bin/bash", "-c" , "cd ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07 && ${S_USER_HOME}/scipion3/scipion3 run ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp compile"]
-RUN mkdir ${S_USER_HOME}/scipion3/software/lib || true
-RUN ["/bin/bash", "-c" , "cd ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07 && ${S_USER_HOME}/scipion3/scipion3 run ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp install"]
-RUN ln -s ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/build ${S_USER_HOME}/scipion3/software/em/xmipp
+#RUN ["/bin/bash", "-c" , "${S_USER_HOME}/scipion3/scipion3 installp -p scipion-em-xmipp -j $(nproc) --noBin"]
+#RUN mkdir ${S_USER_HOME}/scipion3/software/em || true
+#RUN wget http://scipion.cnb.csic.es/downloads/scipion/software/em/xmippSrc-v3.20.07.tgz -O ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07.tgz
+#RUN tar xfz ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07.tgz -C ${S_USER_HOME}/scipion3/software/em/
+#RUN ["/bin/bash", "-c" , "cd ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07 && ${S_USER_HOME}/scipion3/scipion3 run ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp noAsk config"]
+#RUN sed -i 's/-mtune=native -march=native //g' ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp.conf
+#RUN sed -i 's/CUDA=True/CUDA=False/g' ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp.conf
+#RUN ["/bin/bash", "-c" , "cd ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07 && ${S_USER_HOME}/scipion3/scipion3 run ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp compile"]
+#RUN mkdir ${S_USER_HOME}/scipion3/software/lib || true
+#RUN ["/bin/bash", "-c" , "cd ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07 && ${S_USER_HOME}/scipion3/scipion3 run ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp install"]
+#RUN ln -s ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/build ${S_USER_HOME}/scipion3/software/em/xmipp
+
+USER root
+
+COPY res/scipion.conf ${S_USER_HOME}/scipion3/config/scipion.conf
+RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/scipion.conf
+
+USER $S_USER
+
+RUN /home/scipionuser/scipion3/scipion3 installp -p scipion-em-xmipp -j $(nproc)
+
 
 RUN du -sh / || true
 
@@ -114,11 +124,12 @@ RUN chmod +x /docker-entrypoint-root.sh && \
     chmod +x /docker-entrypoint.sh
 
 
-RUN apt update && apt install -y --no-install-recommends iputils-ping strace
+RUN apt update && apt install -y --no-install-recommends iputils-ping strace xauth
 
 #USER root
 USER $S_USER
 
 RUN export string="\ \ \ \ \ \ \ \ print(\"debugovacivypiszacatek-\" + str(self.getInputMicrographs()) + \"-debugovacivypiskonec\")" && sed -i "570 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/xmipp3/protocols/protocol_extract_particles_pairs.py
 #ENTRYPOINT ["/docker-entrypoint-root.sh"]
+
 ENTRYPOINT ["/docker-entrypoint.sh"]

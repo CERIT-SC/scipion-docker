@@ -4,11 +4,11 @@
 #FROM jhandl/scipion-base:v4
 FROM jhandl/scipion-base:tool
 
-ARG TURBOVNC_VERSION=2.2.4
-ARG VIRTUALGL_VERSION=2.5.2
-ARG LIBJPEG_VERSION=1.5.2
-ARG WEBSOCKIFY_VERSION=0.8.0
-ARG NOVNC_VERSION=1.1.0
+ARG TURBOVNC_VERSION=2.2.7
+ARG VIRTUALGL_VERSION=3.0
+ARG LIBJPEG_VERSION=2.1.2
+ARG WEBSOCKIFY_VERSION=0.10.0
+ARG NOVNC_VERSION=1.3.0
 
 ARG SLURM_VERSION=20.02.6
 
@@ -34,7 +34,15 @@ RUN apt update && apt install -y --no-install-recommends \
 
 # websockify requirements
 RUN apt update && apt install -y --no-install-recommends \
-	python-numpy
+	python3-numpy
+
+# virtualgl requirements
+RUN apt update && apt install -y --no-install-recommends \
+        libxtst6:i386 \
+        libxv1:i386 \
+        libglu1-mesa:i386 \
+        libegl1-mesa:i386 \
+        libegl1-mesa
 
 # Install useful packages
 RUN apt update && apt install -y --no-install-recommends \
@@ -98,8 +106,7 @@ RUN curl -fsSL https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz |
 RUN mkdir ${S_USER_HOME}/Desktop || true
 ADD res/scipion_logo.png ${S_USER_HOME}/scipion3/
 ADD res/Scipion.desktop ${S_USER_HOME}/Desktop/
-RUN chmod +x ${S_USER_HOME}/scipion3/scipion_logo.png && \
-    chmod +x ${S_USER_HOME}/Desktop/Scipion.desktop
+RUN chmod +x ${S_USER_HOME}/Desktop/Scipion.desktop
 
 RUN chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop
 
@@ -129,6 +136,7 @@ permitted-security-types = TLSVnc, TLSOtp, TLSPlain, TLSNone, X509Vnc, X509Otp, 
 ' > /etc/turbovncserver-security.conf
 
 ADD res/turbovncserver.conf /etc/turbovncserver.conf
+ADD res/turbovncserver-security.conf /etc/turbovncserver-security.conf
 
 # Prepare environment
 # Create X11 dir
@@ -158,7 +166,23 @@ COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint-root.sh && \
     chmod +x /docker-entrypoint.sh
 
-RUN apt update && apt install -y --no-install-recommends iputils-ping traceroute cuda-samples-10-2 strace
+RUN apt update && apt install -y --no-install-recommends iputils-ping traceroute cuda-samples-10-2 strace nmap
+
+# Install minimal prerequisites (Ubuntu 18.04 as reference)
+#RUN apt update && apt install -y --no-install-recommends cmake g++ wget unzip python-numpy
+# Download and unpack sources
+#RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/4.x.zip && \
+#    wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.x.zip && \
+#    unzip opencv.zip && \
+#    unzip opencv_contrib.zip
+# Create build directory and switch into it
+#RUN mkdir -p build && cd build
+# Configure
+#RUN cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-4.x/modules ../opencv-4.x
+# Build
+#RUN cmake --build .
+
+
 
 RUN cd /usr/local/cuda/samples/0_Simple/vectorAdd && make
 

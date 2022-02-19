@@ -4,4 +4,5 @@
 #xset s off -dpms
 
 # Start xfce4
+DISPLAY=:1 xhost +
 xfce4-session

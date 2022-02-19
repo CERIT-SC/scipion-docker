@@ -34,6 +34,8 @@ spec:
           name: scipion-user-data
         resources:
           limits:
+            memory: 10Gi
+            cpu: 5
 #            nvidia.com/gpu: 1 # dedicated GPU
 #            cerit.io/gpu-mem: 1 # shared GPU
         securityContext:

@@ -37,9 +37,13 @@ trap "trap_terminate" SIGTERM SIGINT SIGQUIT
 
 while true
 do
-	JOB_STATUS=$(kubectl get pod "$JOB_ID" | grep "$JOB_ID" | head -n 1 | awk '{print $3}')
+	JOB_STATUS=$(kubectl get pod | grep "$JOB_ID" | head -n 1 | awk '{print $3}')
 
-	if [ "$JOB_STATUS" = "Completed" ]; then
+	if [ -z "$JOB_STATUS" ]; then
+		notify_send "A Kubernetes job was unexpectedly deleted or not started."
+		exit 1
+
+	elif [ "$JOB_STATUS" = "Completed" ]; then
 		clean_job
 
 		if [ -s diff.txt ]; then
