@@ -17,3 +17,6 @@ rules:
   resources: ["jobs"]
   verbs: ["get", "list", "create", "delete"]
 
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "create", "delete"]

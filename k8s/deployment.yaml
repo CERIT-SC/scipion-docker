@@ -26,25 +26,28 @@ spec:
         image: jhandl/scipion-mn:tool
         imagePullPolicy: Always
         ports:
-        - containerPort: 5906
+        - containerPort: 5901
+        - containerPort: 6001
         env:
         - name: ROOT_PASS
           value: "abc"
         - name: USER_PASS
           value: "abc"
         - name: USE_DISPLAY
-          value: "6"
+          value: "1"
         volumeMounts:
 #        - name: x-socket
-#          mountPath: /tmp/.X11-unix/X0
-#        - name: scipion-user-data
-#          mountPath: /home/scipionuser/ScipionUserData
-        - mountPath: "/home/scipionuser/ScipionUserData"
-          name: scipion-user-data
-#        resources:
-#          limits:
+#          mountPath: /tmp/.X11-unix
+        - name: scipion-user-data
+          mountPath: /home/scipionuser/ScipionUserData
+#        - mountPath: "/home/scipionuser/ScipionUserData"
+#          name: scipion-user-data
+        resources:
+          limits:
+            memory: 10Gi
+            cpu: 10
 #            nvidia.com/gpu: 1 # dedicated GPU
-#            cerit.io/gpu-mem: 1 # shared GPU
+            cerit.io/gpu-mem: 1 # shared GPU
         securityContext:
           privileged: false
           runAsUser: 1000
@@ -58,6 +61,15 @@ spec:
 #        hostPath:
 #          path: /home/jhandl/k8s-volume
 ##        emptyDir: {}
+
+#       - name: x-socket
+#         emptyDir:
+#           medium: memory
+#           sizeLimit: 10Mi
        - name: scipion-user-data
          persistentVolumeClaim:
            claimName: scipion-test-volume
+#           claimName: pvc-onedata
+#       - name: x-socket
+#         persistentVolumeClaim:
+#           claimName: scipion-test-volume-x
