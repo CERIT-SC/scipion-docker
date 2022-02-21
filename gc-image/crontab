@@ -1,1 +1,0 @@
-20 * * * * for job in $(kubectl get pod | grep "scipion-tool-job" | grep "Completed" | cut -d" " -f1); do kubectl delete job "$job"; done
