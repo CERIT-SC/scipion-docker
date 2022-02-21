@@ -12,9 +12,6 @@ ARG NOVNC_VERSION=1.3.0
 
 ARG SLURM_VERSION=20.02.6
 
-ARG S_USER=scipionuser
-ARG S_USER_HOME=/home/${S_USER}
-
 USER root
 #######################
 
@@ -52,25 +49,6 @@ RUN apt update && apt install -y --no-install-recommends \
 	mesa-utils \
 	htop
 
-# Install slurm
-#RUN apt update && apt install -y --no-install-recommends \
-#        slurm-client \
-#        libmunge2 \
-#        munge \
-#        libmunge-dev
-
-# Slurm requirements
-#RUN apt update && apt install -y --no-install-recommends \
-#        libmunge2 \
-#        libpq5 \
-#        munge \
-#        libmunge-dev \
-#        gcc \
-#        make \
-#        bzip2
-
-RUN useradd --uid 1052 -M slurm
-
 # Clean apt
 RUN rm -rf /var/lib/apt/lists/*
 
@@ -92,15 +70,6 @@ RUN curl -fsSL https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz |
     mv /opt/websockify-${WEBSOCKIFY_VERSION} /opt/websockify && \
     ln -s /opt/noVNC/vnc.html /opt/noVNC/index.html && \
     cd /opt/websockify && make
-
-# Install Slurm client
-#RUN cd /tmp && \
-#    curl -fsSL -o slurm.tar.bz2 http://ftpgrycap.i3m.upv.es/src/slurm-${SLURM_VERSION}.tar.bz2 && \
-#    tar -xjf slurm.tar.bz2 && \
-#    cd slurm-${SLURM_VERSION} && \
-#    ./configure && \
-#    make && \
-#    make install
 
 # Create Scipion icon
 RUN mkdir ${S_USER_HOME}/Desktop || true
@@ -128,13 +97,6 @@ USER root
 #######################
 
 # Create TurboVNC config
-RUN echo 'no-remote-connections\n\
-no-httpd\n\
-no-x11-tcp-connections\n\
-no-pam-sessions\n\
-permitted-security-types = TLSVnc, TLSOtp, TLSPlain, TLSNone, X509Vnc, X509Otp, X509Plain, X509None, VNC, OTP, UnixLogin, Plain\
-' > /etc/turbovncserver-security.conf
-
 ADD res/turbovncserver.conf /etc/turbovncserver.conf
 ADD res/turbovncserver-security.conf /etc/turbovncserver-security.conf
 
@@ -179,10 +141,6 @@ RUN chmod +x /docker-entrypoint-root.sh && \
 #RUN cmake -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-4.x/modules ../opencv-4.x
 # Build
 #RUN cmake --build .
-
-
-
-RUN cd /usr/local/cuda/samples/0_Simple/vectorAdd && make
 
 COPY res/hosts.conf ${S_USER_HOME}/scipion3/config/hosts.conf
 RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/hosts.conf

@@ -36,6 +36,8 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-rec
 # gettext - envsubst
 # cuda-samples, strace, nmap - for testing and debuging purpose
 
+RUN cd /usr/local/cuda/samples/0_Simple/vectorAdd && make
+
 # Required by Scipion
 RUN apt update && apt install -y --no-install-recommends \
 	libxv1 \
@@ -68,19 +70,14 @@ RUN rm -rf /var/lib/apt/lists/*
 # Create scipionuser
 RUN groupadd --gid 1000 ${S_USER} && \
     useradd --uid 1000 --create-home --home-dir ${S_USER_HOME} -s /bin/bash -g ${S_USER} ${S_USER} && \
-    usermod -aG sudo ${S_USER}
-
-RUN chown -R ${S_USER}:${S_USER} ${S_USER_HOME}
+    usermod -aG sudo ${S_USER} && \
+    chown -R ${S_USER}:${S_USER} ${S_USER_HOME}
 
 ENV CUDA_HOME "/usr/local/cuda"
 #ENV PATH "${CUDA_HOME}/bin:$PATH"
 ENV CUDA_BIN "/usr/local/cuda/bin"
 
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
-
-# data directory for mount OneData using docker volume
-RUN mkdir /mnt/onedata && \
-    chown -R ${S_USER}:${S_USER} /mnt/onedata
 
 # prepare working directory
 RUN mkdir ${S_USER_HOME}/ScipionUserData && \
@@ -103,19 +100,6 @@ RUN bash ${S_USER_HOME}/miniconda.sh -b
 RUN ${S_USER_HOME}/miniconda3/bin/conda init
 RUN ["/bin/bash", "-ci" , "python3 -m pip install scipion-installer"]
 RUN ["/bin/bash", "-ci" , "cd ${S_USER_HOME} && python3 -m scipioninstaller ${S_USER_HOME}/scipion3 -noAsk -noXmipp -j $(nproc)"]
-
-# Install xmipp without native compilation flags
-#RUN ["/bin/bash", "-c" , "${S_USER_HOME}/scipion3/scipion3 installp -p scipion-em-xmipp -j $(nproc) --noBin"]
-#RUN mkdir ${S_USER_HOME}/scipion3/software/em || true
-#RUN wget http://scipion.cnb.csic.es/downloads/scipion/software/em/xmippSrc-v3.20.07.tgz -O ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07.tgz
-#RUN tar xfz ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07.tgz -C ${S_USER_HOME}/scipion3/software/em/
-#RUN ["/bin/bash", "-c" , "cd ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07 && ${S_USER_HOME}/scipion3/scipion3 run ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp noAsk config"]
-#RUN sed -i 's/-mtune=native -march=native //g' ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp.conf
-#RUN sed -i 's/CUDA=True/CUDA=False/g' ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp.conf
-#RUN ["/bin/bash", "-c" , "cd ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07 && ${S_USER_HOME}/scipion3/scipion3 run ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp compile"]
-#RUN mkdir ${S_USER_HOME}/scipion3/software/lib || true
-#RUN ["/bin/bash", "-c" , "cd ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07 && ${S_USER_HOME}/scipion3/scipion3 run ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/xmipp install"]
-#RUN ln -s ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/build ${S_USER_HOME}/scipion3/software/em/xmipp
 
 USER root
 #######################
