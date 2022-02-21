@@ -166,8 +166,6 @@ COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint-root.sh && \
     chmod +x /docker-entrypoint.sh
 
-RUN apt update && apt install -y --no-install-recommends iputils-ping traceroute cuda-samples-10-2 strace nmap
-
 # Install minimal prerequisites (Ubuntu 18.04 as reference)
 #RUN apt update && apt install -y --no-install-recommends cmake g++ wget unzip python-numpy
 # Download and unpack sources
@@ -195,12 +193,11 @@ COPY res/job-watchdog.sh /opt/k8s/
 RUN chmod +x /opt/k8s/job-watchdog.sh
 RUN chown -R ${S_USER}:${S_USER} /opt
 
-USER $S_USER
-#USER root
+USER ${S_USER}
+#######################
 
 RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_TOOL'] = protocol.getClassPlugin().getName()" && sed -i "132 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
 RUN export string="\ \ \ \ \ \ \ \ submitDict['REQUIRES_GPU'] = protocol.requiresGpu()" && sed -i "133 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-#ENTRYPOINT ["/docker-entrypoint-root.sh"]
 

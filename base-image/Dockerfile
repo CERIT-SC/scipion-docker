@@ -8,17 +8,17 @@
 # cannot compile xmipp using "runtime" image
 FROM nvidia/cudagl:10.2-devel-ubuntu18.04
 
-ARG S_USER=scipionuser
-ARG S_USER_HOME=/home/${S_USER}
+ENV S_USER=scipionuser
+ENV S_USER_HOME=/home/${S_USER}
 
 RUN apt update && apt upgrade -y
 
-RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y \
+RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y --no-install-recommends \
         apt-utils \
 	tzdata
 
 # Install necessary packages
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
 	bash \
 	make \
 	curl \
@@ -29,13 +29,15 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
 	bison \
 	flex \
 	git \
-        gettext
+        gettext \
+        cuda-samples-10-2 \
+        strace \
+        nmap
 # gettext - envsubst
-
-# bison, flex, ca-certificates, git ??
+# cuda-samples, strace, nmap - for testing and debuging purpose
 
 # Required by Scipion
-RUN apt update && apt install -y \
+RUN apt update && apt install -y --no-install-recommends \
 	libxv1 \
 	openjdk-8-jdk \
 	libfftw3-dev \
@@ -52,9 +54,9 @@ RUN apt update && apt install -y --no-install-recommends \
         kubectl
 
 # Required by Scipion for conda installation
-RUN apt install -y sudo wget gcc g++ libopenmpi-dev mesa-utils openssh-client cmake libnss3 libfontconfig1 libxrender1 libxtst6 xterm libasound2 libglu1 libxcursor1 libdbus-1-3 libxkbcommon-x11-0 libhdf5-dev
+RUN apt install -y --no-install-recommends sudo wget gcc g++ libopenmpi-dev mesa-utils openssh-client cmake libnss3 libfontconfig1 libxrender1 libxtst6 xterm libasound2 libglu1 libxcursor1 libdbus-1-3 libxkbcommon-x11-0 libhdf5-dev
 # Another MPI requirements
-RUN apt install -y libopenmpi-dev libopenmpi2 openmpi-bin openmpi-common
+RUN apt install -y --no-install-recommends libopenmpi-dev libopenmpi2 openmpi-bin openmpi-common
 
 
 # Install oneclient (OneData client)

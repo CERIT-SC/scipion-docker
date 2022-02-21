@@ -3,13 +3,10 @@ FROM jhandl/scipion-base:tool
 USER root
 ######################
 
-# run docker-entrypoint.sh
 COPY docker-entrypoint-root.sh /
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint-root.sh && \
     chmod +x /docker-entrypoint.sh
-
-RUN apt update && apt install -y --no-install-recommends iputils-ping strace xauth
 
 USER ${S_USER}
 ######################
@@ -27,6 +24,5 @@ RUN if [ ! -z "$SD_PLUGIN" ]; then \
     fi
 
 RUN export string="\ \ \ \ \ \ \ \ print(\"debugovacivypiszacatek-\" + str(self.getInputMicrographs()) + \"-debugovacivypiskonec\")" && sed -i "570 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/xmipp3/protocols/protocol_extract_particles_pairs.py
-#ENTRYPOINT ["/docker-entrypoint-root.sh"]
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
