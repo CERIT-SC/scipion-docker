@@ -33,8 +33,11 @@ spec:
           value: "abc"
         - name: USER_PASS
           value: "abc"
+        - name: VNC_PASS
+          value: "abc"
         - name: USE_DISPLAY
           value: "1"
+# USE_DISPLAY 1 is hardcoded in other files!
         volumeMounts:
 #        - name: x-socket
 #          mountPath: /tmp/.X11-unix
