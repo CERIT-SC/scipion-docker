@@ -2,8 +2,14 @@
 
 set -e
 
-../base-image/build.sh
+cd "$(dirname "$0")"
+
+if [ "$1" != "--nobase" ]; then
+	../base-image/build.sh
+fi
 
 for file in $(ls build-*.sh); do
-	./${file}
+	./$file &
 done
+
+wait
