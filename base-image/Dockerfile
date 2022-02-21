@@ -86,11 +86,6 @@ RUN mkdir ${S_USER_HOME}/ScipionUserData && \
     mkdir projects logs && \
     chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/ScipionUserData
 
-# link OneData to working directory
-#RUN ln -s /mnt/onedata ${S_USER_HOME}/ScipionUserData/data && \
-#    chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/ScipionUserData
-
-
 COPY docker-entrypoint-base.sh /
 RUN chmod +x /docker-entrypoint-base.sh
 
@@ -99,9 +94,6 @@ USER ${S_USER}
 
 RUN ["/bin/bash", "-c", "echo $CUDA_HOME"]
 RUN ["/bin/bash", "-c", "echo $PATH"]
-
-RUN du -sh / || true
-
 
 # Install Scipion
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ${S_USER_HOME}/miniconda.sh
@@ -124,25 +116,20 @@ RUN ["/bin/bash", "-ci" , "cd ${S_USER_HOME} && python3 -m scipioninstaller ${S_
 #RUN ln -s ${S_USER_HOME}/scipion3/software/em/xmippSrc-v3.20.07/build ${S_USER_HOME}/scipion3/software/em/xmipp
 
 USER root
+#######################
 
 COPY res/scipion.conf ${S_USER_HOME}/scipion3/config/scipion.conf
 RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/scipion.conf
 
-USER $S_USER
+USER ${S_USER}
+#######################
 
 RUN /home/scipionuser/scipion3/scipion3 installp -p scipion-em-xmipp -j $(nproc)
 
 ENV PATH "${PATH}:/home/scipionuser/scipion3"
-RUN du -sh / || true
-
 
 # Disable conda auto activation
 RUN ${S_USER_HOME}/miniconda3/bin/conda config --set auto_activate_base false
-
-USER root
-
-COPY res/hosts.conf ${S_USER_HOME}/scipion3/config/hosts.conf
-RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/hosts.conf
 
 USER ${S_USER}
 #######################

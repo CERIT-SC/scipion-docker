@@ -186,6 +186,9 @@ RUN apt update && apt install -y --no-install-recommends iputils-ping traceroute
 
 RUN cd /usr/local/cuda/samples/0_Simple/vectorAdd && make
 
+COPY res/hosts.conf ${S_USER_HOME}/scipion3/config/hosts.conf
+RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/hosts.conf
+
 RUN mkdir /opt/k8s
 COPY res/depl-tool.yaml /opt/k8s/
 COPY res/job-watchdog.sh /opt/k8s/
