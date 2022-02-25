@@ -1,8 +1,11 @@
 #!/bin/sh
 
+set -e
+
 # Disable screensaver
 #xset s off -dpms
 
 # Start xfce4
 DISPLAY=:1 xhost +
+cd ${S_USER_HOME}
 xfce4-session

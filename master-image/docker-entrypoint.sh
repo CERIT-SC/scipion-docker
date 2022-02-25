@@ -30,6 +30,7 @@ mkdir $S_USER_HOME/.vnc
 echo $VNC_PASS
 echo $VNC_PASS | vncpasswd -f > $S_USER_HOME/.vnc/passwd
 chmod 0600 $S_USER_HOME/.vnc/passwd
+
 /opt/websockify/run ${WEBPORT} --web=/opt/noVNC --wrap-mode=ignore -- vncserver ${DISPLAY} -listen TCP -xstartup /tmp/xsession
 #/opt/websockify/run ${WEBPORT} --cert=/self.pem --ssl-only --web=/opt/noVNC --wrap-mode=ignore -- vncserver ${DISPLAY} -xstartup /tmp/xsession
 
