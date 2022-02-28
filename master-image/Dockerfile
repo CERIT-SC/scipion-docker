@@ -109,6 +109,9 @@ RUN chmod -R ugo+rwx /tmp/.X11-unix
 COPY xfce4 ${S_USER_HOME}/.config/xfce4/
 RUN chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/.config/xfce4
 
+# Disable logout from xfce4
+#RUN sed -ie 's/^Exec=.*/Exec=notify-send "Logout is disabled"/' /usr/share/applications/xfce4-session-logout.desktop
+
 # Set screensaver to blank
 COPY res/.xscreensaver ${S_USER_HOME}/
 RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/.xscreensaver

@@ -80,9 +80,7 @@ ENV CUDA_BIN "/usr/local/cuda/bin"
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 
 # prepare working directory
-RUN mkdir ${S_USER_HOME}/ScipionUserData && \
-    cd ${S_USER_HOME}/ScipionUserData && \
-    mkdir projects logs && \
+RUN ln -s /mnt/onedata ${S_USER_HOME}/ScipionUserData && \
     chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/ScipionUserData
 
 COPY docker-entrypoint-base.sh /
