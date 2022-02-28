@@ -38,13 +38,18 @@ spec:
         - name: USE_DISPLAY
           value: "1"
 # USE_DISPLAY 1 is hardcoded in other files!
+        - name: USE_VNCCLIENT
+          value: "true"
         volumeMounts:
 #        - name: x-socket
 #          mountPath: /tmp/.X11-unix
         - name: scipion-user-data
-          mountPath: /home/scipionuser/ScipionUserData
+#          mountPath: /home/scipionuser/ScipionUserData
+          mountPath: "/mnt/onedata"
 #        - mountPath: "/home/scipionuser/ScipionUserData"
 #          name: scipion-user-data
+        - name: scipion-projects
+          mountPath: "/mnt/projects"
         resources:
           limits:
             memory: 10Gi
@@ -71,8 +76,11 @@ spec:
 #           sizeLimit: 10Mi
        - name: scipion-user-data
          persistentVolumeClaim:
-           claimName: scipion-test-volume
+           claimName: pvc-sec-scipion-onedata
 #           claimName: pvc-onedata
+       - name: scipion-projects
+         persistentVolumeClaim:
+           claimName: scipion-test-volume
 #       - name: x-socket
 #         persistentVolumeClaim:
 #           claimName: scipion-test-volume-x
