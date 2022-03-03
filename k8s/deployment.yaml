@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: scipion-master
-  namespace: handl-ns
+  namespace: "$SUBST_NAMESPACE"
 spec:
   selector:
     matchLabels:

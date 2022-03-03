@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: scipion-master-svc-vnc
-  namespace: handl-ns
+  namespace: "$SUBST_NAMESPACE"
 spec:
   type: ClusterIP
   ports:
