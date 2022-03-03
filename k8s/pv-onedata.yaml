@@ -14,3 +14,4 @@ spec:
     nodePublishSecretRef:
       name: sec-scipion-onedata
       namespace: "$SUBST_NAMESPACE"
+    volumeHandle: "$SUBST_NAMESPACE"
