@@ -16,7 +16,7 @@ the service with the following command: `microk8s enable dns`
 3. Create `csi-onedata` namespace for the driver  
   `kubectl create namespace csi-onedata`
 
-4. (for microk8s only) Change paths in one yaml file 
+4. (for microk8s only) Change paths in one yaml file   
   Open `csi-nodeplugin-sshfs.yaml` file and change all the paths 
 
 5. Deploy the driver  
