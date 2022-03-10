@@ -39,7 +39,7 @@ spec:
           value: "1"
 # USE_DISPLAY 1 is hardcoded in other files!
         - name: USE_VNCCLIENT
-          value: "true"
+          value: "false"
         volumeMounts:
 #        - name: x-socket
 #          mountPath: /tmp/.X11-unix
