@@ -51,4 +51,8 @@ this step with your cluster administrator.
 Scipion instance
 
 5. Deploy the instance  
-  `scipion-docker/k8s/deploy.sh` _`your-namespace`_ _`onedata-host`_ _`onedata-token`_
+  This step requires the namespace name from the step 2, Onedata credentials from the previous step, and a new password you want to use for log in to the new Scipion instance.
+  `scipion-docker/k8s/deploy.sh` _`your-namespace`_ _`onedata-host`_ _`onedata-token`_ _`vnc-password`_
+
+6. Connect to the instance  
+  In a web browser, open the URL you entered in the ingress.yaml file in the step 3.

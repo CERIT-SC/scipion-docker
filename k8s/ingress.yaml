@@ -19,7 +19,7 @@ spec:
       paths:
       - backend:
           service:
-            name: scipion-master-svc-vnc
+            name: scipion-master-svc-novnc
             port:
               number: 5901
         pathType: ImplementationSpecific

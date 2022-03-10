@@ -34,7 +34,7 @@ spec:
         - name: USER_PASS
           value: "abc"
         - name: VNC_PASS
-          value: "abc"
+          value: "$SUBST_VNC_PASS"
         - name: USE_DISPLAY
           value: "1"
 # USE_DISPLAY 1 is hardcoded in other files!
