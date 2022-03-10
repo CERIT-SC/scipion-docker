@@ -48,14 +48,14 @@ spec:
           mountPath: "/mnt/onedata"
 #        - mountPath: "/home/scipionuser/ScipionUserData"
 #          name: scipion-user-data
-        - name: scipion-projects
-          mountPath: "/mnt/projects"
+#        - name: scipion-projects
+#          mountPath: "/mnt/projects"
         resources:
           limits:
-            memory: 10Gi
-            cpu: 10
+#            memory: 10Gi
+#            cpu: 10
 #            nvidia.com/gpu: 1 # dedicated GPU
-            cerit.io/gpu-mem: 1 # shared GPU
+#            cerit.io/gpu-mem: 1 # shared GPU
         securityContext:
           privileged: false
           runAsUser: 1000
@@ -76,11 +76,11 @@ spec:
 #           sizeLimit: 10Mi
        - name: scipion-user-data
          persistentVolumeClaim:
-           claimName: pvc-sec-scipion-onedata
+           claimName: pvc-scipion-onedata
 #           claimName: pvc-onedata
-       - name: scipion-projects
-         persistentVolumeClaim:
-           claimName: scipion-test-volume
+#       - name: scipion-projects
+#         persistentVolumeClaim:
+#           claimName: scipion-test-volume
 #       - name: x-socket
 #         persistentVolumeClaim:
 #           claimName: scipion-test-volume-x

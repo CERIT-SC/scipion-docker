@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-jhandl-onedata-test
+  name: pvc-scipion-onedata
   namespace: "$SUBST_NAMESPACE"
 spec:
   accessModes:
@@ -10,4 +10,4 @@ spec:
     requests:
       storage: 5000Gi
   storageClassName: "onedata"
-  volumeName: pv-jhandl-onedata-test
+  volumeName: pv-scipion-onedata

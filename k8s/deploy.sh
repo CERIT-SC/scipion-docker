@@ -22,8 +22,8 @@ yaml_files=(
 )
 
 export SUBST_NAMESPACE="$1"
-export SUBST_OD_HOST="$2"
-export SUBST_OD_TOKEN="$3"
+export SUBST_OD_HOST=$(echo "$2" | base64 --wrap 0)
+export SUBST_OD_TOKEN=$(echo "$3" | base64 --wrap 0)
 
 for yaml in "${yaml_files[@]}"; do
 	envsubst < "$yaml" | kubectl apply -f -
