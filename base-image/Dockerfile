@@ -60,10 +60,6 @@ RUN apt install -y --no-install-recommends sudo wget gcc g++ libopenmpi-dev mesa
 # Another MPI requirements
 RUN apt install -y --no-install-recommends libopenmpi-dev libopenmpi2 openmpi-bin openmpi-common
 
-
-# Install oneclient (OneData client)
-RUN curl -sS  http://get.onedata.org/oneclient.sh | bash
-
 # Clean apt
 RUN rm -rf /var/lib/apt/lists/*
 
