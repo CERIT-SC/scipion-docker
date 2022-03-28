@@ -27,5 +27,5 @@ export SUBST_OD_TOKEN=$(echo "$3" | base64 --wrap 0)
 export SUBST_VNC_PASS="$4"
 
 for yaml in "${yaml_files[@]}"; do
-	envsubst < "$yaml" | kubectl apply -f -
+	envsubst < "$yaml" | microk8s.kubectl apply -f -
 done

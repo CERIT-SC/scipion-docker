@@ -12,6 +12,6 @@ spec:
   csi:
     driver: csi-onedata
     nodePublishSecretRef:
-      name: sec-scipion-onedata
+      name: scipion-onedata
       namespace: "$SUBST_NAMESPACE"
     volumeHandle: "$SUBST_NAMESPACE"

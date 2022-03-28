@@ -76,7 +76,7 @@ spec:
 #           sizeLimit: 10Mi
        - name: scipion-user-data
          persistentVolumeClaim:
-           claimName: pvc-sec-scipion-onedata
+           claimName: pvc-scipion-onedata
 #           claimName: pvc-onedata
 #       - name: scipion-projects
 #         persistentVolumeClaim:
