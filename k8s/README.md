@@ -10,7 +10,7 @@ the service with the following command: `microk8s enable dns`
 
 1. Install Microk8s  
   `sudo snap install microk8s --classic --channel=1.21/stable`  
-  `sudo usermod -a -G microk8s ubuntu && sudo chown -f -R ubuntu ~/.kube`  
+  `sudo usermod -a -G microk8s $USER && sudo chown -f -R $USER ~/.kube`  
   **Log out and log in to apply group changes!**
 
 2. Start the Microk8s  
