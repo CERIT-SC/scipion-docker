@@ -41,19 +41,16 @@ spec:
         - name: USE_VNCCLIENT
           value: "false"
         volumeMounts:
-#        - name: x-socket
-#          mountPath: /tmp/.X11-unix
-        - name: scipion-user-data
-#          mountPath: /home/scipionuser/ScipionUserData
-          mountPath: "/mnt/onedata"
-#        - mountPath: "/home/scipionuser/ScipionUserData"
-#          name: scipion-user-data
-#        - name: scipion-projects
-#          mountPath: "/mnt/projects"
+#        - name: scipion-onedata-work
+#          mountPath: "/mnt/onedata-work"
+#        - name: scipion-onedata-projects
+#          mountPath: "/mnt/onedata-projects"
+        - name: scipion-onedata-sources
+          mountPath: "/mnt/onedata-sources"
         resources:
           limits:
-#            memory: 10Gi
-#            cpu: 10
+            memory: 10Gi
+            cpu: 10
 #            nvidia.com/gpu: 1 # dedicated GPU
 #            cerit.io/gpu-mem: 1 # shared GPU
         securityContext:
@@ -74,13 +71,14 @@ spec:
 #         emptyDir:
 #           medium: memory
 #           sizeLimit: 10Mi
-       - name: scipion-user-data
+#       - name: scipion-onedata-work
+#         persistentVolumeClaim:
+#           claimName: pvc-scipion-work
+#       - name: scipion-onedata-projects
+#         persistentVolumeClaim:
+#           claimName: pvc-scipion-onedata-projects
+       - name: scipion-onedata-sources
          persistentVolumeClaim:
-           claimName: pvc-scipion-onedata
-#           claimName: pvc-onedata
-#       - name: scipion-projects
-#         persistentVolumeClaim:
-#           claimName: scipion-test-volume
-#       - name: x-socket
-#         persistentVolumeClaim:
-#           claimName: scipion-test-volume-x
+           claimName: pvc-scipion-onedata-sources
+           readOnly: true
+

@@ -32,6 +32,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-rec
         gettext \
         cuda-samples-10-2 \
         strace \
+        iputils-ping \
         nmap
 # gettext - envsubst
 # cuda-samples, strace, nmap - for testing and debuging purpose
@@ -76,7 +77,10 @@ ENV CUDA_BIN "/usr/local/cuda/bin"
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 
 # prepare working directory
-RUN ln -s /mnt/onedata ${S_USER_HOME}/ScipionUserData && \
+RUN mkdir ${S_USER_HOME}/ScipionUserData && \
+    ln -s /mnt/onedata-work ${S_USER_HOME}/ScipionUserData/work && \
+    ln -s /mnt/onedata-projects ${S_USER_HOME}/ScipionUserData/projects && \
+    ln -s /mnt/onedata-sources ${S_USER_HOME}/ScipionUserData/sources && \
     chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/ScipionUserData
 
 COPY docker-entrypoint-base.sh /
@@ -104,6 +108,7 @@ RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/scipion.conf
 USER ${S_USER}
 #######################
 
+RUN ln -s ${S_USER_HOME}/ScipionUserData/work ${S_USER_HOME}/scipion3/data
 RUN /home/scipionuser/scipion3/scipion3 installp -p scipion-em-xmipp -j $(nproc)
 
 ENV PATH "${PATH}:/home/scipionuser/scipion3"

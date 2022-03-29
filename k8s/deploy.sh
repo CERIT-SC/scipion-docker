@@ -12,12 +12,11 @@ yaml_files=(
 	"secret.yaml"
 	"cluster-ip-vnc.yaml"
 	"cluster-ip-x11.yaml"
-	"pvc-onedata.yaml"
-	"pv-onedata.yaml"
+	"pvc-onedata-sources.yaml"
+	"pv-onedata-sources.yaml"
 	"sa.yaml"
 	"role.yaml"
 	"rolebinding.yaml"
-	"ingress.yaml"
 	"deployment.yaml"
 )
 
@@ -29,3 +28,5 @@ export SUBST_VNC_PASS="$4"
 for yaml in "${yaml_files[@]}"; do
 	envsubst < "$yaml" | microk8s.kubectl apply -f -
 done
+#	"pvc-work.yaml"
+#	"pvc-onedata-projects-temp.yaml"
