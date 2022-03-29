@@ -26,11 +26,11 @@ the service with the following command: `microk8s enable dns`
 
 2. Go to `csi-onedata/deploy/kubernetes`
 
-3. (microk8s only) Change paths in one yaml file   
-  Open `csi-nodeplugin-sshfs.yaml` file and change all the paths 
+[//]: # (3. (microk8s only) Change paths in one yaml file   )
+[//]: # (  Open `csi-nodeplugin-sshfs.yaml` file and change all the paths)
 
 4. Deploy the driver  
-  `kubectl apply -f csi-onedata/deploy/kubernetes/`  
+  `kubectl apply -f ./`  
 
 ## Deploying a Scipion instance (for users)
 
@@ -58,7 +58,7 @@ Scipion instance
 
 5. Deploy the instance  
   This step requires the namespace name from the step 2, Onedata credentials from the previous step, and a new password you want to use for log in to the new Scipion instance.
-  `scipion-docker/k8s/deploy.sh` _`your-namespace`_ _`onedata-host`_ _`onedata-token`_ _`vnc-password`_
+  `cd scipion-docker/k8s/ && ./deploy.sh` _`your-namespace`_ _`onedata-host`_ _`onedata-token`_ _`vnc-password`_
 
 6. (microk8s only) Expose the service  
   `microk8s.kubectl -n scipion port-forward service/scipion-master-svc-novnc 5901:5901 &`  
