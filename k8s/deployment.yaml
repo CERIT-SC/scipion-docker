@@ -49,8 +49,8 @@ spec:
           mountPath: "/mnt/onedata-sources"
         resources:
           limits:
-            memory: 10Gi
-            cpu: 10
+#            memory: 10Gi
+#            cpu: 10
 #            nvidia.com/gpu: 1 # dedicated GPU
 #            cerit.io/gpu-mem: 1 # shared GPU
         securityContext:
