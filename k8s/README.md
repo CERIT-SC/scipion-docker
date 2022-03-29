@@ -8,15 +8,15 @@ the service with the following command: `microk8s enable dns`
 
 ## Prepare Microk8s
 
-1. Install Microk8s
-  `sudo snap install microk8s --classic --channel=1.21/stable`
-  `sudo usermod -a -G microk8s ubuntu && sudo chown -f -R ubuntu ~/.kube`
+1. Install Microk8s  
+  `sudo snap install microk8s --classic --channel=1.21/stable`  
+  `sudo usermod -a -G microk8s ubuntu && sudo chown -f -R ubuntu ~/.kube`  
   **Log out and log in to apply group changes!**
 
-2. Start the Microk8s.
+2. Start the Microk8s  
   `microk8s start`
 
-3. Enable the DNS add-on.
+3. Enable the DNS add-on  
   `microk8s enable dns`
 
 ## Deploying CSI-Onedata (for cluster administrator)
@@ -60,8 +60,8 @@ Scipion instance
   This step requires the namespace name from the step 2, Onedata credentials from the previous step, and a new password you want to use for log in to the new Scipion instance.
   `scipion-docker/k8s/deploy.sh` _`your-namespace`_ _`onedata-host`_ _`onedata-token`_ _`vnc-password`_
 
-6. (microk8s only) Expose the service
-  `microk8s.kubectl -n scipion port-forward service/scipion-master-svc-novnc 5901:5901 &`
+6. (microk8s only) Expose the service  
+  `microk8s.kubectl -n scipion port-forward service/scipion-master-svc-novnc 5901:5901 &`  
   `microk8s.kubectl -n scipion port-forward service/scipion-master-svc-x11 6001:6001 &`
 
 7. Connect to the instance  
