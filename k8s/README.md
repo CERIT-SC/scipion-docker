@@ -26,10 +26,7 @@ the service with the following command: `microk8s enable dns`
 
 2. Go to `csi-onedata/deploy/kubernetes`
 
-[//]: # (3. (microk8s only) Change paths in one yaml file   )
-[//]: # (  Open `csi-nodeplugin-sshfs.yaml` file and change all the paths)
-
-4. Deploy the driver  
+3. Deploy the driver  
   `kubectl apply -f ./`  
 
 ## Deploying a Scipion instance (for users)
