@@ -52,8 +52,11 @@ spec:
 #          mountPath: "/mnt/projects"
         resources:
           limits:
-#            memory: 10Gi
-#            cpu: 10
+            memory: 4Gi
+            cpu: 1
+          requests:
+            memory: 4Gi
+            cpu: .2
 #            nvidia.com/gpu: 1 # dedicated GPU
 #            cerit.io/gpu-mem: 1 # shared GPU
         securityContext:
@@ -76,7 +79,7 @@ spec:
 #           sizeLimit: 10Mi
        - name: scipion-user-data
          persistentVolumeClaim:
-           claimName: pvc-sec-scipion-onedata
+           claimName: pvc-sec-scipion-onedata-$SUBST_NAMESPACE
 #           claimName: pvc-onedata
 #       - name: scipion-projects
 #         persistentVolumeClaim:
