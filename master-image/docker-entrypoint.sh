@@ -7,12 +7,6 @@ echo "docker-entrypoint.sh"
 S_USER=scipionuser
 S_USER_HOME=/home/${S_USER}
 
-
-ls -la ${S_USER_HOME}/scipion3/
-ls -la ${S_USER_HOME}/ScipionUserData/
-ls -la ${S_USER_HOME}
-ln -s ${S_USER_HOME}/ScipionUserData/ ${S_USER_HOME}/scipion3/data
-
 # run base-image's docker-entrypoint-base.sh
 #/docker-entrypoint-base.sh
 

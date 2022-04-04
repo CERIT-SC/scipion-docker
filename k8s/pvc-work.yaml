@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-scipion-work
+  namespace: "$SUBST_NAMESPACE"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5000Gi
+  storageClassName: nfs-csi

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv-scipion-onedata
+  name: pv-scipion-onedata-sources
   namespace: "$SUBST_NAMESPACE"
 spec:
   accessModes:
@@ -12,6 +12,6 @@ spec:
   csi:
     driver: csi-onedata
     nodePublishSecretRef:
-      name: sec-scipion-onedata
+      name: scipion-onedata-sources
       namespace: "$SUBST_NAMESPACE"
     volumeHandle: "$SUBST_NAMESPACE"
