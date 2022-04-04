@@ -14,14 +14,6 @@ spec:
         app: scipion-master
     spec:
       containers:
-# Conatiner that removes old tool containers
-#      - name: garbage-collector
-#        image: jhandl/scipion-gc:latest
-#        imagePullPolicy: Always
-#        securityContext:
-#          privileged: false
-#          runAsUser: 1000
-#          runAsGroup: 1000
       - name: scipion-master
         image: jhandl/scipion-mn:tool
         imagePullPolicy: Always
@@ -41,10 +33,10 @@ spec:
         - name: USE_VNCCLIENT
           value: "false"
         volumeMounts:
-#        - name: scipion-onedata-work
-#          mountPath: "/mnt/onedata-work"
-#        - name: scipion-onedata-projects
-#          mountPath: "/mnt/onedata-projects"
+        - name: scipion-onedata-work
+          mountPath: "/mnt/onedata-work"
+        - name: scipion-onedata-projects
+          mountPath: "/mnt/onedata-projects"
         - name: scipion-onedata-sources
           mountPath: "/mnt/onedata-sources"
         resources:
@@ -62,24 +54,12 @@ spec:
           runAsGroup: 1000
       serviceAccountName: pod-reader-sa
       volumes:
-#      - name: x-socket
-#        hostPath:
-#          path: /tmp/.X11-unix/X0
-#      - name: scipion-user-data
-#        hostPath:
-#          path: /home/jhandl/k8s-volume
-##        emptyDir: {}
-
-#       - name: x-socket
-#         emptyDir:
-#           medium: memory
-#           sizeLimit: 10Mi
-#       - name: scipion-onedata-work
-#         persistentVolumeClaim:
-#           claimName: pvc-scipion-work
-#       - name: scipion-onedata-projects
-#         persistentVolumeClaim:
-#           claimName: pvc-scipion-onedata-projects
+       - name: scipion-onedata-work
+         persistentVolumeClaim:
+           claimName: pvc-scipion-work
+       - name: scipion-onedata-projects
+         persistentVolumeClaim:
+           claimName: pvc-scipion-onedata-projects
        - name: scipion-onedata-sources
          persistentVolumeClaim:
            claimName: pvc-scipion-onedata-sources-$SUBST_NAMESPACE
