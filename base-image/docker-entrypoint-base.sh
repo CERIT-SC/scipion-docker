@@ -1,17 +1,18 @@
 #!/bin/bash
 
-# mount OneData
+dir_source="/mnt/vol-source"
+dir_project="/mnt/vol-project"
 
-# Pepa
-#ONEDATA_TOKEN=MDAyMWxvY2F00aW9uIG9uZXpvbmUub25lZGF00YS5vcmcKMDA2YmlkZW500aWZpZXIgMi9ubWQvdXNyLTI4YWRmMmViZDY2NTczMDhkMTI4NTJjZWMwYzFmMDkwY2g2NTczL2FjdC9mYzRiYWYwODQzZjUxMWEzMjQ2YTU4YWFhNzU1NGM3YmNoZWFjZAowMDE4Y2lkIHNlcnZpY2UgPSBvcHctKgowMDJmc2lnbmF00dXJlILwbQY74hrfqu4DajWjNpXN8sV7fHz01ebs8OhO00HrLd01Cg
+test_mountpoint () {
+	if [ "1" != $(ls "$1" | wc -l) ]; then
+		echo "There is more or less spaces than one in the \"${1}\""
+		echo "The instance cannot be started"
+		exit 1
+	fi
+}
 
-# Tomas - stary token
-#ONEDATA_TOKEN=MDAyMWxvY2F00aW9uIG9uZXpvbmUub25lZGF00YS5vcmcKMDA2YmlkZW500aWZpZXIgMi9ubWQvdXNyLTlkMTU2MjJjYTJiYWQ3Nzk3NjZhNWE00MzU2NGYzNzA1Y2hiYWQ3L2FjdC9kNDcyZTUwNDA00ZmQ4Y2YyZGY1ZDYyZjhmNzAzYTc1OWNoNjlhOQowMDE4Y2lkIHNlcnZpY2UgPSBvcHctKgowMDJmc2lnbmF00dXJlIAG55pyR1AxNuEAGFy8F1Lycq00GoeEtkQGIoZS8tFW8BCg
+test_mountpoint "$dir_source"
+test_mountpoint "$dir_project"
 
-# Tomas
-ONEDATA_TOKEN=MDAxY2xvY2F00aW9uIGRhdGFodWIuZWdpLmV1CjAwNmJpZGVudGlmaWVyIDIvbm1kL3Vzci003OGQwNjhmYzliYTVkMGU1ZjY3NGE1YTdjZjVjODMzOGNoYTVkMC9hY3QvOGRlNzRmZWRiZjY3ZjZkNWE00OGUwZmE4NzM4MjBkYWNjaDllNDYKMDAxZWNpZCBpbnRlcmZhY2UgPSBvbmVjbGllbnQKMDAyZnNpZ25hdHVyZSD27JhES8VOCDfRmIACXLxcd027nkFrkSDUN5egCjsJ9PAo
-
-#ONEDATA_PROVIDER=muni.onezone.onedata.org
-ONEDATA_PROVIDER=muni-ics.datahub.egi.eu
-oneclient -H ${ONEDATA_PROVIDER} -t ${ONEDATA_TOKEN} /mnt/onedata
-
+ln -s "${dir_source}/*" "${S_USER_HOME}/ScipionUserData/source"
+ln -s "${dir_project}/*" "${S_USER_HOME}/ScipionUserData/projects" # this should be the only occurence of the word "projects" (plural) instead of "project". Scipion requires this directory

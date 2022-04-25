@@ -8,7 +8,7 @@ S_USER=scipionuser
 S_USER_HOME=/home/${S_USER}
 
 # run base-image's docker-entrypoint-base.sh
-#/docker-entrypoint-base.sh
+/docker-entrypoint-base.sh
 
 echo $USE_DISPLAY
 export WEBPORT=590${USE_DISPLAY}

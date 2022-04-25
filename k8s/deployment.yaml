@@ -13,10 +13,35 @@ spec:
       labels:
         app: scipion-master
     spec:
+      initContainers:
+      - name: scipion-cloner
+        image: jhandl/scipion-cloner:latest
+        imagePullPolicy: Always
+        securityContext:
+          privileged: false
+          runAsUser: 1000
+          runAsGroup: 1000
+        volumeMounts:
+        - name: scipion-od-source-ro
+          mountPath: "/mnt/od-source"
+#        - name: scipion-od-project-rw
+#          mountPath: "/mnt/od-project"
+        - name: scipion-vol-source-rw
+          mountPath: "/mnt/vol-source"
+
+#        - name: scipion-od-project-rw
+#          mountPath: "/mnt/od-project"
+#        - name: scipion-vol-project-rw
+#          mountPath: "/mnt/vol-project"
+
       containers:
       - name: scipion-master
         image: jhandl/scipion-mn:tool
         imagePullPolicy: Always
+        securityContext:
+          privileged: false
+          runAsUser: 1000
+          runAsGroup: 1000
         ports:
         - containerPort: 5901
         - containerPort: 6001
@@ -33,12 +58,10 @@ spec:
         - name: USE_VNCCLIENT
           value: "false"
         volumeMounts:
-        - name: scipion-onedata-work
-          mountPath: "/mnt/onedata-work"
-        - name: scipion-onedata-projects
-          mountPath: "/mnt/onedata-projects"
-        - name: scipion-onedata-sources
-          mountPath: "/mnt/onedata-sources"
+        - name: scipion-vol-source-rw
+          mountPath: "/mnt/vol-source"
+        - name: scipion-vol-project-rw # TODO tady patri vol misto od
+          mountPath: "/mnt/vol-project"
         resources:
           limits:
             memory: 4Gi
@@ -48,20 +71,40 @@ spec:
             cpu: .2
 #            nvidia.com/gpu: 1 # dedicated GPU
 #            cerit.io/gpu-mem: 1 # shared GPU
-        securityContext:
-          privileged: false
-          runAsUser: 1000
-          runAsGroup: 1000
       serviceAccountName: pod-reader-sa
       volumes:
-       - name: scipion-onedata-work
+
+       # Onedata
+       # ---------------------
+
+       # cloner
+       - name: scipion-od-source-ro
          persistentVolumeClaim:
-           claimName: pvc-scipion-work
-       - name: scipion-onedata-projects
-         persistentVolumeClaim:
-           claimName: pvc-scipion-onedata-projects
-       - name: scipion-onedata-sources
-         persistentVolumeClaim:
-           claimName: pvc-scipion-onedata-sources-$SUBST_NAMESPACE
+           claimName: pvc-scipion-od-source-$SUBST_NAMESPACE
            readOnly: true
+
+       # syncer
+       - name: scipion-od-project-rw
+         persistentVolumeClaim:
+           claimName: pvc-scipion-od-project-$SUBST_NAMESPACE
+
+       # Auto vol provisioning
+       # ---------------------
+
+       # cloner (master - tmp)
+       - name: scipion-vol-source-rw
+         persistentVolumeClaim:
+           claimName: pvc-scipion-vol-source-$SUBST_NAMESPACE
+
+# TODO RO for RW PVC does not work
+#       # master
+#       - name: scipion-vol-source-ro
+#         persistentVolumeClaim:
+#           claimName: pvc-scipion-vol-source-$SUBST_NAMESPACE
+#           readOnly: true
+
+       # master + syncer
+       - name: scipion-vol-project-rw
+         persistentVolumeClaim:
+           claimName: pvc-scipion-vol-project-$SUBST_NAMESPACE
 

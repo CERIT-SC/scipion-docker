@@ -22,7 +22,8 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
 	xauth \
 	xterm \
 	konsole \
-	pluma
+	pluma \
+        thunar-archive-plugin
 
 # libjpeg-turbo requirements
 RUN apt update && apt install -y --no-install-recommends \
@@ -153,6 +154,13 @@ COPY res/depl-tool.yaml /opt/k8s/
 COPY res/job-watchdog.sh /opt/k8s/
 RUN chmod +x /opt/k8s/job-watchdog.sh
 RUN chown -R ${S_USER}:${S_USER} /opt
+
+COPY scipion-test-list.txt ${S_USER_HOME}/Desktop/
+COPY scipion-test.sh ${S_USER_HOME}/Desktop/
+
+RUN chmod +x ${S_USER_HOME}/Desktop/scipion-test.sh
+RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop/scipion-test-list.txt
+RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop/scipion-test.sh
 
 USER ${S_USER}
 #######################
