@@ -1,0 +1,28 @@
+
+# Dynamic volume provisioning
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-scipion-vol-source-$SUBST_NAMESPACE
+  namespace: "$SUBST_NAMESPACE"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5000Gi
+  storageClassName: nfs-csi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-scipion-vol-project-$SUBST_NAMESPACE
+  namespace: "$SUBST_NAMESPACE"
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5000Gi
+  storageClassName: nfs-csi

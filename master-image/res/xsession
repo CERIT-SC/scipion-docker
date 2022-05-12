@@ -2,10 +2,40 @@
 
 set -e
 
+DISPLAY=:1 xhost +
+
+dir_od="/mnt/od-source"
+dir_vol="/mnt/vol-source"
+
+sleep infinity
+
+# Check the lock
+if [ -f ${dir_od}/*/project-lock_scipion-docker ]; then
+	echo "This project is in use by another Scipion instance"
+	exit 1
+fi
+
+# Create lock
+echo "locked" > ${dir_od}/*/project-lock_scipion-docker
+echo "Project has been locked for modifications from another Scipion instances" >> /instance.log
+
+# Copy the project from the Onedata mount to the k8s volume
+# Start the syncer-init
+# =====================
+# TODO
+echo "Preparing the project data" >> /instance.log
+/opt/syncer/syncer-init.sh
+echo "Done" >> /instance.log
+
+# Start the syncer-autosave
+/opt/syncer/syncer-autosave.sh &
+
+# TODO nezapomenout na symlinky
+
 # Disable screensaver
 #xset s off -dpms
 
 # Start xfce4
-DISPLAY=:1 xhost +
+echo "Starting the desktop environment" >> /instance.log
 cd ${S_USER_HOME}
 xfce4-session

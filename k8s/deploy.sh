@@ -24,6 +24,7 @@ use_kuba () {
 	for yaml in "${yaml_files[@]}"; do
 		envsubst < "$yaml" | kubectl apply -f -
 	done
+	echo -e "kuba\n${SUBST_NAMESPACE}" > deployment_script_info
 }
 
 use_microk8s () {

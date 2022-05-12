@@ -1,0 +1,30 @@
+
+# Required by pv-scipion-od (Onedata)
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-scipion-od-source-$SUBST_NAMESPACE
+  namespace: "$SUBST_NAMESPACE"
+spec:
+  accessModes:
+    - ReadOnlyMany # RO
+  resources:
+    requests:
+      storage: 5000Gi
+  storageClassName: "onedata"
+  volumeName: pv-scipion-od-source-$SUBST_NAMESPACE
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-scipion-od-project-$SUBST_NAMESPACE
+  namespace: "$SUBST_NAMESPACE"
+spec:
+  accessModes:
+    - ReadWriteMany # RW
+  resources:
+    requests:
+      storage: 5000Gi
+  storageClassName: "onedata"
+  volumeName: pv-scipion-od-project-$SUBST_NAMESPACE

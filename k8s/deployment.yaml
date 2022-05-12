@@ -13,9 +13,10 @@ spec:
       labels:
         app: scipion-master
     spec:
-      initContainers:
-      - name: scipion-cloner
-        image: jhandl/scipion-cloner:latest
+      terminationGracePeriodSeconds: 180
+      containers:
+      - name: controller
+        image: jhandl/scipion-controller:latest
         imagePullPolicy: Always
         securityContext:
           privileged: false
@@ -34,7 +35,6 @@ spec:
 #        - name: scipion-vol-project-rw
 #          mountPath: "/mnt/vol-project"
 
-      containers:
       - name: scipion-master
         image: jhandl/scipion-mn:tool
         imagePullPolicy: Always
