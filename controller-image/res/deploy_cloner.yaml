@@ -1,0 +1,68 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: scipion-cloner-$SUBST_CLONER_ACTION
+  namespace: "$SUBST_NAMESPACE"
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: scipion-cloner-$SUBST_CLONER_ACTION
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: cloner
+        image: jhandl/scipion-cloner:latest
+        imagePullPolicy: Always
+        env:
+        - name: CLONER_ACTION
+          value: "$SUBST_CLONER_ACTION"
+        securityContext:
+          privileged: false
+          runAsUser: 1000
+          runAsGroup: 1000
+        volumeMounts:
+
+          # Onedata source (rsync src)
+        - name: scipion-od-source-ro
+          mountPath: "/mnt/od-source"
+
+          # Volume source (rsync dest)
+        - name: scipion-vol-source-rw
+          mountPath: "/mnt/vol-source"
+
+          # Onedata project (rsync src/dest)
+        - name: scipion-od-project-rw
+          mountPath: "/mnt/od-project"
+
+          # Volume project (rsync src/dest) + store logs
+        - name: scipion-vol-project-rw
+          mountPath: "/mnt/vol-project"
+
+      volumes:
+
+       # Onedata
+       # ---------------------
+
+       - name: scipion-od-source-ro
+         persistentVolumeClaim:
+           claimName: pvc-scipion-od-source-$SUBST_NAMESPACE
+           readOnly: true
+
+       - name: scipion-od-project-rw
+         persistentVolumeClaim:
+           claimName: pvc-scipion-od-project-$SUBST_NAMESPACE
+
+       # Auto vol provisioning
+       # ---------------------
+
+       - name: scipion-vol-source-rw
+         persistentVolumeClaim:
+           claimName: pvc-scipion-vol-source-$SUBST_NAMESPACE
+
+       - name: scipion-vol-project-rw
+         persistentVolumeClaim:
+           claimName: pvc-scipion-vol-project-$SUBST_NAMESPACE
+
