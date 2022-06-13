@@ -19,6 +19,8 @@ spec:
         env:
         - name: CLONER_ACTION
           value: "$SUBST_CLONER_ACTION"
+        - name: CLONER_REMOVE_LOCK
+          value: "$SUBST_CLONER_REMOVE_LOCK"
         securityContext:
           privileged: false
           runAsUser: 1000

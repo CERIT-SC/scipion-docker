@@ -1,29 +1,101 @@
 #!/bin/bash
 
+check_status () {
+	local pod="$1"
+
+	pod_k8s_line=$(kubectl get pod | grep "$pod")
+	pod_fullname=$(echo "$pod_k8s_line" | awk '{print $1}')
+	pod_status=$(echo "$pod_k8s_line" | awk '{print $3}')
+
+	if [ -z "$pod_status" ]; then
+		echo "${pod}: Container was unexpectedly terminated." >> "$file_log"
+	elif [ "$pod_status" = "Completed" ]; then
+		echo "${pod}: Container completed successfully." >> "$file_log"
+
+		return 0
+
+	elif [ "$pod_status" = "ImagePullBackOff" ] ||
+	     [ "$pod_status" = "ErrImagePull" ]; then
+		echo "" >> "$file_log"
+		echo "${pod}: Container cannot be started. K8S description:" >> "$file_log"
+		sleep 2
+		kubectl describe pod "$pod_fullname" >> "$file_log"
+		echo ""
+		echo "${pod}: Instance startup failed. Check the log in the \"controller\" container: \"${file_log}\"" >> "$file_log"
+
+		return 0
+
+	elif [ "$pod_status" = "CrashLoopBackOff" ] ||
+	     [ "$pod_status" = "Error" ]; then
+		echo "" >> "$file_log"
+		echo "${pod}: Container failed. K8S log:" >> "$file_log"
+		sleep 2
+
+		kubectl logs "$pod_fullname" >> "$file_log"
+		echo ""
+		echo "${pod}: Instance startup failed. Check the log in the \"controller\" container: \"${file_log}\"" >> "$file_log"
+
+		return 0
+
+	elif [ "$pod_status" = "ContainerCreating" ]; then
+		echo "${pod}: Container is still creating." >> "$file_log"
+	elif [ "$pod_status" = "Pending" ]; then
+		echo "${pod}: Pending launch." >> "$file_log"
+	elif [ "$pod_status" = "Running" ]; then
+		echo "${pod}: Container is still running." >> "$file_log"
+	fi
+
+	return 1
+}
+
+#auto_save () {
+#}
+
+trap_save () {
+	echo "This Scipion instance has received a stop signal. The Scipion application will be terminated and the project saved to the Onedata." >> "$file_log"
+
+	kubectl delete --force job scipion-docker-backup || true
+	export SUBST_CLONER_ACTION="backup"
+	export SUBST_CLONER_REMOVE_LOCK="true"
+	pod_saver=$(envsubst < /opt/deploy_cloner.yaml | kubectl apply -f - | awk '{print $1}' | cut -d'/' -f2)
+
+	while ! check_status "scipion-docker-backup"; do
+		sleep 10
+	done
+	
+	echo "Project is saved. This instance is being deleted." >> "$file_log"
+
+	kubectl delete \
+		job.batch/scipion-cloner-backup \
+		job.batch/scipion-cloner-restore \
+		job.batch/scipion-cloner-clone \
+		deployment.apps/scipion-master || true
+}
+
 set -x
 
 dir_scipion="/mnt/vol-project/scipion-docker"
-log_file="${dir_scipion}/instance.log"
-status_file="${dir_scipion}/instance-status"
+file_log="${dir_scipion}/instance.log"
+file_status="${dir_scipion}/instance-status"
+
+export SUBST_NAMESPACE=handl-ns
 
 mkdir -p "${dir_scipion}"
-rm "${status_file}" || true
-rm "${log_file}" || true
+rm "${file_status}" || true
+rm "${file_log}" || true
 
-echo "Deployment created" >> "$log_file"
+echo "Deployment created" >> "$file_log"
 
 # Run cloner
-export SUBST_NAMESPACE=handl-ns
-export SUBST_CLONER_ACTION=clone
-echo "Copying raw source data from Onedata storage" >> "$log_file"
+export SUBST_CLONER_ACTION="clone"
+echo "Copying raw source data from Onedata storage" >> "$file_log"
 pod_cloner=$(envsubst < /opt/deploy_cloner.yaml | kubectl apply -f - | awk '{print $1}' | cut -d'/' -f2)
 
 echo "debug - pod clone ${pod_cloner}"
 
 # Run syncer restore
-export SUBST_NAMESPACE=handl-ns
-export SUBST_CLONER_ACTION=restore
-echo "Restoring project data from Onedata storage" >> "$log_file"
+export SUBST_CLONER_ACTION="restore"
+echo "Restoring project data from Onedata storage" >> "$file_log"
 pod_syncer=$(envsubst < /opt/deploy_cloner.yaml | kubectl apply -f - | awk '{print $1}' | cut -d'/' -f2)
 
 echo "debug - pod restore ${pod_syncer}"
@@ -40,69 +112,41 @@ while [ "${pod_list_stopped[0]}" = "false" ] || [ "${pod_list_stopped[1]}" = "fa
 
 		pod="${pod_list[$pod_index]}"
 
-		sleep 30
-		pod_k8s_line=$(kubectl get pod | grep "$pod")
-		pod_fullname=$(echo "$pod_k8s_line" | awk '{print $1}')
-		pod_status=$(echo "$pod_k8s_line" | awk '{print $3}')
-		
-		echo "debug - checking status - pod ${pod_fullname}"
-
-		if [ -z "$pod_status" ]; then
-			echo "${pod}: Container was unexpectedly terminated." >> "$log_file"
-		elif [ "$pod_status" = "Completed" ]; then
-			echo "${pod}: Container completed successfully." >> "$log_file"
-
+		if check_status "$pod"; then
 			pod_list_stopped[$pod_index]="true"
-
-		elif [ "$pod_status" = "ImagePullBackOff" ] ||
-		     [ "$pod_status" = "ErrImagePull" ]; then
-			echo "" >> "$log_file"
-			echo "${pod}: Container cannot be started. K8S description:" >> "$log_file"
-			sleep 2
-			kubectl describe pod "$pod_fullname" >> "$log_file"
-			echo ""
-			echo "${pod}: Instance startup failed. Check the log in the controller container: \"${log_file}\"" >> "$log_file"
-
-			pod_list_stopped[$pod_index]="true"
-
-		elif [ "$pod_status" = "CrashLoopBackOff" ] ||
-		     [ "$pod_status" = "Error" ]; then
-			echo "" >> "$log_file"
-			echo "${pod}: Container failed. K8S log:" >> "$log_file"
-			sleep 2
-
-			# TODO kubectl log instead of describe - problem with creating/updating roles in k8s
-			kubectl describe pod "$pod_fullname" >> "$log_file"
-			echo ""
-			echo "${pod}: Instance startup failed. Check the log in the controller container: \"${log_file}\"" >> "$log_file"
-
-			pod_list_stopped[$pod_index]="true"
-
-		elif [ "$pod_status" = "ContainerCreating" ]; then
-			echo "${pod}: Container is still creating." >> "$log_file"
-		elif [ "$pod_status" = "Pending" ]; then
-			echo "${pod}: Pending launch." >> "$log_file"
 		fi
+
+		sleep 30
 	done
 done
 
 echo "je mozne spustit scipion"
-echo "ok" >> "$status_file"
+echo "ok" >> "$file_status"
+
 #kubectl delete job.batch/scipion-cloner-clone job.batch/scipion-cloner-restore || true
 
+trap trap_save EXIT 
+
 while true; do
-	echo "Autosaving the project" >> "$log_file"
-	#envsubst < /opt/deploy_syncer_autosave.yaml | kubectl apply -f -
 	sleep 600
+
+	previous_cloner=$(kubectl get pod | grep scipion-cloner-backup | awk '{print $3}')
+	if [ "Running" = "${previous_cloner}" ]; then
+		echo "The previous autosave is still running. The new one will not start now." >> "$file_log"
+		return 1
+	fi
+	
+	echo "Autosaving the project" >> "$file_log"
+
+	kubectl delete --force job scipion-docker-backup || true
+	
+	export SUBST_CLONER_ACTION=backup
+	pod_saver=$(envsubst < /opt/deploy_cloner.yaml | kubectl apply -f - | awk '{print $1}' | cut -d'/' -f2)
 done
 
-# hook: run syncer save
-# TODO
-echo "This Scipion instance received a stop signal. The Scipion application will be terminated and project saved to the Onedata." >> "$log_file"
+
 # TODO kill and wait (pozor na timeout v k8s podu)
-echo "Saving the project" >> "$log_file"
-# TODO dave
-echo "Project is saved. Destroying the instance." >> "$log_file"
+echo "Saving the project" >> "$file_log"
 # 
 # TODO provest "ls" pro force updatu adresaru v k8s volumu! | kvuli logum | Ales
  
