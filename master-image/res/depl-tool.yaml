@@ -28,10 +28,10 @@ spec:
         - name: XMIPP_IN_QUEUE
           value: "1" 
         volumeMounts:
-#        - name: scipion-user-data
-#          mountPath: /home/scipionuser/ScipionUserData
-        - mountPath: "/home/scipionuser/ScipionUserData"
-          name: scipion-user-data
+        - name: scipion-vol-source-rw
+          mountPath: "/mnt/vol-source"
+        - name: scipion-vol-project-rw
+          mountPath: "/mnt/vol-project"
         resources:
           limits:
             memory: 10Gi
@@ -44,9 +44,13 @@ spec:
           runAsGroup: 1000
       restartPolicy: Never
       volumes:
-      - name: scipion-user-data
-        persistentVolumeClaim:
-          claimName: scipion-test-volume
+       - name: scipion-vol-source-rw
+         persistentVolumeClaim:
+           claimName: pvc-scipion-vol-source-$TOOL_SUBST_NAMESPACE
+
+       - name: scipion-vol-project-rw
+         persistentVolumeClaim:
+           claimName: pvc-scipion-vol-project-$TOOL_SUBST_NAMESPACE
 
 #        hostPath:
 #          path: /home/jhandl/k8s-volume
