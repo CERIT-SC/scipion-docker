@@ -42,10 +42,10 @@ if [ "$#" != 8 ]; then
 	print_help
 fi
 
-if [ -f deployment_script_info ]; then
-	echo "An instance of scipion is already running. (deployment_script_info file exists)."
-	exit 2
-fi
+#if [ -f deployment_script_info ]; then
+#	echo "An instance of scipion is already running. (deployment_script_info file exists)."
+#	exit 2
+#fi
 
 export SUBST_NAMESPACE="$2"
 export SUBST_OD_HOST=$(echo "$3" | base64 --wrap 0)
