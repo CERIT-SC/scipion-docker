@@ -23,7 +23,11 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
 	xterm \
 	konsole \
 	pluma \
-        thunar-archive-plugin
+	thunar-archive-plugin \
+	xdotool \
+	rsync
+# xdotool - window manipulation
+# rsync is required only by cloner
 
 # libjpeg-turbo requirements
 RUN apt update && apt install -y --no-install-recommends \
