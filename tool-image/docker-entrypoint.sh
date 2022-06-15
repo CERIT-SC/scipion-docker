@@ -8,17 +8,9 @@ S_USER_HOME=/home/${S_USER}
 # run base-image's docker-entrypoint-base.sh
 /docker-entrypoint-base.sh
 
-ln -s ${S_USER_HOME}/ScipionUserData/ ${S_USER_HOME}/scipion3/data
-
 export PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
 
 export DISPLAY=scipion-master-svc-x11:1
-
-#ls -laR ${S_USER_HOME}/
-#sleep 30
-#ls -laR ${S_USER_HOME}/
-
-
 
 #echo "$TOOL_COMMAND" > ${S_USER_HOME}/ScipionUserData/`date +%s`.txt
 #
