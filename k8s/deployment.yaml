@@ -25,15 +25,12 @@ spec:
         volumeMounts:
         - name: scipion-od-source-ro
           mountPath: "/mnt/od-source"
-#        - name: scipion-od-project-rw
-#          mountPath: "/mnt/od-project"
+        - name: scipion-od-project-rw
+          mountPath: "/mnt/od-project"
         - name: scipion-vol-source-rw
           mountPath: "/mnt/vol-source"
-
-#        - name: scipion-od-project-rw
-#          mountPath: "/mnt/od-project"
-#        - name: scipion-vol-project-rw
-#          mountPath: "/mnt/vol-project"
+        - name: scipion-vol-project-rw
+          mountPath: "/mnt/vol-project"
 
       - name: scipion-master
         image: jhandl/scipion-mn:tool
@@ -60,7 +57,7 @@ spec:
         volumeMounts:
         - name: scipion-vol-source-rw
           mountPath: "/mnt/vol-source"
-        - name: scipion-vol-project-rw # TODO tady patri vol misto od
+        - name: scipion-vol-project-rw
           mountPath: "/mnt/vol-project"
         resources:
           limits:
@@ -77,13 +74,13 @@ spec:
        # Onedata
        # ---------------------
 
-       # cloner
+       # Controller cloner
        - name: scipion-od-source-ro
          persistentVolumeClaim:
            claimName: pvc-scipion-od-source-$SUBST_NAMESPACE
            readOnly: true
 
-       # syncer
+       # Controller restore,autosave,trapsave
        - name: scipion-od-project-rw
          persistentVolumeClaim:
            claimName: pvc-scipion-od-project-$SUBST_NAMESPACE
@@ -91,19 +88,19 @@ spec:
        # Auto vol provisioning
        # ---------------------
 
-       # cloner (master - tmp)
+       # Master + Controller cloner (master - tmp)
        - name: scipion-vol-source-rw
          persistentVolumeClaim:
            claimName: pvc-scipion-vol-source-$SUBST_NAMESPACE
 
 # TODO RO for RW PVC does not work
-#       # master
+#       # Master
 #       - name: scipion-vol-source-ro
 #         persistentVolumeClaim:
 #           claimName: pvc-scipion-vol-source-$SUBST_NAMESPACE
 #           readOnly: true
 
-       # master + syncer
+       # Master + Controller restore,autosave,trapsave
        - name: scipion-vol-project-rw
          persistentVolumeClaim:
            claimName: pvc-scipion-vol-project-$SUBST_NAMESPACE
