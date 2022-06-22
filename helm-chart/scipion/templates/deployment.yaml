@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: scipion-master
-  namespace: "$SUBST_NAMESPACE"
 spec:
   selector:
     matchLabels:
@@ -48,12 +47,12 @@ spec:
         - name: USER_PASS
           value: "abc"
         - name: VNC_PASS
-          value: "$SUBST_VNC_PASS"
+          value: {{ .Values.master.vncPassword | quote }}
         - name: USE_DISPLAY
           value: "1"
 # USE_DISPLAY 1 is hardcoded in other files!
         - name: USE_VNCCLIENT
-          value: "false"
+          value: {{ .Values.master.useVncClient | quote }}
         volumeMounts:
         - name: scipion-vol-source-rw
           mountPath: "/mnt/vol-source"
@@ -77,13 +76,13 @@ spec:
        # Controller cloner
        - name: scipion-od-source-ro
          persistentVolumeClaim:
-           claimName: pvc-scipion-od-source-$SUBST_NAMESPACE
+           claimName: pvc-scipion-od-source-{{ .Release.Namespace }}
            readOnly: true
 
        # Controller restore,autosave,trapsave
        - name: scipion-od-project-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-od-project-$SUBST_NAMESPACE
+           claimName: pvc-scipion-od-project-{{ .Release.Namespace }}
 
        # Auto vol provisioning
        # ---------------------
@@ -91,7 +90,7 @@ spec:
        # Master + Controller cloner (master - tmp)
        - name: scipion-vol-source-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-source-$SUBST_NAMESPACE
+           claimName: pvc-scipion-vol-source-{{ .Release.Namespace }}
 
 # TODO RO for RW PVC does not work
 #       # Master
@@ -103,5 +102,5 @@ spec:
        # Master + Controller restore,autosave,trapsave
        - name: scipion-vol-project-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-project-$SUBST_NAMESPACE
+           claimName: pvc-scipion-vol-project-{{ .Release.Namespace }}
 

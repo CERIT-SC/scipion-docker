@@ -1,0 +1,17 @@
+
+instance:
+  microk8s: false
+
+master:
+  useVncClient: false
+  vncPassword: null
+
+od:
+  host: null
+  source:
+    token: null
+    spaceId: null
+  project:
+    token: null
+    spaceId: null
+

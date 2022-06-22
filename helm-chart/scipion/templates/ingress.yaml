@@ -2,8 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: scipion-master-ingress
-  namespace: "$SUBST_NAMESPACE"
   annotations:
+    "helm.sh/resource-policy": keep
     kuberentes.io/ingress.class: "nginx"
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
@@ -11,10 +11,10 @@ metadata:
 spec:
   tls:
     - hosts:
-        - "scipion.dyn.cloud.e-infra.cz"
-      secretName: scipion-dyn-cloud-e-infra-cz-tls
+        - "scipion.{{ .Release.Namespace }}.dyn.cloud.e-infra.cz"
+      secretName: scipion-{{ .Release.Namespace }}-dyn-cloud-e-infra-cz-tls
   rules:
-  - host: "scipion.dyn.cloud.e-infra.cz"
+  - host: "scipion.{{ .Release.Namespace }}.dyn.cloud.e-infra.cz"
     http:
       paths:
       - backend:

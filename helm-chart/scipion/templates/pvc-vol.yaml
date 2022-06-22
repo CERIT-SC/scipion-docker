@@ -4,8 +4,9 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-scipion-vol-source-$SUBST_NAMESPACE
-  namespace: "$SUBST_NAMESPACE"
+  name: pvc-scipion-vol-source-{{ .Release.Namespace }}
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   accessModes:
     - ReadWriteMany
@@ -17,8 +18,9 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-scipion-vol-project-$SUBST_NAMESPACE
-  namespace: "$SUBST_NAMESPACE"
+  name: pvc-scipion-vol-project-{{ .Release.Namespace }}
+  annotations:
+    "helm.sh/resource-policy": keep
 spec:
   accessModes:
     - ReadWriteMany

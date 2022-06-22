@@ -1,11 +1,11 @@
 
 # Required by pv-scipion-od (Onedata)
 
+{{ if .Values.instance.microk8s }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-scipion-od-source-$SUBST_NAMESPACE
-  namespace: "$SUBST_NAMESPACE"
+  name: pvc-scipion-od-source-{{ .Release.Namespace }}
 spec:
   accessModes:
     - ReadOnlyMany # RO
@@ -13,13 +13,12 @@ spec:
     requests:
       storage: 5000Gi
   storageClassName: "onedata"
-  volumeName: pv-scipion-od-source-$SUBST_NAMESPACE
+  volumeName: pv-scipion-od-source-{{ .Release.Namespace }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-scipion-od-project-$SUBST_NAMESPACE
-  namespace: "$SUBST_NAMESPACE"
+  name: pvc-scipion-od-project-{{ .Release.Namespace }}
 spec:
   accessModes:
     - ReadWriteMany # RW
@@ -27,4 +26,5 @@ spec:
     requests:
       storage: 5000Gi
   storageClassName: "onedata"
-  volumeName: pv-scipion-od-project-$SUBST_NAMESPACE
+  volumeName: pv-scipion-od-project-{{ .Release.Namespace }}
+{{ end }}
