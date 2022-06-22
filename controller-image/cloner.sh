@@ -115,7 +115,7 @@ restore_project () {
 #--------------------------
 clone_source () {
 	echo "Cloning a source data" >> "$file_instance_log_path"
-	rsync -av --delete --no-perms --omit-dir-times "${dir_od_s_path}/" "${dir_vol_s_path}/" > "${dir_cloner}/progress-clone.log"
+	rsync $rsync_options "${dir_od_s_path}/" "${dir_vol_s_path}/" > "${dir_cloner}/progress-clone.log"
 	echo "Cloning has been completed" >> "$file_instance_log_path"
 }
 
