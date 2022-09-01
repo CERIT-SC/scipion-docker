@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -ex
+set -e
 
 dir_od_p="/mnt/od-project"
 dir_vol_p="/mnt/vol-project"
