@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: scipion-tool-job-$TOOL_SUBST_NAME-$SUBMIT_PID
-        image: jhandl/scipion-tool:scipion-em-$TOOL_SUBST_TOOL
+        image: hub.cerit.io/josef_handl/scipion-tool:scipion-em-$TOOL_SUBST_TOOL
         imagePullPolicy: Always
         env:
         - name: ROOT_PASS
