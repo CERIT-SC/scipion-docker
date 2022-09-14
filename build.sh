@@ -4,11 +4,12 @@ set -e
 
 cd "$(dirname "$0")"
 
-syncer-image/build.sh &
+controller-image/build.sh
 
 base-image/build.sh
+master-image/build.sh --nobase
 
-master-image/build.sh --nobase &
-tool-image/build.sh --nobase &
+tool-image/build.sh --nobase
 
 wait
+
