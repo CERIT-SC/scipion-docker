@@ -3,6 +3,15 @@ FROM jhandl/scipion-base:tool
 USER root
 ######################
 
+# Required by Relion tool
+RUN apt update && apt install -y --no-install-recommends \
+      pkg-config \
+      libxft-dev \
+      libfreetype6-dev
+
+# Clean apt
+RUN rm -rf /var/lib/apt/lists/*
+
 COPY docker-entrypoint-root.sh /
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint-root.sh && \
@@ -25,4 +34,5 @@ RUN if [ ! -z "$SD_PLUGIN" ]; then \
 
 RUN export string="\ \ \ \ \ \ \ \ print(\"debugovacivypiszacatek-\" + str(self.getInputMicrographs()) + \"-debugovacivypiskonec\")" && sed -i "570 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/xmipp3/protocols/protocol_extract_particles_pairs.py
 
+#ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
