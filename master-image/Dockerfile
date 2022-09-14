@@ -52,7 +52,10 @@ RUN apt update && apt install -y --no-install-recommends \
 	vim \
 	sudo \
 	mesa-utils \
-	htop
+	htop \
+	iperf \
+	screen
+# TODO iperf, screen - debuging
 
 # Clean apt
 RUN rm -rf /var/lib/apt/lists/*
@@ -96,7 +99,9 @@ RUN for pl in $(cat ${S_USER_HOME}/plugin-list.txt); do ${S_USER_HOME}/scipion3/
 
 # This is needed since we do not have binaries installed in master docker
 RUN mkdir ${S_USER_HOME}/scipion3/software/em/gctf-1.18
+RUN mkdir ${S_USER_HOME}/scipion3/software/em/gautomatch-0.56
 RUN mkdir ${S_USER_HOME}/scipion3/software/em/motioncor2-1.4.0
+RUN mkdir ${S_USER_HOME}/scipion3/software/em/eman-2.99
 
 USER root
 #######################
@@ -166,11 +171,16 @@ RUN chmod +x ${S_USER_HOME}/Desktop/scipion-test.sh
 RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop/scipion-test-list.txt
 RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop/scipion-test.sh
 
+COPY res/rsync-benchmark /opt/rsync-benchmark
+RUN chown -R ${S_USER}:${S_USER} /opt/rsync-benchmark
+RUN chmod +x /opt/rsync-benchmark/*.sh
+
 USER ${S_USER}
 #######################
 
 RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_TOOL'] = protocol.getClassPlugin().getName()" && sed -i "132 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
 RUN export string="\ \ \ \ \ \ \ \ submitDict['REQUIRES_GPU'] = protocol.requiresGpu()" && sed -i "133 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
 
+#ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
