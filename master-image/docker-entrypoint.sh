@@ -29,7 +29,7 @@ if [ "$USE_VNCCLIENT" == "true" ]; then
 	vncserver ${DISPLAY} -listen TCP -xstartup /tmp/xsession
 	sleep infinity
 else
-	/opt/websockify/run ${WEBPORT} --web=/opt/noVNC --wrap-mode=ignore -- vncserver ${DISPLAY} -listen TCP -xstartup /tmp/xsession
+	/opt/websockify/run ${WEBPORT} --verbose --web=/opt/noVNC --wrap-mode=ignore -- vncserver ${DISPLAY} -listen TCP -xstartup /tmp/xsession
 fi
 
 #/opt/websockify/run ${WEBPORT} --cert=/self.pem --ssl-only --web=/opt/noVNC --wrap-mode=ignore -- vncserver ${DISPLAY} -xstartup /tmp/xsession
