@@ -29,10 +29,8 @@ RUN mkdir ${S_USER_HOME}/ScipionUserData && \
 #COPY ../base-image/docker-entrypoint-base.sh /
 #RUN chmod +x /docker-entrypoint-base.sh
 
-COPY docker-entrypoint-root.sh /
 COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint-root.sh && \
-    chmod +x /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 USER ${S_USER}
 ######################

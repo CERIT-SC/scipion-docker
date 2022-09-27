@@ -10,7 +10,7 @@ S_USER_HOME=/home/${S_USER}
 
 export PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
 
-export DISPLAY=scipion-master-svc-x11:1
+export DISPLAY=scipion-master-svc-x11-${INSTANCE_NAME}:1
 
 #echo "$TOOL_COMMAND" > ${S_USER_HOME}/ScipionUserData/`date +%s`.txt
 #

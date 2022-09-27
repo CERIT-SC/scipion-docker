@@ -1,5 +1,6 @@
 #!/bin/sh
 
+export SUBST_NAME="$INSTANCE_NAME"
 export SUBST_NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
 export SUBST_FIREFOX_ARGS="$@"
 

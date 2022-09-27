@@ -11,7 +11,7 @@ dir_project="/mnt/vol-project"
 ln -s "${dir_source}/" "${S_USER_HOME}/ScipionUserData/source"
 ln -s "${dir_project}/" "${S_USER_HOME}/ScipionUserData/projects" # this should be the only occurence of the word "projects" (plural) instead of "project". Scipion requires this directory
 
-export DISPLAY=scipion-master-svc-x11:1
+export DISPLAY="scipion-master-svc-x11-${INSTANCE_NAME}:1"
 
 echo "firefox args: $FIREFOX_ARGS"
 

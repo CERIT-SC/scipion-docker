@@ -18,17 +18,17 @@ touch "$FILE"
 
 function clean_job {
         kubectl delete "$JOB_ID_RAW"
-	#notify-send "Watchdog $JOB_ID was terminated"
+	#notify-send --icon /home/scipionuser/scipion3/scipion_logo.png "Watchdog $JOB_ID was terminated"
 }
 
 function trap_terminate {
-	notify-send "Job $JOB_ID was terminated by a linux trap"
+	notify-send --icon /home/scipionuser/scipion3/scipion_logo.png "Job $JOB_ID was terminated by a linux trap"
 	clean_job
 	exit 1
 }
 
 function watchdog_terminate {
-	notify-send "Job $JOB_ID was terminated by his watchdog"
+	notify-send --icon /home/scipionuser/scipion3/scipion_logo.png "Job $JOB_ID was terminated by his watchdog"
 	clean_job
 	exit 1
 }
@@ -40,14 +40,14 @@ do
 	JOB_STATUS=$(kubectl get pod | grep "$JOB_ID" | head -n 1 | awk '{print $3}')
 
 	if [ -z "$JOB_STATUS" ]; then
-		notify_send "A Kubernetes job was unexpectedly deleted or not started."
+		notify_send --icon /home/scipionuser/scipion3/scipion_logo.png "A Kubernetes job was unexpectedly deleted or not started."
 		exit 1
 
 	elif [ "$JOB_STATUS" = "Completed" ]; then
 		clean_job
 
 		if [ -s diff.txt ]; then
-			notify_send "A job completed successfully, but a problem with Kubernetes occured when the job was running. The log was saved to the following file: $FILE"
+			notify_send --icon /home/scipionuser/scipion3/scipion_logo.png "A job completed successfully, but a problem with Kubernetes occured when the job was running. The log was saved to the following file: $FILE"
 		else
 	                rm "$FILE"
 		fi
@@ -59,7 +59,7 @@ do
 	     [ "$JOB_STATUS" = "Error" ]; then
 		kubectl describe "$JOB_ID_RAW" >> "$FILE"
 		echo -e "\n\n\n\n" >> "$FILE"
-		notify_send "The job: $JOB_ID failed. Log from the kubernetes was saved to the following file: $FILE"
+		notify_send --icon /home/scipionuser/scipion3/scipion_logo.png "The job: $JOB_ID failed. Log from the kubernetes was saved to the following file: $FILE"
 
 		watchdog_terminate
 

@@ -1,20 +1,22 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: scipion-firefox
+  name: scipion-firefox-$SUBST_NAME
 spec:
   ttlSecondsAfterFinished: 0
   backoffLimit: 0
   template:
     metadata:
       labels:
-        name: scipion-firefox
+        name: scipion-firefox-$SUBST_NAME
     spec:
       containers:
-      - name: scipion-firefox
+      - name: scipion-firefox-$SUBST_NAME
         image: hub.cerit.io/josef_handl/scipion-firefox:latest
         imagePullPolicy: Always
         env:
+        - name: INSTANCE_NAME
+          value: "$SUBST_NAME"
         - name: FIREFOX_ARGS
           value: "$SUBST_FIREFOX_ARGS"
         volumeMounts:
@@ -34,9 +36,9 @@ spec:
       volumes:
        - name: scipion-vol-source-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-source-$SUBST_NAMESPACE
+           claimName: pvc-scipion-vol-source-$SUBST_NAME-$SUBST_NAMESPACE
 
        - name: scipion-vol-project-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-project-$SUBST_NAMESPACE
+           claimName: pvc-scipion-vol-project-$SUBST_NAME-$SUBST_NAMESPACE
 
