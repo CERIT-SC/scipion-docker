@@ -27,13 +27,13 @@ spec:
           runAsGroup: 1000
         volumeMounts:
 
-          # Onedata source (rsync src)
-        - name: scipion-od-source-ro
-          mountPath: "/mnt/od-source"
+          # Onedata dataset (rsync src)
+        - name: scipion-od-dataset-ro
+          mountPath: "/mnt/od-dataset"
 
-          # Volume source (rsync dest)
-        - name: scipion-vol-source-rw
-          mountPath: "/mnt/vol-source"
+          # Volume dataset (rsync dest)
+        - name: scipion-vol-dataset-rw
+          mountPath: "/mnt/vol-dataset"
 
           # Onedata project (rsync src/dest)
         - name: scipion-od-project-rw
@@ -48,9 +48,9 @@ spec:
        # Onedata
        # ---------------------
 
-       - name: scipion-od-source-ro
+       - name: scipion-od-dataset-ro
          persistentVolumeClaim:
-           claimName: pvc-scipion-od-source-$SUBST_NAMESPACE
+           claimName: pvc-scipion-od-dataset-$SUBST_NAMESPACE
            readOnly: true
 
        - name: scipion-od-project-rw
@@ -60,9 +60,9 @@ spec:
        # Auto vol provisioning
        # ---------------------
 
-       - name: scipion-vol-source-rw
+       - name: scipion-vol-dataset-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-source-$SUBST_NAMESPACE
+           claimName: pvc-scipion-vol-dataset-$SUBST_NAMESPACE
 
        - name: scipion-vol-project-rw
          persistentVolumeClaim:

@@ -30,8 +30,8 @@ spec:
         - name: XMIPP_IN_QUEUE
           value: "1" 
         volumeMounts:
-        - name: scipion-vol-source-rw
-          mountPath: "/mnt/vol-source"
+        - name: scipion-vol-dataset-rw
+          mountPath: "/mnt/vol-dataset"
         - name: scipion-vol-project-rw
           mountPath: "/mnt/vol-project"
         resources:
@@ -46,9 +46,9 @@ spec:
           runAsGroup: 1000
       restartPolicy: Never
       volumes:
-       - name: scipion-vol-source-rw
+       - name: scipion-vol-dataset-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-source-$SUBST_NAME-$TOOL_SUBST_NAMESPACE
+           claimName: pvc-scipion-vol-dataset-$SUBST_NAME-$TOOL_SUBST_NAMESPACE
 
        - name: scipion-vol-project-rw
          persistentVolumeClaim:

@@ -20,8 +20,8 @@ spec:
         - name: FIREFOX_ARGS
           value: "$SUBST_FIREFOX_ARGS"
         volumeMounts:
-        - name: scipion-vol-source-rw
-          mountPath: "/mnt/vol-source"
+        - name: scipion-vol-dataset-rw
+          mountPath: "/mnt/vol-dataset"
         - name: scipion-vol-project-rw
           mountPath: "/mnt/vol-project"
         resources:
@@ -34,9 +34,9 @@ spec:
           runAsGroup: 1000
       restartPolicy: Never
       volumes:
-       - name: scipion-vol-source-rw
+       - name: scipion-vol-dataset-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-source-$SUBST_NAME-$SUBST_NAMESPACE
+           claimName: pvc-scipion-vol-dataset-$SUBST_NAME-$SUBST_NAMESPACE
 
        - name: scipion-vol-project-rw
          persistentVolumeClaim:

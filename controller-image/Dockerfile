@@ -36,4 +36,5 @@ COPY cloner.sh /
 RUN chmod +x /docker-entrypoint.sh
 RUN chmod +x /cloner.sh
 
+#ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/docker-entrypoint.sh"]

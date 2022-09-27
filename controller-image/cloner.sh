@@ -7,8 +7,8 @@ dir_vol_p="/mnt/vol-project"
 dir_cloner="/opt/cloner"
 dir_tmp="${dir_cloner}/tmp"
 
-dir_od_s="/mnt/od-source"
-dir_vol_s="/mnt/vol-source"
+dir_od_s="/mnt/od-dataset"
+dir_vol_s="/mnt/vol-dataset"
 
 dir_scipion="scipion-docker"
 file_symlink_dump="symlink-dump"
@@ -111,10 +111,10 @@ restore_project () {
 	echo "Restore has been completed" >> "$file_instance_log_path"
 }
 
-# od-source > vol-source
+# od-dataset > vol-dataset
 #--------------------------
-clone_source () {
-	echo "Cloning a source data" >> "$file_instance_log_path"
+clone_dataset () {
+	echo "Cloning a dataset data" >> "$file_instance_log_path"
 	rsync $rsync_options "${dir_od_s_path}/" "${dir_vol_s_path}/" > "${dir_cloner}/progress-clone.log"
 	echo "Cloning has been completed" >> "$file_instance_log_path"
 }
@@ -126,7 +126,7 @@ elif [ "$1" = "trapsave" ]; then
 elif [ "$1" = "restore" ]; then
 	restore_project
 elif [ "$1" = "clone" ]; then
-	clone_source
+	clone_dataset
 else
 	echo "No action has been specified"
 	exit 1

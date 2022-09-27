@@ -2,8 +2,8 @@
 
 set -e
 
-dir_od="/mnt/od-source"
-dir_vol="/mnt/vol-source"
+dir_od="/mnt/od-dataset"
+dir_vol="/mnt/vol-dataset"
 
 dir_scipion="/mnt/vol-project/scipion-docker"
 file_log="${dir_scipion}/instance.log"

@@ -4,7 +4,7 @@ set -e
 
 DISPLAY=:1 xhost +
 
-dir_source="/mnt/vol-source"
+dir_dataset="/mnt/vol-dataset"
 dir_project="/mnt/vol-project"
 dir_scipion="${dir_project}/scipion-docker"
 file_status="${dir_scipion}/instance-status"
@@ -15,7 +15,7 @@ while true; do
 	xterm -bg black -fg gray -fa 'Monospace' -fs 11 -maximized -xrm 'XTerm.vt100.allowTitleOps: false' -T "Instance logs" -e /bin/bash -c "while true; do ls ${file_log} > /dev/null; cat ${file_log}; sleep 10; clear; done"
 done &
 
-# Wait for the cloners ("clone" - clone source data, "restore" - restore project)
+# Wait for the cloners ("clone" - clone dataset data, "restore" - restore project)
 while [ ! -f "${file_status}" ] || ! grep -q "ok" "${file_status}"; do
 	sleep 10
 done
