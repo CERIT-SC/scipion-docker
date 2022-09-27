@@ -1,0 +1,10 @@
+#!/bin/sh
+
+export SUBST_NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
+export SUBST_FIREFOX_ARGS="$@"
+
+#JOB_FF=$(kubectl get pod | grep "scipion-firefox" | head -n 1 | awk '{print $1}')
+#if [ -z "$JOB_FF" ]; then
+	notify-send --icon /opt/firefox/logo.png "Container with the Firefox will start in a few seconds"
+	envsubst < /opt/k8s/depl-firefox.yaml | kubectl apply -f -
+#else

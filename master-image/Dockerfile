@@ -160,16 +160,21 @@ RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/hosts.conf
 
 RUN mkdir /opt/k8s
 COPY res/depl-tool.yaml /opt/k8s/
+COPY res/depl-firefox.yaml /opt/k8s/
 COPY res/job-watchdog.sh /opt/k8s/
 RUN chmod +x /opt/k8s/job-watchdog.sh
 RUN chown -R ${S_USER}:${S_USER} /opt
 
-COPY scipion-test-list.txt ${S_USER_HOME}/Desktop/
-COPY scipion-test.sh ${S_USER_HOME}/Desktop/
+COPY res/firefox /opt/firefox
+RUN chmod +x /opt/firefox/firefox
+ENV PATH "${PATH}:/opt/firefox"
+ENV BROWSER=/opt/firefox/firefox
 
-RUN chmod +x ${S_USER_HOME}/Desktop/scipion-test.sh
-RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop/scipion-test-list.txt
-RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop/scipion-test.sh
+#COPY scipion-test-list.txt ${S_USER_HOME}/Desktop/
+#COPY scipion-test.sh ${S_USER_HOME}/Desktop/
+#RUN chmod +x ${S_USER_HOME}/Desktop/scipion-test.sh
+#RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop/scipion-test-list.txt
+#RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop/scipion-test.sh
 
 COPY res/rsync-benchmark /opt/rsync-benchmark
 RUN chown -R ${S_USER}:${S_USER} /opt/rsync-benchmark
