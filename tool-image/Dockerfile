@@ -1,4 +1,4 @@
-FROM jhandl/scipion-base:tool
+FROM hub.cerit.io/josef_handl/scipion-base:latest
 
 USER root
 ######################

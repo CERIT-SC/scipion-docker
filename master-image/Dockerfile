@@ -1,16 +1,10 @@
-
-#FROM registry.gitlab.ics.muni.cz:443/eosc-synergy/scipion-docker/base-image:dev
-#FROM ldelcano/scipion-base:slurm
-#FROM jhandl/scipion-base:v4
-FROM jhandl/scipion-base:tool
+FROM hub.cerit.io/josef_handl/scipion-base:latest
 
 ARG TURBOVNC_VERSION=3.0
 ARG VIRTUALGL_VERSION=3.0
 ARG LIBJPEG_VERSION=2.1.2
 ARG WEBSOCKIFY_VERSION=0.10.0
 ARG NOVNC_VERSION=1.3.0
-
-ARG SLURM_VERSION=20.02.6
 
 USER root
 #######################
@@ -24,10 +18,8 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
 	konsole \
 	pluma \
 	thunar-archive-plugin \
-	xdotool \
-	rsync
+	xdotool
 # xdotool - window manipulation
-# rsync is required only by cloner
 
 # libjpeg-turbo requirements
 RUN apt update && apt install -y --no-install-recommends \
@@ -130,7 +122,6 @@ RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/.xscreensaver
 COPY res/xsession /tmp/
 RUN chmod +x /tmp/xsession
 
-ENV MYVNCPASSWORD abc
 ENV EDITOR=/usr/bin/pluma
 
 COPY plugin-list.txt ${S_USER_HOME}/
