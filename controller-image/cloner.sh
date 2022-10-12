@@ -38,7 +38,7 @@ save_project () {
 	rsync $rsync_options --links "${dir_vol_p_path}/" "${dir_tmp}/"
 
 	# create symlinks dump
-	rm "${dir_tmp}/${dir_scipion}/${file_symlink_dump}" || true
+	rm "${dir_tmp}/${dir_scipion}/${file_symlink_dump}" 2> /dev/null || true
 	cd "${dir_tmp}/"
 	for link in $(find -L "./" -xtype l); do
 		link_target="$(readlink ${link})"

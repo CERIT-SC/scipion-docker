@@ -47,7 +47,7 @@ trapsave () {
 		"The autosave was terminated" >> "$file_log"
 	fi
 
-	./cloner.sh trapsave
+	./cloner.sh trapsave 2>> "$file_log" &
 
 	echo "Project is saved. Instance is being deleted" >> "$file_log"
 
@@ -63,10 +63,10 @@ echo "Deployment created" >> "$file_log"
 # Start cloner-clone and cloner-restore
 #==========================================
 
-./cloner.sh clone &
+./cloner.sh clone 2>> "$file_log" &
 pid_clone=$!
 
-./cloner.sh restore &
+./cloner.sh restore 2>> "$file_log" &
 pid_restore=$!
 
 update_progress () {
@@ -114,7 +114,7 @@ set +e
 
 while true; do
 	sleep 30
-	./cloner.sh autosave &
+	./cloner.sh autosave 2>> "$file_log" &
 	pid_autosave=$!
 	if ! wait $pid_autosave; then
 		echo "Autosave failed" >> "$file_log"
