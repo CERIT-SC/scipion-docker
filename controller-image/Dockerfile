@@ -20,8 +20,6 @@ RUN apt update && apt install -y \
 # Clean apt
 RUN rm -rf /var/lib/apt/lists/*
 
-COPY res/deploy_cloner.yaml /opt/
-
 # Create scipionuser
 RUN groupadd --gid 1000 ${S_USER} && \
     useradd --uid 1000 --create-home --home-dir ${S_USER_HOME} -s /bin/bash -g ${S_USER} ${S_USER} && \
