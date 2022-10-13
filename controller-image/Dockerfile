@@ -32,8 +32,10 @@ RUN mkdir -p /opt/cloner && \
     chown ${S_USER}:${S_USER} /opt/cloner
 
 COPY docker-entrypoint.sh /
+COPY controller-daemon.sh /
 COPY cloner.sh /
 RUN chmod +x /docker-entrypoint.sh
+RUN chmod +x /controller-daemon.sh
 RUN chmod +x /cloner.sh
 
 #ENTRYPOINT ["sleep", "infinity"]

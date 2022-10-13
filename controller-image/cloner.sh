@@ -5,7 +5,6 @@ set -e
 dir_od_p="/mnt/od-project"
 dir_vol_p="/mnt/vol-project"
 dir_cloner="/opt/cloner"
-dir_tmp="${dir_cloner}/tmp"
 
 dir_od_s="/mnt/od-dataset"
 dir_vol_s="/mnt/vol-dataset"
@@ -26,97 +25,77 @@ dir_vol_s_path="${dir_vol_s}"
 
 rsync_options="--delete --recursive --times --omit-dir-times --info=progress2"
 
-echo "${dir_od_p_path}/"
-echo "${dir_od_s_path}/"
-
 # vol-project > od-project
 #--------------------------
 save_project () {
-	mkdir -p "${dir_tmp}"
-
-	# rsync vol-project > tmp
-	rsync $rsync_options --links "${dir_vol_p_path}/" "${dir_tmp}/"
-
 	# create symlinks dump
-	rm "${dir_tmp}/${dir_scipion}/${file_symlink_dump}" 2> /dev/null || true
-	cd "${dir_tmp}/"
+	rm "${dir_vol_p_path}/${file_symlink_dump}" 2> /dev/null || true
+	cd "${dir_vol_p_path}/"
 	for link in $(find -L "./" -xtype l); do
 		link_target="$(readlink ${link})"
-		echo "${link_target} ${link}" >> "${dir_tmp}/${file_symlink_dump}"
+		echo "${link_target} ${link}" >> "${dir_vol_p_path}/${file_symlink_dump}"
 	done
 
-	# remove symlinks
-	cd "${dir_tmp}/"
-	for link in $(find -L "./" -xtype l); do
-		rm "${dir_tmp}/${link}"
-	done
-
-	# rsync tmp > od-project
-	rsync $rsync_options "${dir_tmp}/" "${dir_od_p_path}/"
+	# rsync vol-project > od-project (except symlinks)
+	rsync $rsync_options --exclude "${dir_scipion}/" "${dir_vol_p_path}/" "${dir_od_p_path}/" > /dev/null
 
 	# remove project lock in OD
 	if [ "$1" = "unlock" ]; then
 		rm "${dir_od_p_path}/${dir_scipion}/${file_project_lock}"
-		echo "The project lock has been removed" >> "$file_instance_log_path"
+		echo "The project lock has been removed"
 	fi
 }
 autosave_project () {
-	echo "Autosaving the project" >> "$file_instance_log_path"
+	echo "Autosaving the project"
 	save_project
-	echo "Autosave has been completed" >> "$file_instance_log_path"
+	echo "Autosave has been completed"
 }
 trapsave_project () {
-	echo "Saving the project due to instance termination" >> "$file_instance_log_path"
+	echo "Saving the project due to instance termination"
 	save_project unlock
-	echo "Save has been completed" >> "$file_instance_log_path"
+	echo "Save has been completed"
 }
 
 # od-project > vol-project
 #--------------------------
 restore_project () {
-	echo "Restoring the project" >> "$file_instance_log_path"
+	echo "Restoring the project"
 
 	# check project lock
 	if [ -f "${dir_od_p_path}/${dir_scipion}/${file_project_lock}" ]; then
-		echo "The project is open in another instance" >> "$file_instance_log_path"
+		echo "Error: The project is opened in another instance"
 		exit 1
 	fi
 
-	# remove last instance files
-	mkdir -p "${dir_tmp}"
+	# remove files from the last instance
 	mkdir -p "${dir_od_p_path}/${dir_scipion}/"
-	rm "${dir_od_p_path}/${dir_scipion}/${file_instance_status}" || true
-	rm "${dir_od_p_path}/${dir_scipion}/${file_instance_log}" || true
+	rm "${dir_od_p_path}/${dir_scipion}/${file_instance_status}" 2> /dev/null || true
+	rm "${dir_od_p_path}/${dir_scipion}/${file_instance_log}" 2> /dev/null || true
 
 	# lock the project in OD
 	touch "${dir_od_p_path}/${dir_scipion}/${file_project_lock}"
-	echo "The project has been locked so that it cannot be opened from another instance of Scipion" >> "$file_instance_log_path"	
+	echo "The project has been locked so that it cannot be opened from another instance of Scipion"
 
-	# rsync od-project > tmp
-	rsync $rsync_options --exclude "${dir_scipion}/" "${dir_od_p_path}/" "${dir_tmp}/" > "${dir_cloner}/progress-restore.log"
-	#rsync $rsync_options --exclude "${dir_tmp}/${dir_scipion}/${file_instance_log}" "${dir_od_p_path}/" "${dir_tmp}/"
+	# rsync od-project > vol-project
+	rsync $rsync_options --exclude "${dir_scipion}/" "${dir_od_p_path}/" "${dir_vol_p_path}/" > "${dir_cloner}/progress-restore.log"
 
-	# restore symlinks in tmp dir
-	cd "${dir_tmp}/"
+	# restore symlinks in vol-project
+	cd "${dir_vol_p_path}/"
 	while read line; do
 		link_target=$(echo $line | awk '{ print $1 }')
 		link=$(echo $line | awk '{ print $2 }')
 		ln -s "$link_target" "$link"
-	done < "${dir_tmp}/${dir_scipion}/${file_symlink_dump}"
+	done < "${dir_od_p_path}/${file_symlink_dump}"
 
-	# rsync tmp > vol-project
-	rsync $rsync_options --links --exclude "${dir_scipion}/" "${dir_tmp}/" "${dir_vol_p_path}/" > "${dir_cloner}/progress-restore.log"
-	#rsync $rsync_options --links --exclude "${dir_vol_p_path}/${dir_scipion}/${file_instance_log}" "${dir_tmp}/" "${dir_vol_p_path}/"
-
-	echo "Restore has been completed" >> "$file_instance_log_path"
+	echo "Restore has been completed"
 }
 
 # od-dataset > vol-dataset
 #--------------------------
 clone_dataset () {
-	echo "Cloning a dataset data" >> "$file_instance_log_path"
+	echo "Cloning a dataset data"
 	rsync $rsync_options "${dir_od_s_path}/" "${dir_vol_s_path}/" > "${dir_cloner}/progress-clone.log"
-	echo "Cloning has been completed" >> "$file_instance_log_path"
+	echo "Cloning has been completed"
 }
 
 if [ "$1" = "autosave" ]; then
