@@ -1,10 +1,12 @@
 #!/bin/bash
 
+tag=${tag:-dev}
+
 cd "$(dirname "$0")"
 
-docker build -t jhandl/scipion-controller:latest .
-docker build -t hub.cerit.io/josef_handl/scipion-controller:latest .
+docker build -t jhandl/scipion-controller:$tag .
+docker build -t hub.cerit.io/josef_handl/scipion-controller:$tag .
 
-docker push jhandl/scipion-controller:latest
-docker push hub.cerit.io/josef_handl/scipion-controller:latest
+docker push jhandl/scipion-controller:$tag
+docker push hub.cerit.io/josef_handl/scipion-controller:$tag
 
