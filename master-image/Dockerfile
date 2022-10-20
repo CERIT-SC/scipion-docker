@@ -99,8 +99,9 @@ USER root
 #######################
 
 # Create TurboVNC config
-ADD res/turbovncserver.conf /etc/turbovncserver.conf
-ADD res/turbovncserver-security.conf /etc/turbovncserver-security.conf
+COPY res/turbovncserver.conf /etc/turbovncserver.conf
+COPY res/turbovncserver-security.conf /etc/turbovncserver-security.conf
+RUN chmod go-rw /etc/turbovncserver.conf /etc/turbovncserver-security.conf
 
 # Prepare environment
 # Create X11 dir
