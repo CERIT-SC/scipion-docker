@@ -6,6 +6,7 @@ echo "docker-entrypoint.sh"
 
 S_USER=scipionuser
 S_USER_HOME=/home/${S_USER}
+CERT_PATH="/mnt/cert-loadbalancer-vncclient"
 
 # run base-image's docker-entrypoint-base.sh
 /docker-entrypoint-base.sh
@@ -26,7 +27,7 @@ echo $VNC_PASS | vncpasswd -f > $S_USER_HOME/.vnc/passwd
 chmod 0600 $S_USER_HOME/.vnc/passwd
 
 if [ "$USE_VNCCLIENT" == "true" ]; then
-	vncserver ${DISPLAY} -listen TCP -xstartup /tmp/xsession
+	vncserver ${DISPLAY} -x509cert "${CERT_PATH}/tls.crt" -x509key "${CERT_PATH}/tls.key" -listen TCP -xstartup /tmp/xsession
 	sleep infinity
 else
 	/opt/websockify/run ${WEBPORT} --verbose --web=/opt/noVNC --wrap-mode=ignore -- vncserver ${DISPLAY} -listen TCP -xstartup /tmp/xsession
