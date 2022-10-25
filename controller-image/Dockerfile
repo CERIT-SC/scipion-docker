@@ -5,7 +5,11 @@ ENV S_USER_HOME=/home/${S_USER}
 
 RUN apt update && apt install -y --no-install-recommends \
 	bash \
-	rsync
+	rsync \
+        python3 \
+        python3-pip \
+        vim \
+        wget
 
 # Install kubectl
 RUN apt update && apt install -y --no-install-recommends \
@@ -36,5 +40,12 @@ RUN chmod +x /docker-entrypoint.sh
 RUN chmod +x /controller-daemon.sh
 RUN chmod +x /cloner.sh
 
-#ENTRYPOINT ["sleep", "infinity"]
-ENTRYPOINT ["/docker-entrypoint.sh"]
+#COPY od-project /mnt/od-project
+#COPY od-dataset /mnt/od-dataset
+
+COPY requirements.txt /
+RUN pip3 install -r requirements.txt
+COPY cloner.py /
+
+ENTRYPOINT ["sleep", "infinity"]
+#ENTRYPOINT ["/docker-entrypoint.sh"]
