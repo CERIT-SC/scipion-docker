@@ -66,12 +66,11 @@ pid_clone=$!
 pid_restore=$!
 
 update_progress () {
-	# remove the previous line from the log
-	sed -i "/${1}:.*$/d" "$file_log"
-
-	# print new line with rsync progress
+	# get a new progess
 	progress=$(sed 's/.*\r//' "$2" | awk '{print $2}')
-	echo "${1}: ${progress}"
+
+	# replace the previous line with the new value in the log file
+	sed -i -e "s/${1}:.*$/${1}: ${progress}/g" "$file_log"
 }
 
 while true; do
