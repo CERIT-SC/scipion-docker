@@ -6,13 +6,10 @@ import sys
 import threading
 import sysrsync
 import time
-#import logging
 
 from threading import Thread
-
 from pathlib import Path
 from loguru import logger
-# logger.warning("msg")
 
 # the following two paths will be updated while checking the mountpoints
 d_od_dataset = "/mnt/od-dataset"
@@ -52,8 +49,8 @@ def check_mountpoint(mountpoint):
 def c_exit(success):
     if not success:
         logger.info("It is not possible to continue.")
-
-    logger.info("Terminating...")
+    else:
+        logger.info("Terminating...")
 
     exit(0)
 
@@ -90,15 +87,16 @@ def sync_restore(empty_project):
 
     # rsync od-project > vol-project
     logger.info("Restoring the project...")
-    run_rsync(d_od_project, d_vol_project, exclusions=[f"{d_scipion}/"])
+    run_rsync(d_od_project, d_vol_project)
+    #run_rsync(d_od_project, d_vol_project, exclusions=[f"{d_scipion}/"])
     logger.info("Restore is complete.")
 
     # restore symlinks in vol-project
     if not os.path.exists(f"{d_od_project}/{f_symlink_dump}"):
         if empty_project:
-            logger.info("The symlink dump file missing, because the project space was empty.")
+            logger.info("The symlink dump file is missing, because the project space was empty.")
         else:
-            logger.warning("The symlink dump file missing, but the project space is not empty. If the project space contains some Scipion's project, the project data is probably corrupted.")
+            logger.warning("The symlink dump file is missing, but the project space is not empty. If the project space contains some Scipion's project, the project data is probably corrupted.")
 
         return
 
@@ -144,7 +142,7 @@ def symlink_search(path):
 
     return result
 
-def save():
+def save(final):
     # Remove old symlinks dump
     p_sym = f"{d_vol_project}/{f_symlink_dump}"
     if os.path.exists(p_sym):
@@ -159,16 +157,21 @@ def save():
 
     p_symlink.close()
 
-	# rsync vol-project > od-project (except symlinks)
-    run_rsync(d_vol_project, d_od_project, exclusions=[f"{d_scipion}/"], ignore_error = True)
+    if not os.path.exists(f"{d_vol_project}/{d_scipion}/{f_project_lock}"):
+        logger.warning("The project lock was recreated because it was missing. Please do not remove the lock.")
+        Path(f"{d_vol_project}/{d_scipion}/{f_project_lock}").touch()
+
+	# rsync vol-project > od-project
+    #exclusions = [f"{d_scipion}/"] if not final else None
+    run_rsync(d_vol_project, d_od_project, exclusions=[], ignore_error = True)
 
 
 def save_trap(sig, frame):
-    logger.info("The stop signal (SIGINT) was received. The Scipion application will be terminated and the project saved to the Onedata.")
+    logger.info("The stop signal (SIGINT or SIGTERM) was received. The Scipion application will be terminated and the project saved to the Onedata.")
 
     logger.info("Saving the project...")
 
-    save()
+    save(final=True)
 
     logger.info("Saving is complete.")
 
@@ -187,7 +190,7 @@ def save_auto():
     if first_autosave:
         logger.info("Autosaving the project...")
 
-    save()
+    save(final=False)
 
     if first_autosave:
         first_autosave = False
@@ -195,7 +198,7 @@ def save_auto():
         logger.info("Autosaving will be started every 10 minutes. New autosave logs will not be printed, except for errors.")
 
 
-# Check the mountpoints whether each containes only one Onedata space
+# Check the mountpoints whether each contains only one Onedata space
 # Get the spaces names
 ret = check_mountpoint(d_od_dataset)
 if not ret:
@@ -207,25 +210,17 @@ if not ret:
     c_exit(False)
 d_od_project = ret
 
+# Change work dir to prevent problems with relative target paths in symlinks
 os.chdir("/mnt/vol-project")
-
-#os.makedirs(f"{d_od_project}/{d_scipion}/")
-#
-#root_logger = logging.getLogger()
-#
-#file_handler = logging.FileHandler(f"{d_vol_project}/{d_scipion}/instance.log")
-#root_logger.addHandler(file_handler)
-#
-#console_handler = logging.StreamHandler()
-#rootLogger.addHandler(console_handler)
 
 # Check if the project is already opened (locked)
 if os.path.exists(f"{d_od_project}/{d_scipion}/{f_project_lock}"):
     logger.error("The project is already opened in another Scipion instance")
     c_exit(False)
 
-# Register handler for the SIGINT signal
+# Register handlers for the SIGINT and SIGTERM signals
 signal.signal(signal.SIGINT, save_trap)
+signal.signal(signal.SIGTERM, save_trap)
 
 # Lock the project
 if not os.path.exists(f"{d_od_project}/{d_scipion}"):
@@ -235,8 +230,8 @@ if not os.path.exists(f"{d_od_project}/{d_scipion}"):
 else:
     empty_project = False
 
-logger.info("The project has been locked to prevent modifications from another instance.")
 Path(f"{d_od_project}/{d_scipion}/{f_project_lock}").touch()
+logger.info("The project has been locked to prevent modifications from another instance.")
 
 # Start restore and clone stages
 t_sync_clone = Thread(target = sync_clone)
@@ -248,8 +243,16 @@ t_sync_restore.start()
 t_sync_clone.join()
 t_sync_restore.join()
 
+# Send a "signal" to the master container that desktop environment can be started
+if not os.path.exists(f"/mnt/shared/instance-status"):
+    Path("/mnt/shared/instance-status").touch()
 
+with open("/mnt/shared/instance-status", "w") as f:
+    f.write("ok")
+logger.info("Starting the desktop environment...")
+
+# Autosaves
 while True:
-    time.sleep(0.2*60)
+    time.sleep(1*60)
     save_auto()
 

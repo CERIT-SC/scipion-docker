@@ -1,14 +1,11 @@
 #!/bin/sh
 
-set -e
+set -ex
 
 DISPLAY=:1 xhost +
 
-dir_dataset="/mnt/vol-dataset"
-dir_project="/mnt/vol-project"
-dir_scipion="${dir_project}/scipion-docker"
-file_status="${dir_scipion}/instance-status"
-file_log="${dir_scipion}/instance.log"
+file_status="/mnt/shared/instance-status"
+file_log="/mnt/shared/instance.log"
 
 # Opens xterm with a tail the logs. Is is useful before running the desktop environment
 while true; do
@@ -24,10 +21,10 @@ done
 #xset s off -dpms
 
 # Start xfce4
-echo "Starting the desktop environment" >> "${file_log}"
 cd ${S_USER_HOME}
 xfce4-session &
 
 # minimize the xterm
 sleep 1
 xdotool getactivewindow windowminimize || true
+

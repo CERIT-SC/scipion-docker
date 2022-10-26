@@ -1,15 +1,22 @@
 #!/bin/bash
 
-set -e
+set -ex
 
-d_scipion="/mnt/vol-project/scipion-docker"
-f_log="${d_scipion}/instance.log"
-f_status="${d_scipion}/instance-status"
+log="/mnt/shared/instance.log"
 
-mkdir -p "${d_scipion}"
-rm "$f_status" || true
-rm "$f_log" || true
-touch "$f_log"
+touch "$log"
+/cloner.py > "$log" 2>&1 & pid_cloner=$!
 
-/controller-daemon.sh 2>&1 | tee -a "$f_log"
+tail -f "$log" & pid_tail=$!
 
+_trap () {
+    kill "$pid_cloner"
+    sleep 2
+    kill "$pid_tail"
+}
+
+#trap "echo trap" SIGTERM
+trap "_trap" SIGINT SIGTERM
+
+wait "$pid_cloner"
+wait "$pid_tail"
