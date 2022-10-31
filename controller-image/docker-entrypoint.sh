@@ -5,7 +5,7 @@ set -ex
 log="/mnt/shared/instance.log"
 
 touch "$log"
-/cloner.py > "$log" 2>&1 & pid_cloner=$!
+unbuffer /cloner.py > "$log" 2>&1 & pid_cloner=$!
 
 tail -f "$log" & pid_tail=$!
 
