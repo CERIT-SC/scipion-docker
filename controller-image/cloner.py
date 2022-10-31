@@ -54,19 +54,17 @@ def c_exit(success):
 
     exit(0)
 
-def run_rsync(src, dest, exclusions = None, ignore_error = False):
+def run_rsync(src, dest, ignore_error = False):
     try:
         sysrsync.run(
             source = src,
             destination = dest,
-            exclusions = exclusions,
             options = ["--delete", "--recursive", "--times", "--omit-dir-times", "--quiet"])
-        # TODO --info=progress2
     except Exception as e:
         logger.error(f"An error occured while running rsync. Error message: {e}")
         
         if not ignore_error:
-            raise Exception from e
+            c_exit(success=False)
 
 
 def sync_clone():
@@ -88,7 +86,6 @@ def sync_restore(empty_project):
     # rsync od-project > vol-project
     logger.info("Restoring the project...")
     run_rsync(d_od_project, d_vol_project)
-    #run_rsync(d_od_project, d_vol_project, exclusions=[f"{d_scipion}/"])
     logger.info("Restore is complete.")
 
     # restore symlinks in vol-project
@@ -162,8 +159,7 @@ def save(final):
         Path(f"{d_vol_project}/{d_scipion}/{f_project_lock}").touch()
 
 	# rsync vol-project > od-project
-    #exclusions = [f"{d_scipion}/"] if not final else None
-    run_rsync(d_vol_project, d_od_project, exclusions=[], ignore_error = True)
+    run_rsync(d_vol_project, d_od_project, ignore_error = True)
 
 
 def save_trap(sig, frame):
@@ -194,7 +190,7 @@ def save_auto():
 
     if first_autosave:
         first_autosave = False
-        logger.info("Autosaving is complete.")
+        logger.info("Autosave is complete.")
         logger.info("Autosaving will be started every 10 minutes. New autosave logs will not be printed, except for errors.")
 
 
