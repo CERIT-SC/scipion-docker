@@ -5,7 +5,9 @@ ENV S_USER_HOME=/home/${S_USER}
 
 RUN apt update && apt install -y --no-install-recommends \
 	bash \
-	rsync
+	rsync \
+        python3 \
+        python3-pip
 
 # Install kubectl
 RUN apt update && apt install -y --no-install-recommends \
@@ -30,11 +32,12 @@ RUN mkdir -p /opt/cloner && \
     chown ${S_USER}:${S_USER} /opt/cloner
 
 COPY docker-entrypoint.sh /
-COPY controller-daemon.sh /
-COPY cloner.sh /
+COPY cloner.py /
 RUN chmod +x /docker-entrypoint.sh
-RUN chmod +x /controller-daemon.sh
-RUN chmod +x /cloner.sh
+RUN chmod +x /cloner.py
+
+COPY requirements.txt /
+RUN pip3 install -r requirements.txt
 
 #ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
