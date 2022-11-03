@@ -7,7 +7,8 @@ RUN apt update && apt install -y --no-install-recommends \
 	bash \
 	rsync \
         python3 \
-        python3-pip
+        python3-pip \
+        expect-dev
 
 # Install kubectl
 RUN apt update && apt install -y --no-install-recommends \

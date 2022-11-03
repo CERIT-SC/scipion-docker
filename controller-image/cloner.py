@@ -29,7 +29,8 @@ sync_clone_ok = False
 sync_restore_ok = False
 
 empty_project = True
-first_autosave = True
+autosave_first = True
+autosave_print = True
 
 def check_mountpoint(mountpoint):
     if not os.path.exists(mountpoint):
@@ -60,11 +61,15 @@ def run_rsync(src, dest, ignore_error = False):
             source = src,
             destination = dest,
             options = ["--delete", "--recursive", "--times", "--omit-dir-times", "--quiet"])
+
+        return True
     except Exception as e:
         logger.error(f"An error occured while running rsync. Error message: {e}")
         
         if not ignore_error:
             c_exit(success=False)
+
+        return False
 
 
 def sync_clone():
@@ -159,7 +164,7 @@ def save(final):
         Path(f"{d_vol_project}/{d_scipion}/{f_project_lock}").touch()
 
 	# rsync vol-project > od-project
-    run_rsync(d_vol_project, d_od_project, ignore_error = True)
+    return run_rsync(d_vol_project, d_od_project, ignore_error = True)
 
 
 def save_trap(sig, frame):
@@ -181,17 +186,25 @@ def save_trap(sig, frame):
     c_exit(True)
 
 def save_auto():
-    global first_autosave
+    global autosave_first
+    global autosave_print
 
-    if first_autosave:
+    if autosave_first or autosave_print:
         logger.info("Autosaving the project...")
 
-    save(final=False)
+    result = save(final=False)
 
-    if first_autosave:
-        first_autosave = False
+    if autosave_first or autosave_print:
+        autosave_print = False
         logger.info("Autosave is complete.")
+
+    if autosave_first:
+        autosave_first = False
         logger.info("Autosaving will be started every 10 minutes. New autosave logs will not be printed, except for errors.")
+
+    if not result:
+        autosave_print = True
+        logger.error("Autosave failed.")
 
 
 # Check the mountpoints whether each contains only one Onedata space
