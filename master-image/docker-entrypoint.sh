@@ -8,6 +8,16 @@ S_USER=scipionuser
 S_USER_HOME=/home/${S_USER}
 CERT_PATH="/mnt/cert-loadbalancer-vncclient"
 
+_trap () {
+	notify-send --urgency=critical "This instance will be destroyed within 30 seconds. Scipion projects will be saved in Onedata."
+
+	sleep 30
+
+	kill -s SIGTERM $(pgrep -f "/opt/TurboVNC/bin/vncserver")
+	kill -s SIGTERM $(pgrep -f "/opt/TurboVNC/bin/Xvnc")
+	kill -s SIGTERM $(pgrep -f "python3 -m websockify")
+}
+
 # run base-image's docker-entrypoint-base.sh
 /docker-entrypoint-base.sh
 
@@ -30,8 +40,10 @@ if [ "$USE_VNCCLIENT" == "true" ]; then
 	vncserver ${DISPLAY} -x509cert "${CERT_PATH}/tls.crt" -x509key "${CERT_PATH}/tls.key" -listen TCP -xstartup /tmp/xsession
 	sleep infinity
 else
-	/opt/websockify/run ${WEBPORT} --verbose --web=/opt/noVNC --wrap-mode=ignore -- vncserver ${DISPLAY} -listen TCP -xstartup /tmp/xsession
+	/opt/websockify/run ${WEBPORT} --verbose --web=/opt/noVNC --wrap-mode=ignore -- vncserver ${DISPLAY} -listen TCP -xstartup /tmp/xsession &
 fi
 
-#/opt/websockify/run ${WEBPORT} --cert=/self.pem --ssl-only --web=/opt/noVNC --wrap-mode=ignore -- vncserver ${DISPLAY} -xstartup /tmp/xsession
+trap "_trap" SIGINT SIGTERM
+
+wait
 
