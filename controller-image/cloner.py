@@ -28,7 +28,7 @@ f_instance_log = "instance.log"
 sync_clone_ok = False
 sync_restore_ok = False
 
-empty_project = True
+project_empty = True
 autosave_first = True
 autosave_print = True
 
@@ -47,11 +47,32 @@ def check_mountpoint(mountpoint):
 
     return f"{mountpoint}/{dirs[0]}"
 
-def c_exit(success):
-    if not success:
-        logger.info("It is not possible to continue.")
+def lock_create():
+    global project_empty
+
+    if not os.path.exists(f"{d_od_project}/{d_scipion}"):
+        project_empty = True
+        logger.info("The project space looks empty. Working dir for the instance has been created.")
+        os.makedirs(f"{d_od_project}/{d_scipion}/")
     else:
+        project_empty = False
+
+def lock_remove():
+    # Unlock the project
+    if not os.path.exists(f"{d_od_project}/{d_scipion}/{f_project_lock}"):
+        logger.warning("Unlocking the project is not needed. The project lock is missing. This should not happen.")
+    else:
+        os.remove(f"{d_od_project}/{d_scipion}/{f_project_lock}")
+        logger.info("The project has been unlocked.")
+
+def c_exit(remove_lock, success):
+    if remove_lock:
+        lock_remove()
+
+    if success:
         logger.info("Terminating...")
+    else:
+        logger.info("It is not possible to continue.")
 
     exit(0)
 
@@ -67,7 +88,7 @@ def run_rsync(src, dest, ignore_error = False):
         logger.error(f"An error occured while running rsync. Error message: {e}")
         
         if not ignore_error:
-            c_exit(success=False)
+            c_exit(remove_lock=True, success=False)
 
         return False
 
@@ -77,7 +98,7 @@ def sync_clone():
     run_rsync(d_od_dataset, d_vol_dataset)
     logger.info("Cloning is complete.")
 
-def sync_restore(empty_project):
+def sync_restore(project_empty):
     # remove files from the last instance
     p_status = f"{d_od_project}/{d_scipion}/{f_instance_status}"
     p_log = f"{d_od_project}/{d_scipion}/{f_instance_log}"
@@ -95,7 +116,7 @@ def sync_restore(empty_project):
 
     # restore symlinks in vol-project
     if not os.path.exists(f"{d_od_project}/{f_symlink_dump}"):
-        if empty_project:
+        if project_empty:
             logger.info("The symlink dump file is missing, because the project space was empty.")
         else:
             logger.warning("The symlink dump file is missing, but the project space is not empty. If the project space contains some Scipion's project, the project data is probably corrupted.")
@@ -176,14 +197,7 @@ def save_trap(sig, frame):
 
     logger.info("Saving is complete.")
 
-    # Unlock the project
-    if not os.path.exists(f"{d_od_project}/{d_scipion}/{f_project_lock}"):
-        logger.warning("Unlocking the project is not needed. The project lock is missing. This should not happen.")
-    else:
-        os.remove(f"{d_od_project}/{d_scipion}/{f_project_lock}")
-        logger.info("The project has been unlocked.")
-
-    c_exit(True)
+    c_exit(remove_lock=True, success=True)
 
 def save_auto():
     global autosave_first
@@ -211,12 +225,12 @@ def save_auto():
 # Get the spaces names
 ret = check_mountpoint(d_od_dataset)
 if not ret:
-    c_exit(False)
+    c_exit(remove_lock=False, success=False)
 d_od_dataset = ret
 
 ret = check_mountpoint(d_od_project)
 if not ret:
-    c_exit(False)
+    c_exit(remove_lock=False, success=False)
 d_od_project = ret
 
 # Change work dir to prevent problems with relative target paths in symlinks
@@ -225,26 +239,21 @@ os.chdir("/mnt/vol-project")
 # Check if the project is already opened (locked)
 if os.path.exists(f"{d_od_project}/{d_scipion}/{f_project_lock}"):
     logger.error("The project is already opened in another Scipion instance")
-    c_exit(False)
+    c_exit(remove_lock=False, success=False)
 
 # Register handlers for the SIGINT and SIGTERM signals
 signal.signal(signal.SIGINT, save_trap)
 signal.signal(signal.SIGTERM, save_trap)
 
 # Lock the project
-if not os.path.exists(f"{d_od_project}/{d_scipion}"):
-    empty_project = True
-    logger.info("The project space looks empty. Working dir for the instance has been created.")
-    os.makedirs(f"{d_od_project}/{d_scipion}/")
-else:
-    empty_project = False
+lock_create()
 
 Path(f"{d_od_project}/{d_scipion}/{f_project_lock}").touch()
 logger.info("The project has been locked to prevent modifications from another instance.")
 
 # Start restore and clone stages
 t_sync_clone = Thread(target = sync_clone)
-t_sync_restore = Thread(target = sync_restore, args = (empty_project,))
+t_sync_restore = Thread(target = sync_restore, args = (project_empty,))
 
 t_sync_clone.start()
 t_sync_restore.start()
