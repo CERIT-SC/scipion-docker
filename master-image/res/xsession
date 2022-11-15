@@ -17,6 +17,12 @@ while [ ! -f "${file_status}" ] || ! grep -q "ok" "${file_status}"; do
 	sleep 10
 done
 
+pid_vncserver=""
+while [ -z "$pid_vncserver" ]; do
+	pid_vncserver=$(pgrep -f "/opt/TurboVNC/bin/vncserver")
+	sleep 2
+done
+
 # Disable screensaver
 #xset s off -dpms
 
