@@ -1,11 +1,11 @@
+#!venv/bin/python3
 
 import threading
 import ctypes
 import time
-#import psutil
+import psutil
 
 from enum import Enum
-from mortal_thread_state import MortalThreadState
 
 
 class MortalThreadState(Enum):
@@ -32,6 +32,8 @@ class MortalThread(threading.Thread):
         return self.status
 
     def run(self):
+        result = False
+
         try:
             args = [self]
             args.extend(self.args)
@@ -50,13 +52,51 @@ class MortalThread(threading.Thread):
     def join(self):
         super().join()
 
-    def terminate(self):
+    def nice_terminate(self):
         if self.get_status() != MortalThreadState.RUNNING:
             return False
 
         self.terminate_signal = True
         return True
+    
+    def terminate(self, pid = None, name = None):
+        if not pid and not name:
+            return False
+
+        self.nice_terminate()
+
+        current_process = psutil.Process()
+        children = current_process.children(recursive=True)
+        for child in children:
+            if pid and child.pid == pid:
+                child.terminate()
+                return True
+            if name and child.name == name:
+                child.terminate()
+                return True
+
+        return False
+
+    def kill(self, pid = None, name = None):
+        if not pid and not name:
+            return False
+
+        self.nice_terminate()
+
+        current_process = psutil.Process()
+        children = current_process.children(recursive=True)
+        for child in children:
+            if pid and child.pid == pid:
+                child.kill()
+                return True
+            if name and child.name == name:
+                child.kill()
+                return True
+
+        return False
+    
+    def is_running(self):
+        return self.get_status() == MortalThreadState.RUNNING
 
     def is_terminate_signal(self):
         return self.terminate_signal
-
