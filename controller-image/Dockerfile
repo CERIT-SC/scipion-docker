@@ -34,6 +34,7 @@ RUN mkdir -p /opt/cloner && \
 
 COPY docker-entrypoint.sh /
 COPY cloner.py /
+COPY mortal_thread.py /
 RUN chmod +x /docker-entrypoint.sh
 RUN chmod +x /cloner.py
 
