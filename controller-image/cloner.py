@@ -79,10 +79,11 @@ def c_exit(remove_lock, success):
 
     if success:
         logger.info("Terminating...")
+        exit(0)
     else:
         logger.info("It is not possible to continue.")
-
-    exit(0)
+        while True:
+            time.sleep(10)
 
 def run_rsync(src, dest):
     try:
@@ -245,7 +246,7 @@ def save_auto():
 
     if autosave_first:
         autosave_first = False
-        logger.info(f"Autosaving will be started every {str(int(timer_autosync / 60))} minutes. New autosave logs will not be printed, except for errors.")
+        logger.info(f"Autosaving will be started every {str(int(timer_autosave / 60))} minutes. New autosave logs will not be printed, except for errors.")
 
     if not result:
         autosave_print = True
