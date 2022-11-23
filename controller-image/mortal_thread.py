@@ -53,7 +53,7 @@ class MortalThread(threading.Thread):
         super().join()
 
     def nice_terminate(self):
-        if self.get_status() != MortalThreadState.RUNNING:
+        if not self.is_running():
             return False
 
         self.terminate_signal = True
