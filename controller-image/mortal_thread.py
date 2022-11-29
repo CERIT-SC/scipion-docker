@@ -11,7 +11,7 @@ from enum import Enum
 class MortalThreadState(Enum):
     READY      = 1
     RUNNING    = 2
-    COMPLETED  = 3
+    COMPLETE   = 3
     TERMINATED = 4
     ERROR      = 5
 
@@ -43,7 +43,7 @@ class MortalThread(threading.Thread):
                 self._set_status(MortalThreadState.TERMINATED)
                 return
 
-            self._set_status(MortalThreadState.COMPLETED if result else MortalThreadState.ERROR)
+            self._set_status(MortalThreadState.COMPLETE if result else MortalThreadState.ERROR)
     
     def start(self):
         self._set_status(MortalThreadState.RUNNING)
