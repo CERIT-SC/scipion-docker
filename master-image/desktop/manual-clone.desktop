@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Sync Dataset
+Comment=Synchronize dataset mount (Re-stage-in data from the Onedata dataset space)
+Exec=/opt/controller/manual-clone
+Icon=/opt/controller/manual-clone_logo.png
+Path=/opt/controller
+Terminal=false
+StartupNotify=false
