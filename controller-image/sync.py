@@ -21,12 +21,21 @@ class SyncStatus(Enum):
 
 class Sync(ABC):
     def __init__(self, cloner_obj):
-        self.status = SyncStatus.INIT
+        self.status = SyncStatus.READY
         self.t = MortalThread(target = self._run, args = ())
         self.cloner = cloner_obj
 
     def get_status(self):
+        if self.t.get_status() == MortalThreadState.COMPLETE:
+            self.status = SyncStatus.COMPLETE
+        elif self.t.get_status() == MortalThreadState.ERROR or \
+                self.t.get_status() == MortalThreadState.TERMINATED:
+            self.status = SyncStatus.ERROR
+
         return self.status
+
+    def is_status(self, status):
+        return self.get_status() == status
 
     def run(self):
         self.status = SyncStatus.RUNNING
@@ -37,14 +46,12 @@ class Sync(ABC):
 
     def join(self):
         self.t.join()
-        # TODO toto je divny, to ma patrit jinam
-        self.status = SyncStatus.COMPLETE if self.t.get_status() == MortalThreadStatus.COMPLETE else SyncStatus.ERROR
 
     @abstractmethod
     def _run(self, t):
         raise NotImplementedError("Must override method \"_run()\"")
 
-    def _run_sync(self, src, dest, progress = False, progress_print_head = "Unknown sync"):
+    def _run_rsync(self, src, dest, progress = False, progress_print_head = "Unknown sync"):
         # start progress printer
         t_progress = MortalThread(target = self._print_progress, args = (self.t, progress_print_head, src, dest))
         t_progress.start()
@@ -87,7 +94,9 @@ class SyncClone(Sync):
     def _run(self, t):
         logger.info("Cloning the dataset...")
 
-        ok = super()._run_sync(d_od_dataset, d_vol_dataset, progress = True, progress_print_head = "Cloning")
+        print(self.cloner.p_od_dataset)
+        print(d_vol_dataset)
+        ok = super()._run_rsync(self.cloner.p_od_dataset, d_vol_dataset, progress = True, progress_print_head = "Cloning")
 
         if not ok:
             logger.error("Cloning failed.")
@@ -100,8 +109,8 @@ class SyncRestore(Sync):
     def _run(self, t):
         # remove files from the last instance
         # TODO copy status and log from the shared mount to the od_project
-        p_status = f"{d_od_project}/{f_instance_status}"
-        p_log = f"{d_od_project}/{f_instance_log}"
+        p_status = f"{self.cloner.p_od_project}/{f_instance_status}"
+        p_log = f"{self.cloner.p_od_project}/{f_instance_log}"
 
         if os.path.exists(p_status):
             os.remove(p_status)
@@ -111,19 +120,19 @@ class SyncRestore(Sync):
 
         logger.info("Restoring the project...")
 
-        ok = super()._run_sync(d_od_project, d_vol_project, progress = True, progress_print_head = "Restoring")
+        ok = super()._run_rsync(self.cloner.p_od_project, d_vol_project, progress = True, progress_print_head = "Restoring")
         if not ok:
             logger.error("Restoring failed.")
             return False
 
         # restore symlinks in vol-project
-        if not os.path.exists(f"{d_od_project}/{f_symlink_dump}"):
+        if not os.path.exists(f"{self.cloner.p_od_project}/{f_symlink_dump}"):
             if self.cloner.project_empty:
                 logger.info("The symlink dump file is missing, because the project space was empty.")
             else:
                 logger.warning("The symlink dump file is missing, but the project space is not empty. If the project space contains some Scipion's project, the project data is probably corrupted.")
         else:
-            f_symlink = open(f"{d_od_project}/{f_symlink_dump}", "r")
+            f_symlink = open(f"{self.cloner.p_od_project}/{f_symlink_dump}", "r")
             for line in f_symlink:
                 line_link = line.strip()
                 if line_link:
@@ -169,7 +178,26 @@ class SyncSave(Sync):
             Path(p_vol_project_lock).touch()
 
     	# rsync vol-project > od-project
-        return super()._run_sync(d_vol_project, d_od_project, progress, progress_print_head)
+        return super()._run_rsync(d_vol_project, self.cloner.p_od_project, progress, progress_print_head)
+
+class SyncAutoSave(SyncSave):
+    def _run(self, t):
+        if self.cloner.autosave_print:
+            logger.info("Auto saving the project...")
+
+        ok = self._helper_save(progress = False, progress_print_head = "Auto save")
+
+        if not ok:
+            self.cloner.autosave_print = True
+            logger.error("Auto save failed.")
+            return False
+
+        if self.cloner.autosave_print:
+            self.cloner.autosave_print = False
+            logger.info("Auto save is complete.")
+            logger.info(f"Auto save will be started every {str(int(timer_autosave / 60))} minutes. New autosave logs will not be printed, except for errors.")
+
+        return True
 
 class SyncFinalSave(SyncSave):
     def _run(self, t):
@@ -186,25 +214,3 @@ class SyncFinalSave(SyncSave):
 
         logger.error("Repeatedly failed to save the project. Project data will likely be corrupted.")
         return False
-
-class SyncAutoSave(SyncSave):
-    def _run(self, t):
-        if autosave_first or autosave_print:
-            logger.info("Auto saving the project...")
-
-        ok = self._helper_save(progress = False, progress_print_head = "Auto save")
-
-        if not ok:
-            autosave_print = True
-            logger.error("Auto save failed.")
-            return False
-
-        if autosave_first or autosave_print:
-            autosave_print = False
-            logger.info("Auto save is complete.")
-
-        if autosave_first:
-            autosave_first = False
-            logger.info(f"Auto save will be started every {str(int(timer_autosave / 60))} minutes. New autosave logs will not be printed, except for errors.")
-
-        return True
