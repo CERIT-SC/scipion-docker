@@ -59,32 +59,20 @@ class Cloner:
 
     # TODO tyhle dva signaly jsou divny, to tu nema co delat
     def send_sig_clone(self):
-        if self.phase == ClonerPhase.STAGE_IN or \
-                self.phase == ClonerPhase.PRE_RUN or \
-                self.phase == ClonerPhase.RUN:
-            self.sig_clone = True
+        self.sig_clone = True
 
     def send_sig_restore(self):
-        if self.phase == ClonerPhase.STAGE_IN:
-            self.sig_restore = True
+        self.sig_restore = True
 
     def send_sig_autosave(self):
-        if self.phase == ClonerPhase.RUN:
-            self.sig_autosave = True
+        self.sig_autosave = True
 
     def send_sig_finalsave(self):
-        if self.phase == ClonerPhase.RUN:
-            self.sig_finalsave = True
+        self.sig_finalsave = True
 
-    def switch_phase(self, phasea):
+    def switch_phase(self, phase):
         # switch phase first to prevent set the signals again from REST API
-        self.phase = phasea
-
-        # reset signals
-        self.sig_clone = False
-        self.sig_restore = False
-        self.sig_autosave = False
-        self.sig_finalsave = False
+        self.phase = phase
 
     def start_loop(self):
         self.t_loop.start()
@@ -168,9 +156,9 @@ class Cloner:
         #=====================
         elif self.phase == ClonerPhase.PRE_STAGE_OUT:
             if self._pre_stage_out():
-                self.self.switch_phase(ClonerPhase.STAGE_OUT)
+                self.switch_phase(ClonerPhase.STAGE_OUT)
             else:
-                self.self.switch_phase(ClonerPhase.CRITICAL_ERROR_UNLOCK)
+                self.switch_phase(ClonerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase STAGE_OUT
         #=================
@@ -181,19 +169,19 @@ class Cloner:
                 self.sync_finalsave.run()
             # switch to END phase
             elif self.sync_finalsave.is_status(SyncStatus.COMPLETE):
-                self.switch_phase(SyncStatus.END)
+                self.switch_phase(ClonerPhase.END)
             # ...or to CRITICAL_ERROR_UNLOCK
             elif self.sync_finalsave.is_status(SyncStatus.ERROR):
-                self.switch_phase(SyncStatus.CRITICAL_ERROR_UNLOCK)
+                self.switch_phase(ClonerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase END
         #===========
         elif self.phase == ClonerPhase.END:
             if self._end():
-                self.switch_phase(SyncStatus.EXIT)
+                self.switch_phase(ClonerPhase.EXIT)
                 self.success = True
             else:
-                self.switch_phase(SyncStatus.CRITICAL_ERROR_UNLOCK)
+                self.switch_phase(ClonerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase CRITICAL_ERROR_UNLOCK
         #=============================
@@ -260,27 +248,14 @@ class Cloner:
 
     def _pre_stage_out(self):
         logger.info("The stop signal (SIGINT or SIGTERM) was received.")
-
-        # TODO neco je spolecne s ukoncenim pri chybe
         logger.info("The Scipion application will be terminated and the project saved to the Onedata.")
 
-        # var t_terminate
-        #=============
-        # terminate still running restore, clone, _print_progress threads
-        if t_terminate:
-            self.t_sync_clone.terminate(name="rsync")
-            self.t_sync_restore.terminate(name="rsync")
+        self._terminate_syncs()
+        return True
 
-            first_it = True
-            while self.t_sync_clone.is_running() \
-                or self.t_sync_restore.is_running():
-
-                if first_it:
-                    first_it = False
-                    logger.info("Terminating other still running threads...")
-
-                logger.info("Waiting for other threads to terminate...")
-                time.sleep(timer_waiting_to_end)
+    def _end(self):
+        self._lock_remove()
+        return True
 
     def _critical_error_unlock(self):
         logger.warning("TODO nejake vypisy v _critical_error_unlock")
@@ -288,6 +263,24 @@ class Cloner:
 
     def _critical_error(self):
         logger.warning("TODO nejake vypisy v _critical_error")
+
+    def _terminate_syncs(self):
+        # terminate still running Clone, Restore, Autosave
+        self.sync_clone.terminate()
+        self.sync_restore.terminate()
+        self.sync_autosave.terminate()
+
+        first_it = True
+        while self.sync_clone.is_running() or \
+                self.sync_restore.is_running() or \
+                self.sync_autosave.is_running():
+
+            if first_it:
+                first_it = False
+                logger.info("Terminating other still running threads...")
+
+            logger.info("Waiting for other threads to terminate...")
+            time.sleep(timer_waiting_to_end)
 
     def _check_mountpoint(self, mountpoint):
         if not os.path.exists(mountpoint):

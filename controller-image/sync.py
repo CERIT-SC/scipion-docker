@@ -44,6 +44,9 @@ class Sync(ABC):
     def terminate(self):
         self.t.terminate(name = "rsync")
 
+    def is_running(self):
+        return self.get_status() == SyncStatus.RUNNING
+
     def join(self):
         self.t.join()
 
@@ -94,8 +97,6 @@ class SyncClone(Sync):
     def _run(self, t):
         logger.info("Cloning the dataset...")
 
-        print(self.cloner.p_od_dataset)
-        print(d_vol_dataset)
         ok = super()._run_rsync(self.cloner.p_od_dataset, d_vol_dataset, progress = True, progress_print_head = "Cloning")
 
         if not ok:

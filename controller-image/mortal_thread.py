@@ -94,9 +94,14 @@ class MortalThread(threading.Thread):
                 return True
 
         return False
-    
+
     def is_running(self):
         return self.get_status() == MortalThreadState.RUNNING
 
     def is_terminate_signal(self):
         return self.terminate_signal
+
+    def is_finished(self):
+        return self.get_status() == MortalThreadState.COMPLETE \
+            or self.get_status() == MortalThreadState.TERMINATED \
+            or self.get_status() == MortalThreadState.ERROR
