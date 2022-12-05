@@ -1,4 +1,3 @@
-#!venv/bin/python3
 
 import threading
 import ctypes
@@ -11,7 +10,7 @@ from enum import Enum
 class MortalThreadState(Enum):
     READY      = 1
     RUNNING    = 2
-    COMPLETED  = 3
+    COMPLETE   = 3
     TERMINATED = 4
     ERROR      = 5
 
@@ -43,7 +42,7 @@ class MortalThread(threading.Thread):
                 self._set_status(MortalThreadState.TERMINATED)
                 return
 
-            self._set_status(MortalThreadState.COMPLETED if result else MortalThreadState.ERROR)
+            self._set_status(MortalThreadState.COMPLETE if result else MortalThreadState.ERROR)
     
     def start(self):
         self._set_status(MortalThreadState.RUNNING)
@@ -94,9 +93,14 @@ class MortalThread(threading.Thread):
                 return True
 
         return False
-    
+
     def is_running(self):
         return self.get_status() == MortalThreadState.RUNNING
 
     def is_terminate_signal(self):
         return self.terminate_signal
+
+    def is_finished(self):
+        return self.get_status() == MortalThreadState.COMPLETE \
+            or self.get_status() == MortalThreadState.TERMINATED \
+            or self.get_status() == MortalThreadState.ERROR
