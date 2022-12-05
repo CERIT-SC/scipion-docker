@@ -48,12 +48,9 @@ spec:
       volumes:
        - name: scipion-vol-dataset-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-dataset-$SUBST_NAME-$TOOL_SUBST_NAMESPACE
+           claimName: pvc-scipion-vol-dataset-$SUBST_NAME-$TOOL_SUBST_NAMESPACE-$SUBST_OD_DATASET_SPACEID
 
        - name: scipion-vol-project-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-project-$SUBST_NAME-$TOOL_SUBST_NAMESPACE
-
-#        hostPath:
-#          path: /home/jhandl/k8s-volume
+           claimName: pvc-scipion-vol-project-$SUBST_NAME-$TOOL_SUBST_NAMESPACE-$SUBST_OD_PROJECT_SPACEID
 
