@@ -20,10 +20,10 @@ class SyncStatus(Enum):
     ERROR    = 4
 
 class Sync(ABC):
-    def __init__(self, cloner_obj):
+    def __init__(self, controller_obj):
         self.status = SyncStatus.READY
         self.t = MortalThread(target = self._run, args = ())
-        self.cloner = cloner_obj
+        self.controller = controller_obj
 
     def get_status(self):
         if self.t.get_status() == MortalThreadState.COMPLETE:
@@ -97,7 +97,7 @@ class SyncClone(Sync):
     def _run(self, t):
         logger.info("Cloning the dataset...")
 
-        ok = super()._run_rsync(self.cloner.p_od_dataset, d_vol_dataset, progress = True, progress_print_head = "Cloning")
+        ok = super()._run_rsync(self.controller.p_od_dataset, d_vol_dataset, progress = True, progress_print_head = "Cloning")
 
         if not ok:
             logger.error("Cloning failed.")
@@ -110,8 +110,8 @@ class SyncRestore(Sync):
     def _run(self, t):
         # remove files from the last instance
         # TODO copy status and log from the shared mount to the od_project
-        p_status = f"{self.cloner.p_od_project}/{f_instance_status}"
-        p_log = f"{self.cloner.p_od_project}/{f_instance_log}"
+        p_status = f"{self.controller.p_od_project}/{f_instance_status}"
+        p_log = f"{self.controller.p_od_project}/{f_instance_log}"
 
         if os.path.exists(p_status):
             os.remove(p_status)
@@ -121,19 +121,19 @@ class SyncRestore(Sync):
 
         logger.info("Restoring the project...")
 
-        ok = super()._run_rsync(self.cloner.p_od_project, d_vol_project, progress = True, progress_print_head = "Restoring")
+        ok = super()._run_rsync(self.controller.p_od_project, d_vol_project, progress = True, progress_print_head = "Restoring")
         if not ok:
             logger.error("Restoring failed.")
             return False
 
         # restore symlinks in vol-project
-        if not os.path.exists(f"{self.cloner.p_od_project}/{f_symlink_dump}"):
-            if self.cloner.project_empty:
+        if not os.path.exists(f"{self.controller.p_od_project}/{f_symlink_dump}"):
+            if self.controller.project_empty:
                 logger.info("The symlink dump file is missing, because the project space was empty.")
             else:
                 logger.warning("The symlink dump file is missing, but the project space is not empty. If the project space contains some Scipion's project, the project data is probably corrupted.")
         else:
-            f_symlink = open(f"{self.cloner.p_od_project}/{f_symlink_dump}", "r")
+            f_symlink = open(f"{self.controller.p_od_project}/{f_symlink_dump}", "r")
             for line in f_symlink:
                 line_link = line.strip()
                 if line_link:
@@ -179,22 +179,22 @@ class SyncSave(Sync):
             Path(p_vol_project_lock).touch()
 
     	# rsync vol-project > od-project
-        return super()._run_rsync(d_vol_project, self.cloner.p_od_project, progress, progress_print_head)
+        return super()._run_rsync(d_vol_project, self.controller.p_od_project, progress, progress_print_head)
 
 class SyncAutoSave(SyncSave):
     def _run(self, t):
-        if self.cloner.autosave_print:
+        if self.controller.autosave_print:
             logger.info("Auto saving the project...")
 
         ok = self._helper_save(progress = False, progress_print_head = "Auto save")
 
         if not ok:
-            self.cloner.autosave_print = True
+            self.controller.autosave_print = True
             logger.error("Auto save failed.")
             return False
 
-        if self.cloner.autosave_print:
-            self.cloner.autosave_print = False
+        if self.controller.autosave_print:
+            self.controller.autosave_print = False
             logger.info("Auto save is complete.")
             logger.info(f"Auto save will be started every {str(int(timer_autosave / 60))} minutes. New autosave logs will not be printed, except for errors.")
 

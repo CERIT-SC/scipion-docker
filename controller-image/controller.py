@@ -14,7 +14,7 @@ from sync import SyncStatus, Sync, SyncClone, SyncRestore, SyncSave, SyncAutoSav
 from constants import *
 
 
-class ClonerPhase(Enum):
+class ControllerPhase(Enum):
     PRE_STAGE_IN          = 0 # Checking the mounts, lock the project...
     STAGE_IN              = 1 # Clone and restore
     PRE_RUN               = 2 # Send signal to start desktop environment...
@@ -27,13 +27,13 @@ class ClonerPhase(Enum):
     EXIT                  = 9
 
 
-class Cloner:
+class Controller:
     def __init__(self):
         # these variables are modified while checking the mountpoints
         self.p_od_dataset = d_od_dataset
         self.p_od_project = d_od_project
 
-        self.phase = ClonerPhase.PRE_STAGE_IN
+        self.phase = ControllerPhase.PRE_STAGE_IN
 
         # init final signal to end the loop of the state machine
         self.exit = False
@@ -87,15 +87,15 @@ class Cloner:
     def _loop_turn(self):
         # phase PRE_STAGE_IN
         #====================
-        if self.phase == ClonerPhase.PRE_STAGE_IN:
+        if self.phase == ControllerPhase.PRE_STAGE_IN:
             if self._pre_stage_in():
-                self.switch_phase(ClonerPhase.STAGE_IN)
+                self.switch_phase(ControllerPhase.STAGE_IN)
             else:
-                self.switch_phase(ClonerPhase.CRITICAL_ERROR)
+                self.switch_phase(ControllerPhase.CRITICAL_ERROR)
 
         # phase STAGE_IN
         #================
-        elif self.phase == ClonerPhase.STAGE_IN:
+        elif self.phase == ControllerPhase.STAGE_IN:
 
             # start Clone thread
             if self.sig_clone and \
@@ -112,23 +112,23 @@ class Cloner:
             # switch to PRE_RUN phase
             if self.sync_clone.is_status(SyncStatus.COMPLETE) and \
                     self.sync_restore.is_status(SyncStatus.COMPLETE):
-                self.switch_phase(ClonerPhase.PRE_RUN)
+                self.switch_phase(ControllerPhase.PRE_RUN)
             # ...or to CRITICAL_ERROR_UNLOCK
             elif self.sync_clone.is_status(SyncStatus.ERROR) or \
                 self.sync_restore.is_status(SyncStatus.ERROR):
-                self.switch_phase(ClonerPhase.CRITICAL_ERROR_UNLOCK)
+                self.switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase PRE_RUN
         #===============
-        elif self.phase == ClonerPhase.PRE_RUN:
+        elif self.phase == ControllerPhase.PRE_RUN:
             if self._pre_run():
-                self.switch_phase(ClonerPhase.RUN)
+                self.switch_phase(ControllerPhase.RUN)
             else:
-                self.switch_phase(ClonerPhase.CRITICAL_ERROR_UNLOCK)
+                self.switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase RUN
         #===========
-        elif self.phase == ClonerPhase.RUN:
+        elif self.phase == ControllerPhase.RUN:
 
             # start Clone thread (re-stage-in the dataset)
             if self.sig_clone:
@@ -150,54 +150,54 @@ class Cloner:
 
             # switch to PRE_STAGE_OUT phase
             if self.sig_finalsave:
-                self.switch_phase(ClonerPhase.PRE_STAGE_OUT)
+                self.switch_phase(ControllerPhase.PRE_STAGE_OUT)
 
         # phase PRE_STAGE_OUT
         #=====================
-        elif self.phase == ClonerPhase.PRE_STAGE_OUT:
+        elif self.phase == ControllerPhase.PRE_STAGE_OUT:
             if self._pre_stage_out():
-                self.switch_phase(ClonerPhase.STAGE_OUT)
+                self.switch_phase(ControllerPhase.STAGE_OUT)
             else:
-                self.switch_phase(ClonerPhase.CRITICAL_ERROR_UNLOCK)
+                self.switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase STAGE_OUT
         #=================
-        elif self.phase == ClonerPhase.STAGE_OUT:
+        elif self.phase == ControllerPhase.STAGE_OUT:
 
             # start Finalsave thread
             if self.sync_finalsave.is_status(SyncStatus.READY):
                 self.sync_finalsave.run()
             # switch to END phase
             elif self.sync_finalsave.is_status(SyncStatus.COMPLETE):
-                self.switch_phase(ClonerPhase.END)
+                self.switch_phase(ControllerPhase.END)
             # ...or to CRITICAL_ERROR_UNLOCK
             elif self.sync_finalsave.is_status(SyncStatus.ERROR):
-                self.switch_phase(ClonerPhase.CRITICAL_ERROR_UNLOCK)
+                self.switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase END
         #===========
-        elif self.phase == ClonerPhase.END:
+        elif self.phase == ControllerPhase.END:
             if self._end():
-                self.switch_phase(ClonerPhase.EXIT)
+                self.switch_phase(ControllerPhase.EXIT)
                 self.success = True
             else:
-                self.switch_phase(ClonerPhase.CRITICAL_ERROR_UNLOCK)
+                self.switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase CRITICAL_ERROR_UNLOCK
         #=============================
-        elif self.phase == ClonerPhase.CRITICAL_ERROR_UNLOCK:
+        elif self.phase == ControllerPhase.CRITICAL_ERROR_UNLOCK:
             self._critical_error_unlock()
-            self.switch_phase(ClonerPhase.CRITICAL_ERROR)
+            self.switch_phase(ControllerPhase.CRITICAL_ERROR)
 
         # phase CRITICAL_ERROR
         #======================
-        elif self.phase == ClonerPhase.CRITICAL_ERROR:
+        elif self.phase == ControllerPhase.CRITICAL_ERROR:
             self._critical_error()
-            self.switch_phase(ClonerPhase.EXIT)
+            self.switch_phase(ControllerPhase.EXIT)
 
         # phase EXIT
         #============
-        elif self.phase == ClonerPhase.EXIT:
+        elif self.phase == ControllerPhase.EXIT:
             # end the loop
             self.exit = True
 
