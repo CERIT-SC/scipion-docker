@@ -29,15 +29,17 @@ RUN groupadd --gid 1000 ${S_USER} && \
     usermod -aG sudo ${S_USER} && \
     chown -R ${S_USER}:${S_USER} ${S_USER_HOME}
 
-RUN mkdir -p /opt/cloner && \
-    chown ${S_USER}:${S_USER} /opt/cloner
-
 COPY docker-entrypoint.sh /
-COPY controller /opt/
+RUN chmod +x /docker-entrypoint.sh
+
+COPY controller /opt/controller
+RUN chown -R ${S_USER}:${S_USER} /opt/controller
 
 WORKDIR /opt/controller
 
 RUN pip3 install -r requirements.txt
+
+USER ${S_USER}
 
 #ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
