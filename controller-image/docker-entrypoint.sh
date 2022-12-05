@@ -5,26 +5,24 @@ set -e
 log="/mnt/shared/instance.log"
 
 touch "$log"
-unbuffer /cloner.py > "$log" 2>&1 &
+unbuffer uvicorn controller-rest:app --reload > "$log" 2>&1 &
 
 tail -f "$log" & pid_tail=$!
 
-pid_cloner=""
-while [ -z "$pid_cloner" ]; do
+pid_controller=""
+while [ -z "$pid_controller" ]; do
     sleep 1
-    pid_cloner=$(pgrep "cloner.py")
+    pid_controller=$(pgrep "uvicorn")
 done
 
-#echo "cloner PID: ${pid_cloner}"
+#echo "controller PID: ${pid_controller}"
 
 _trap () {
-    kill "$pid_cloner"
+    kill "$pid_controller"
     sleep 2
     kill "$pid_tail"
 }
 
-#trap "echo trap" SIGTERM
 trap "_trap" SIGINT SIGTERM
 
 wait "$pid_tail"
-

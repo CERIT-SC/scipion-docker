@@ -33,12 +33,10 @@ RUN mkdir -p /opt/cloner && \
     chown ${S_USER}:${S_USER} /opt/cloner
 
 COPY docker-entrypoint.sh /
-COPY cloner.py /
-COPY mortal_thread.py /
-RUN chmod +x /docker-entrypoint.sh
-RUN chmod +x /cloner.py
+COPY controller /opt/
 
-COPY requirements.txt /
+WORKDIR /opt/controller
+
 RUN pip3 install -r requirements.txt
 
 #ENTRYPOINT ["sleep", "infinity"]
