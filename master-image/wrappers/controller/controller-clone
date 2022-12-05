@@ -1,0 +1,5 @@
+#!/bin/sh
+
+notify-send --icon /opt/controller/manual-clone_logo.png "Dataset sync will start in a few seconds. Please check the instance logs."
+
+curl http://localhost:5000/clone
