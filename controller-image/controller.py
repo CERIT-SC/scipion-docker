@@ -57,7 +57,14 @@ class Controller:
 
         self.autosave_print = True
 
-    # TODO tyhle dva signaly jsou divny, to tu nema co delat
+    def startup(self):
+        self._start_loop()
+        self.send_sig_clone()
+        self.send_sig_restore()
+
+    def shutdown(self):
+        self.send_sig_finalsave()
+
     def send_sig_clone(self):
         self.sig_clone = True
 
@@ -70,11 +77,10 @@ class Controller:
     def send_sig_finalsave(self):
         self.sig_finalsave = True
 
-    def switch_phase(self, phase):
-        # switch phase first to prevent set the signals again from REST API
+    def _switch_phase(self, phase):
         self.phase = phase
 
-    def start_loop(self):
+    def _start_loop(self):
         self.t_loop.start()
 
     def _loop(self):
@@ -89,9 +95,9 @@ class Controller:
         #====================
         if self.phase == ControllerPhase.PRE_STAGE_IN:
             if self._pre_stage_in():
-                self.switch_phase(ControllerPhase.STAGE_IN)
+                self._switch_phase(ControllerPhase.STAGE_IN)
             else:
-                self.switch_phase(ControllerPhase.CRITICAL_ERROR)
+                self._switch_phase(ControllerPhase.CRITICAL_ERROR)
 
         # phase STAGE_IN
         #================
@@ -112,19 +118,19 @@ class Controller:
             # switch to PRE_RUN phase
             if self.sync_clone.is_status(SyncStatus.COMPLETE) and \
                     self.sync_restore.is_status(SyncStatus.COMPLETE):
-                self.switch_phase(ControllerPhase.PRE_RUN)
+                self._switch_phase(ControllerPhase.PRE_RUN)
             # ...or to CRITICAL_ERROR_UNLOCK
             elif self.sync_clone.is_status(SyncStatus.ERROR) or \
                 self.sync_restore.is_status(SyncStatus.ERROR):
-                self.switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
+                self._switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase PRE_RUN
         #===============
         elif self.phase == ControllerPhase.PRE_RUN:
             if self._pre_run():
-                self.switch_phase(ControllerPhase.RUN)
+                self._switch_phase(ControllerPhase.RUN)
             else:
-                self.switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
+                self._switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase RUN
         #===========
@@ -150,15 +156,15 @@ class Controller:
 
             # switch to PRE_STAGE_OUT phase
             if self.sig_finalsave:
-                self.switch_phase(ControllerPhase.PRE_STAGE_OUT)
+                self._switch_phase(ControllerPhase.PRE_STAGE_OUT)
 
         # phase PRE_STAGE_OUT
         #=====================
         elif self.phase == ControllerPhase.PRE_STAGE_OUT:
             if self._pre_stage_out():
-                self.switch_phase(ControllerPhase.STAGE_OUT)
+                self._switch_phase(ControllerPhase.STAGE_OUT)
             else:
-                self.switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
+                self._switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase STAGE_OUT
         #=================
@@ -169,31 +175,31 @@ class Controller:
                 self.sync_finalsave.run()
             # switch to END phase
             elif self.sync_finalsave.is_status(SyncStatus.COMPLETE):
-                self.switch_phase(ControllerPhase.END)
+                self._switch_phase(ControllerPhase.END)
             # ...or to CRITICAL_ERROR_UNLOCK
             elif self.sync_finalsave.is_status(SyncStatus.ERROR):
-                self.switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
+                self._switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase END
         #===========
         elif self.phase == ControllerPhase.END:
             if self._end():
-                self.switch_phase(ControllerPhase.EXIT)
+                self._switch_phase(ControllerPhase.EXIT)
                 self.success = True
             else:
-                self.switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
+                self._switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase CRITICAL_ERROR_UNLOCK
         #=============================
         elif self.phase == ControllerPhase.CRITICAL_ERROR_UNLOCK:
             self._critical_error_unlock()
-            self.switch_phase(ControllerPhase.CRITICAL_ERROR)
+            self._switch_phase(ControllerPhase.CRITICAL_ERROR)
 
         # phase CRITICAL_ERROR
         #======================
         elif self.phase == ControllerPhase.CRITICAL_ERROR:
             self._critical_error()
-            self.switch_phase(ControllerPhase.EXIT)
+            self._switch_phase(ControllerPhase.EXIT)
 
         # phase EXIT
         #============
@@ -247,7 +253,7 @@ class Controller:
         return True
 
     def _pre_stage_out(self):
-        logger.info("The stop signal (SIGINT or SIGTERM) was received.")
+        logger.info("A stop signal has been received.")
         logger.info("The Scipion application will be terminated and the project saved to the Onedata.")
 
         self._terminate_syncs()
@@ -258,11 +264,11 @@ class Controller:
         return True
 
     def _critical_error_unlock(self):
-        logger.warning("TODO nejake vypisy v _critical_error_unlock")
+        logger.error("TODO some prints in _critical_error_unlock")
         self._lock_remove()
 
     def _critical_error(self):
-        logger.warning("TODO nejake vypisy v _critical_error")
+        logger.error("TODO some prints in _critical_error")
 
     def _terminate_syncs(self):
         # terminate still running Clone, Restore, Autosave
@@ -302,7 +308,6 @@ class Controller:
         logger.info("The project has been locked to prevent modifications from another instance.")
 
     def _lock_remove(self):
-        # Unlock the project
         p_od_project_lock = f"{self.p_od_project}/{f_project_lock}"
         if not os.path.exists(p_od_project_lock):
             logger.warning("Unlocking the project is not needed. The project lock is missing. This should not happen.")
@@ -321,6 +326,4 @@ class Controller:
         if self.success:
             logger.info("Terminating...")
         else:
-            logger.info("It is not possible to continue.")
-            while True:
-                time.sleep(10)
+            logger.error("It is not possible to continue.")

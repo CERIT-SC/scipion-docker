@@ -109,7 +109,6 @@ class SyncClone(Sync):
 class SyncRestore(Sync):
     def _run(self, t):
         # remove files from the last instance
-        # TODO copy status and log from the shared mount to the od_project
         p_status = f"{self.controller.p_od_project}/{f_instance_status}"
         p_log = f"{self.controller.p_od_project}/{f_instance_log}"
 
@@ -201,17 +200,17 @@ class SyncAutoSave(SyncSave):
         return True
 
 class SyncFinalSave(SyncSave):
+    # TODO copy status and log from the shared mount to the od_project
     def _run(self, t):
         for i in range(3):
             logger.info("Final saving the project...")
             ok = self._helper_save(progress = True, progress_print_head = "Final save")
-
-            if not ok:
-                logger.error("Final save failed.")
-                return False
             
-            logger.info("Final save is complete.")
-            return True
+            if ok:
+                logger.info("Final save is complete.")
+                return True
 
-        logger.error("Repeatedly failed to save the project. Project data will likely be corrupted.")
+            logger.error("Final save failed.")
+
+        logger.error("Repeatedly failed to save the project. Project data will probably be corrupted.")
         return False

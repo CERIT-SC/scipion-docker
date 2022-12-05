@@ -15,4 +15,4 @@ f_instance_log = f"{d_scipion}/instance.log"
 timer_print_progress = 60*0.5
 timer_autosave = 60*2
 timer_status_checking = 1
-timer_waiting_to_end = 2
+timer_waiting_to_end = 3
