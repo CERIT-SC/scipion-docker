@@ -54,10 +54,11 @@ class Sync(ABC):
     def _run(self, t):
         raise NotImplementedError("Must override method \"_run()\"")
 
-    def _run_rsync(self, src, dest, progress = False, progress_print_head = "Unknown sync"):
+    def _run_rsync(self, src, dest, progress = True, progress_print_head = "Unknown sync"):
         # start progress printer
-        t_progress = MortalThread(target = self._print_progress, args = (self.t, progress_print_head, src, dest))
-        t_progress.start()
+        if progress:
+            t_progress = MortalThread(target = self._print_progress, args = (self.t, progress_print_head, src, dest))
+            t_progress.start()
         
         # rsync
         result = False
@@ -72,8 +73,9 @@ class Sync(ABC):
             result = False
 
         # end progress printer
-        t_progress.nice_terminate()
-        t_progress.join()
+        if progress:
+            t_progress.nice_terminate()
+            t_progress.join()
 
         return result
 
