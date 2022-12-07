@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 log="/mnt/shared/instance.log"
 
 touch "$log"
@@ -19,7 +17,9 @@ done
 
 _trap () {
     kill "$pid_controller"
-    sleep 2
+    while ps "$pid_controller" > /dev/null ; do
+        sleep 1
+    done
     kill "$pid_tail"
 }
 

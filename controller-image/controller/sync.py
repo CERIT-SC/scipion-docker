@@ -111,11 +111,7 @@ class SyncClone(Sync):
 class SyncRestore(Sync):
     def _run(self, t):
         # remove files from the last instance
-        p_status = f"{self.controller.p_od_project}/{f_instance_status}"
         p_log = f"{self.controller.p_od_project}/{f_instance_log}"
-
-        if os.path.exists(p_status):
-            os.remove(p_status)
 
         if os.path.exists(p_log):
             os.remove(p_log)
@@ -202,17 +198,22 @@ class SyncAutoSave(SyncSave):
         return True
 
 class SyncFinalSave(SyncSave):
-    # TODO copy status and log from the shared mount to the od_project
+    # TODO improve copying the log file from the shared mount to the od_project - this copy the log before the lock is removed
     def _run(self, t):
+        result = False
         for i in range(3):
             logger.info("Final saving the project...")
             ok = self._helper_save(progress = True, progress_print_head = "Final save")
             
             if ok:
                 logger.info("Final save is complete.")
-                return True
+                result = True
+                break
 
             logger.error("Final save failed.")
 
-        logger.error("Repeatedly failed to save the project. Project data will probably be corrupted.")
-        return False
+        if not result:
+            logger.error("Repeatedly failed to save the project. Project data will probably be corrupted.")
+
+        self._run_rsync(f"{d_shared}/{f_instance_log}", f"{self.controller.p_od_project}/{d_scipion}/{f_instance_log}", progress = False, progress_print_head = None)
+        return result

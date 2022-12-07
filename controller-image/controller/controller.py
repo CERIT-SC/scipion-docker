@@ -242,10 +242,10 @@ class Controller:
     def _pre_run(self):
         # TODO try-except
         # Send a "signal" to the master container that desktop environment can be started
-        if not os.path.exists(f"/mnt/shared/instance-status"):
-            Path("/mnt/shared/instance-status").touch()
+        if not os.path.exists(f_instance_status):
+            Path(f_instance_status).touch()
 
-        with open("/mnt/shared/instance-status", "w") as f:
+        with open(f_instance_status, "w") as f:
             f.write("ok")
         logger.info("Starting the desktop environment...")
 
