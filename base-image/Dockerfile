@@ -62,16 +62,6 @@ RUN apt update && apt install -y --no-install-recommends \
 	libfftw3-dev \
 	libtiff-dev
 
-# Install kubectl
-RUN apt update && apt install -y --no-install-recommends \
-        apt-transport-https \
-        ca-certificates \
-        curl
-RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-RUN echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
-RUN apt update && apt install -y --no-install-recommends \
-        kubectl
-
 # Required by Scipion for conda installation
 RUN apt install -y --no-install-recommends sudo wget gcc g++ libopenmpi-dev mesa-utils openssh-client cmake libnss3 libfontconfig1 libxrender1 libxtst6 xterm libasound2 libglu1 libxcursor1 libdbus-1-3 libxkbcommon-x11-0 libhdf5-dev
 # Another MPI requirements

@@ -66,6 +66,24 @@ RUN apt update && apt install -y --no-install-recommends \
 # Build
 #RUN cmake --build .
 
+# Install kubectl
+RUN apt update && apt install -y --no-install-recommends \
+        apt-transport-https \
+        ca-certificates \
+        curl && \
+    curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list&& \
+    apt update && apt install -y --no-install-recommends \
+        kubectl
+
+# Install Helm
+RUN apt install -y --no-install-recommends \
+        apt-transport-https && \
+    curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list && \
+    apt update && apt install -y --no-install-recommends \
+        helm
+
 # Clean apt
 RUN rm -rf /var/lib/apt/lists/*
 
@@ -212,7 +230,7 @@ USER ${S_USER}
 ###############
 
 RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_TOOL'] = protocol.getClassPlugin().getName()" && sed -i "132 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
-RUN export string="\ \ \ \ \ \ \ \ submitDict['REQUIRES_GPU'] = protocol.requiresGpu()" && sed -i "133 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
+RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_REQUIRES_GPU'] = protocol.requiresGpu()" && sed -i "133 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
 
 #ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/docker-entrypoint.sh"]

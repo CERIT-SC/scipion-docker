@@ -1,0 +1,9 @@
+apiVersion: v2
+name: scipion-tool
+version: 0.1.0
+appVersion: "3.0.10"
+description: A Helm chart to deploy Scipion's tool in Kubernetes
+icon: file://logo.png
+keywords:
+- scipion
+type: application

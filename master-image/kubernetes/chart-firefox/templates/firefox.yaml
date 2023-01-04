@@ -1,24 +1,24 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: scipion-firefox-$SUBST_NAME
+  name: scipion-firefox-{{ .Values.instance.name }}
 spec:
   ttlSecondsAfterFinished: 0
   backoffLimit: 0
   template:
     metadata:
       labels:
-        name: scipion-firefox-$SUBST_NAME
+        name: scipion-firefox-{{ .Values.instance.name }}
     spec:
       containers:
-      - name: scipion-firefox-$SUBST_NAME
+      - name: scipion-firefox-{{ .Values.instance.name }}
         image: hub.cerit.io/josef_handl/scipion-firefox:latest
         imagePullPolicy: Always
         env:
         - name: INSTANCE_NAME
-          value: "$SUBST_NAME"
+          value: {{ .Values.instance.name | quote }}
         - name: FIREFOX_ARGS
-          value: "$SUBST_FIREFOX_ARGS"
+          value: {{ .Values.firefox.args | quote }}
         volumeMounts:
         - name: scipion-vol-dataset-rw
           mountPath: "/mnt/vol-dataset"
@@ -26,8 +26,11 @@ spec:
           mountPath: "/mnt/vol-project"
         resources:
           limits:
-            memory: 2Gi
             cpu: 2
+            memory: 2Gi
+          requests:
+            cpu: 1
+            memory: 1Gi
         securityContext:
           privileged: false
           runAsUser: 1000
@@ -36,9 +39,9 @@ spec:
       volumes:
        - name: scipion-vol-dataset-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-dataset-$SUBST_NAME-$SUBST_NAMESPACE-$SUBST_OD_DATASET_SPACEID
+           claimName: pvc-scipion-vol-dataset-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.dataset }}
 
        - name: scipion-vol-project-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-project-$SUBST_NAME-$SUBST_NAMESPACE-$SUBST_OD_PROJECT_SPACEID
+           claimName: pvc-scipion-vol-project-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.project }}
 

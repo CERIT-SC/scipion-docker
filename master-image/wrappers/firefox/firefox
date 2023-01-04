@@ -1,13 +1,12 @@
 #!/bin/sh
 
-export SUBST_NAME="$INSTANCE_NAME"
-export SUBST_NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
-export SUBST_FIREFOX_ARGS="$@"
-export SUBST_OD_DATASET_SPACEID="$OD_DATASET_SPACEID"
-export SUBST_OD_PROJECT_SPACEID="$OD_PROJECT_SPACEID"
+notify-send --icon /opt/firefox/logo.png "Container with the Firefox will start in a few seconds"
 
-#JOB_FF=$(kubectl get pod | grep "scipion-firefox" | head -n 1 | awk '{print $1}')
-#if [ -z "$JOB_FF" ]; then
-	notify-send --icon /opt/firefox/logo.png "Container with the Firefox will start in a few seconds"
-	envsubst < /opt/kubernetes/firefox.yaml | kubectl apply -f -
-#else
+helm template \
+    --set instance.namespace=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace) \
+    --set instance.name="$INSTANCE_NAME" \
+    --set firefox.args="$@" \
+    --set od.sid.dataset="$OD_DATASET_SPACEID" \
+    --set od.sid.project="$OD_PROJECT_SPACEID" \
+/opt/kubernetes/chart-firefox/ | kubectl apply -f -
+

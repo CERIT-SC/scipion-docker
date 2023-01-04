@@ -3,28 +3,28 @@ kind: Job
 #apiVersion: apps/v1
 #kind: Deployment
 metadata:
-  name: scipion-tool-job-$SUBST_NAME-$TOOL_SUBST_JOB_NAME-$SUBMIT_PID
+  name: scipion-tool-job-{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
 spec:
   ttlSecondsAfterFinished: 30
   backoffLimit: 0
   template:
     metadata:
       labels:
-        name: scipion-tool-job-$SUBST_NAME-$TOOL_SUBST_JOB_NAME-$SUBMIT_PID
+        name: scipion-tool-job-{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
     spec:
       containers:
-      - name: scipion-tool-job-$SUBST_NAME-$TOOL_SUBST_JOB_NAME-$SUBMIT_PID
-        image: hub.cerit.io/josef_handl/scipion-tool:scipion-em-$TOOL_SUBST_TOOL
+      - name: scipion-tool-job-{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
+        image: hub.cerit.io/josef_handl/scipion-tool:scipion-em-{{ .Values.job.tool }}
         imagePullPolicy: Always
         env:
         - name: INSTANCE_NAME
-          value: "$SUBST_NAME"
+          value: {{ .Values.instance.name | quote }}
         - name: ROOT_PASS
           value: "abc"
         - name: USER_PASS
           value: "abc"
         - name: TOOL_COMMAND
-          value: "$TOOL_SUBST_COMMAND"
+          value: {{ .Values.job.command | quote }}
         - name: SUBMIT_PID
           value: "-1"
         - name: XMIPP_IN_QUEUE
@@ -36,10 +36,13 @@ spec:
           mountPath: "/mnt/vol-project"
         resources:
           limits:
-            memory: 10Gi
-            cpu: 5
+            cpu: {{ .Values.instance.maxcpu }}
+            memory: {{ .Values.instance.maxram }}
 #            nvidia.com/gpu: 1 # dedicated GPU
 #            cerit.io/gpu-mem: 1 # shared GPU
+          requests:
+            cpu: {{ .Values.instance.mincpu }}
+            memory: {{ .Values.instance.minram }}
         securityContext:
           privileged: false
           runAsUser: 1000
@@ -48,9 +51,9 @@ spec:
       volumes:
        - name: scipion-vol-dataset-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-dataset-$SUBST_NAME-$TOOL_SUBST_NAMESPACE-$SUBST_OD_DATASET_SPACEID
+           claimName: pvc-scipion-vol-dataset-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.dataset }}
 
        - name: scipion-vol-project-rw
          persistentVolumeClaim:
-           claimName: pvc-scipion-vol-project-$SUBST_NAME-$TOOL_SUBST_NAMESPACE-$SUBST_OD_PROJECT_SPACEID
+           claimName: pvc-scipion-vol-project-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.project }}
 
