@@ -24,9 +24,14 @@ async def event_shutdown():
 async def autosave():
     controller.send_sig_autosave()
 
-@app.get("/clone")
-async def index():
+@app.post("/clone")
+async def clone():
     controller.send_sig_clone()
+
+@app.get("/phase")
+async def phase():
+    controller.get_phase_str()
+    return "Not implemented"
 
 @app.get("/")
 async def index():
