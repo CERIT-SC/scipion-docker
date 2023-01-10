@@ -129,6 +129,7 @@ RUN mkdir ${S_USER_HOME}/scipion3/software/em/gautomatch-0.56
 RUN mkdir ${S_USER_HOME}/scipion3/software/em/motioncor2-1.4.0
 RUN mkdir ${S_USER_HOME}/scipion3/software/em/eman-2.99
 RUN mkdir ${S_USER_HOME}/scipion3/software/em/relion-4.0
+RUN mkdir ${S_USER_HOME}/scipion3/software/em/cistem-1.0.0-beta
 
 ###############
 USER root
