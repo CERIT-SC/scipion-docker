@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: scipion-tool-job-{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
-        image: hub.cerit.io/josef_handl/scipion-tool:scipion-em-{{ .Values.job.tool }}
+        image: hub.cerit.io/josef_handl/scipion-tool:{{ .Values.job.tool }}-latest
         imagePullPolicy: Always
         env:
         - name: INSTANCE_NAME
@@ -28,21 +28,23 @@ spec:
         - name: SUBMIT_PID
           value: "-1"
         - name: XMIPP_IN_QUEUE
-          value: "1" 
+          value: {{ .Values.job.xmipp_in_queue | quote }}
         volumeMounts:
         - name: scipion-vol-dataset-rw
           mountPath: "/mnt/vol-dataset"
         - name: scipion-vol-project-rw
           mountPath: "/mnt/vol-project"
         resources:
-          limits:
-            cpu: {{ .Values.instance.maxcpu }}
-            memory: {{ .Values.instance.maxram }}
-#            nvidia.com/gpu: 1 # dedicated GPU
-#            cerit.io/gpu-mem: 1 # shared GPU
-          requests:
-            cpu: {{ .Values.instance.mincpu }}
-            memory: {{ .Values.instance.minram }}
+          limits: # request is the same as limits if not specified
+            cpu: {{ .Values.instance.maxcpu | quote }}
+            memory: {{ .Values.instance.maxram | quote }}
+{{- if .Values.job.gpu.required }} {{- /* value "1"/"0" (int) is expected */}}
+  {{- if .Values.job.gpu.dedicated }} {{- /* value "true"/"false" (bool) is expected */}}
+            nvidia.com/gpu: 1 # dedicated GPU
+  {{- else }}
+            cerit.io/gpu-mem: {{ .Values.job.gpu.shared_mem | quote }} # shared GPU
+  {{- end }}
+{{- end }}
         securityContext:
           privileged: false
           runAsUser: 1000
