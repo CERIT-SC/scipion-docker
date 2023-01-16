@@ -1,17 +1,17 @@
 #!/bin/bash
 
-set -e
-
 tag=${tag:-dev}
+
+set -e
 
 img_docker_com="jhandl/scipion-tool"
 img_cerit_io="hub.cerit.io/josef_handl/scipion-tool"
 
 docker-build-push () {
-	docker build -t "${img_docker_com}:${1}-${tag}" "${@:2}" .
+	#docker build -t "${img_docker_com}:${1}-${tag}" "${@:2}" .
 	docker build -t "${img_cerit_io}:${1}-${tag}" "${@:2}" .
 
-	docker push "${img_docker_com}:${1}-${tag}"
+	#docker push "${img_docker_com}:${1}-${tag}"
 	docker push "${img_cerit_io}:${1}-${tag}"
 }
 
