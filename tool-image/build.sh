@@ -31,6 +31,10 @@ build-tool () {
 
 cd "$(dirname "$0")"
 
+if [ "$1" = "--base" ]; then
+	../base-image/build.sh
+fi
+
 build-tool
 
 wait
