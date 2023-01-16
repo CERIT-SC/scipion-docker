@@ -17,11 +17,6 @@ COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint-root.sh && \
     chmod +x /docker-entrypoint.sh
 
-# Scipion hosts.conf
-#====================
-COPY scipion/hosts.conf ${S_USER_HOME}/scipion3/config/hosts.conf
-RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/hosts.conf
-
 USER ${S_USER}
 ######################
 
