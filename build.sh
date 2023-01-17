@@ -12,9 +12,9 @@ controller-image/build.sh
 firefox-image/build.sh
 
 base-image/build.sh
-master-image/build.sh --nobase
+master-image/build.sh
 
-tool-image/build.sh --nobase
+tool-image/build.sh
 
 wait
 

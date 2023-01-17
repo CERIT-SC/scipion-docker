@@ -12,10 +12,8 @@ RUN apt update && apt install -y --no-install-recommends \
 # Clean apt
 RUN rm -rf /var/lib/apt/lists/*
 
-COPY docker-entrypoint-root.sh /
 COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint-root.sh && \
-    chmod +x /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 USER ${S_USER}
 ######################

@@ -76,6 +76,19 @@ class Controller:
     def send_sig_finalsave(self):
         self.sig_finalsave = True
 
+    def get_phase_str(self):
+        if   (self.phase == ControllerPhase.PRE_STAGE_IN):          return "pre-stage-in"
+        elif (self.phase == ControllerPhase.STAGE_IN):              return "stage-in"
+        elif (self.phase == ControllerPhase.PRE_RUN):               return "pre-run"
+        elif (self.phase == ControllerPhase.RUN):                   return "run"
+        elif (self.phase == ControllerPhase.PRE_STAGE_OUT):         return "pre-stage-out"
+        elif (self.phase == ControllerPhase.STAGE_OUT):             return "stage-out"
+        elif (self.phase == ControllerPhase.END):                   return "end"
+        elif (self.phase == ControllerPhase.CRITICAL_ERROR_UNLOCK): return "critical-error-unlock"
+        elif (self.phase == ControllerPhase.CRITICAL_ERROR):        return "critical-error"
+        elif (self.phase == ControllerPhase.EXIT):                  return "exit"
+        else: return "unknown"
+
     def _switch_phase(self, phase):
         self.phase = phase
 
