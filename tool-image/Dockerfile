@@ -38,5 +38,9 @@ RUN chmod +x /docker-entrypoint.sh
 USER ${S_USER}
 ######################
 
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
+ENV NVIDIA_VISIBLE_DEVICES=0
+ENV CUDA_VISIBLE_DEVICES=0
+
 #ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
