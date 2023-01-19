@@ -31,6 +31,6 @@ tool_log_file="${tool_log_dir}/${HOSTNAME}.txt"
 mkdir -p "${tool_log_dir}"
 
 echo "cmd ${TOOL_COMMAND}" >> "${tool_log_file}"
-echo "start_time $(date +%s)" >> "${tool_log_file}"
+echo "start_time \"$(date)\"" >> "${tool_log_file}"
 ${S_USER_HOME}/scipion3/scipion3 run $TOOL_COMMAND
-echo "stop_time $(date +%s)" >> "${tool_log_file}"
+echo "stop_time \"$(date)\"" >> "${tool_log_file}"
