@@ -38,7 +38,7 @@ spec:
           limits: # request is the same as limits if not specified
             cpu: {{ .Values.instance.maxcpu | quote }}
             memory: {{ .Values.instance.maxram | quote }}
-{{- if .Values.job.gpu.required }} {{- /* value "1"/"0" (int) is expected */}}
+{{- if or .Values.job.gpu.required .Values.job.gpu.allow }} {{- /* value "1"/"0" (int) is expected */}}
   {{- if .Values.job.gpu.dedicated }} {{- /* value "true"/"false" (bool) is expected */}}
             nvidia.com/gpu: 1 # dedicated GPU
   {{- else }}
