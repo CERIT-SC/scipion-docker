@@ -11,7 +11,12 @@ from enum import Enum
 from mortal_thread import MortalThread, MortalThreadState
 from sync import SyncStatus, Sync, SyncClone, SyncRestore, SyncSave, SyncAutoSave, SyncFinalSave
 from constants import *
+from kube_sa_auto_config import KubeSaAutoConfig
+from kubectl import Kubectl
 
+class ControllerHealth(Enum):
+    OK       = 0
+    DEGRADED = 1
 
 class ControllerPhase(Enum):
     PRE_STAGE_IN          = 0 # Checking the mounts, lock the project...
@@ -25,14 +30,18 @@ class ControllerPhase(Enum):
     CRITICAL_ERROR        = 8 # Special phase for failed PRE_STAGE_IN phase and others from the CRITICAL_ERROR_UNLOCK
     EXIT                  = 9
 
-
 class Controller:
-    def __init__(self):
+    def __init__(self, namespace, instance_name):
         # these variables are modified while checking the mountpoints
         self.p_od_dataset = d_od_dataset
         self.p_od_project = d_od_project
 
         self.phase = ControllerPhase.PRE_STAGE_IN
+
+        self.namespace = namespace
+        self.instance_name = instance_name
+
+        self.kubectl = Kubectl(KubeSaAutoConfig(), namespace, instance_name)
 
         # init final signal to end the loop of the state machine
         self.exit = False
@@ -88,6 +97,22 @@ class Controller:
         elif (self.phase == ControllerPhase.CRITICAL_ERROR):        return "critical-error"
         elif (self.phase == ControllerPhase.EXIT):                  return "exit"
         else: return "unknown"
+
+    def get_health(self):
+        if self.kubectl.filter_masters(self.instance_name):
+            return ControllerHealth.OK
+
+        return ControllerHealth.DEGRADED
+
+    def get_health_str(self):
+        if self.get_health() == ControllerHealth.OK: return "ok"
+        else: return "degraded"
+
+    def get_master(self):
+        return self.kubectl.filter_masters(self.instance_name)
+
+    def get_tools(self):
+        return self.kubectl.filter_tools(self.instance_name)
 
     def _switch_phase(self, phase):
         self.phase = phase

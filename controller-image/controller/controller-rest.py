@@ -8,8 +8,11 @@ from fastapi_utils.tasks import repeat_every
 from constants import *
 from controller import *
 
+namespace = os.environ["NAMESPACE"]
+instance_name = os.environ["INSTANCE_NAME"]
+
 app = FastAPI()
-controller = Controller()
+controller = Controller(namespace, instance_name)
 
 @app.on_event("startup")
 async def event_startup():
@@ -30,9 +33,25 @@ async def clone():
 
 @app.get("/phase")
 async def phase():
-    controller.get_phase_str()
-    return "Not implemented"
+    return {
+        "phase": controller.get_phase_str()
+    }
+
+@app.get("/health")
+async def health():
+    return {
+        "health": controller.get_health_str()
+    }
+
+@app.get("/info")
+async def info():
+    return {
+        "health": controller.get_health_str(),
+        "phase": controller.get_phase_str(),
+        "master": controller.get_master(),
+        "tools": controller.get_tools()
+    }
 
 @app.get("/")
 async def index():
-    return "index"
+    return {}
