@@ -230,8 +230,8 @@ RUN chmod +x /docker-entrypoint-root.sh && \
 USER ${S_USER}
 ###############
 
-RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_TOOL'] = protocol.getClassPlugin().getName()" && sed -i "132 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
-RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_REQUIRES_GPU'] = protocol.requiresGpu()" && sed -i "133 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
+RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_TOOL'] = protocol.getClassPlugin().getName()" && sed -i "156 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
+RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_REQUIRES_GPU'] = protocol.requiresGpu()" && sed -i "157 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
 
 #ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
