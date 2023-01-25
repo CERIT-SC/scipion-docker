@@ -43,7 +43,7 @@ class MortalThread(threading.Thread):
                 return
 
             self._set_status(MortalThreadState.COMPLETE if result else MortalThreadState.ERROR)
-    
+
     def start(self):
         self._set_status(MortalThreadState.RUNNING)
         super().start()
@@ -57,7 +57,7 @@ class MortalThread(threading.Thread):
 
         self.terminate_signal = True
         return True
-    
+
     def terminate(self, pid = None, name = None):
         if not pid and not name:
             return False

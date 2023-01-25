@@ -222,10 +222,8 @@ RUN chmod +x /opt/rsync-benchmark/*.sh
 
 # docker-entrypoint.sh
 #======================
-COPY docker-entrypoint-root.sh /
 COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint-root.sh && \
-    chmod +x /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 USER ${S_USER}
 ###############
