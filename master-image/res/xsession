@@ -9,7 +9,7 @@ file_log="/mnt/shared/instance.log"
 
 # Opens xterm with a tail the logs. Is is useful before running the desktop environment
 while true; do
-	xterm -bg black -fg gray -fa 'Monospace' -fs 11 -maximized -xrm 'XTerm.vt100.allowTitleOps: false' -T "Instance logs" -e /bin/bash -c "while true; do ls ${file_log} > /dev/null; cat ${file_log}; sleep 10; clear; done"
+	xterm -bg black -fg gray -fa 'Monospace' -fs 11 -maximized -xrm 'XTerm.vt100.allowTitleOps: false' -T "Instance logs" -e /bin/bash -c "while true; do ls ${file_log} > /dev/null 2>&1; cat ${file_log} 2> /dev/null || echo 'Waiting for the controller...'; sleep 10; clear; done"
 done &
 
 # Wait for the cloners ("clone" - clone dataset data, "restore" - restore project)
