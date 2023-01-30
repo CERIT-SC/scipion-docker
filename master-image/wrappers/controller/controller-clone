@@ -2,4 +2,4 @@
 
 notify-send --icon /opt/controller/controller-clone_logo.png "Dataset sync will start in a few seconds. Please check the instance logs."
 
-curl -X POST http://localhost:8000/clone
+curl -X POST http://scipion-controller-svc-rest-${INSTANCE_NAME}:8000/clone

@@ -12,9 +12,6 @@ RUN apt update && apt install -y --no-install-recommends \
 # Clean apt
 RUN rm -rf /var/lib/apt/lists/*
 
-COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
-
 USER ${S_USER}
 ######################
 
@@ -31,6 +28,19 @@ RUN if [ ! -z "$SD_PLUGIN" ]; then \
     fi
 
 RUN export string="\ \ \ \ \ \ \ \ print(\"debugovacivypiszacatek-\" + str(self.getInputMicrographs()) + \"-debugovacivypiskonec\")" && sed -i "570 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/xmipp3/protocols/protocol_extract_particles_pairs.py
+
+USER root
+######################
+
+COPY docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
+
+USER ${S_USER}
+######################
+
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
+ENV NVIDIA_VISIBLE_DEVICES=0
+ENV CUDA_VISIBLE_DEVICES=0
 
 #ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/docker-entrypoint.sh"]

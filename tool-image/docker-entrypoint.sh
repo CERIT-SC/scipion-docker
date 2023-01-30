@@ -25,4 +25,12 @@ export DISPLAY=scipion-master-svc-x11-${INSTANCE_NAME}:1
 #
 #sleep 999999
 
+tool_log_dir="/mnt/vol-project/scipion-docker/tool-logs"
+tool_log_file="${tool_log_dir}/${HOSTNAME}.txt"
+
+mkdir -p "${tool_log_dir}"
+
+echo "cmd ${TOOL_COMMAND}" >> "${tool_log_file}"
+echo "start_time \"$(date)\"" >> "${tool_log_file}"
 ${S_USER_HOME}/scipion3/scipion3 run $TOOL_COMMAND
+echo "stop_time \"$(date)\"" >> "${tool_log_file}"

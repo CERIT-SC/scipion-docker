@@ -81,8 +81,8 @@ ENV CUDA_HOME "/usr/local/cuda"
 ENV CUDA_BIN "/usr/local/cuda/bin"
 
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
-ENV NVIDIA_VISIBLE_DEVICES=all
-ENV CUDA_VISIBLE_DEVICES=all
+ENV NVIDIA_VISIBLE_DEVICES=0
+ENV CUDA_VISIBLE_DEVICES=0
 
 # prepare working directory
 RUN mkdir ${S_USER_HOME}/ScipionUserData && \

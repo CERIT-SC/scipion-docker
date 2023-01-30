@@ -3,7 +3,7 @@
 log="/mnt/shared/instance.log"
 
 touch "$log"
-unbuffer uvicorn controller-rest:app --reload > "$log" 2>&1 &
+unbuffer uvicorn controller-rest:app --host 0.0.0.0 --port 8000 --reload > "$log" 2>&1 &
 
 tail -f "$log" & pid_tail=$!
 
