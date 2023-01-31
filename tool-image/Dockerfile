@@ -1,4 +1,6 @@
-FROM hub.cerit.io/josef_handl/scipion-base:latest
+ARG TAG
+
+FROM hub.cerit.io/scipion/scipion-base:${TAG}
 
 USER root
 ######################

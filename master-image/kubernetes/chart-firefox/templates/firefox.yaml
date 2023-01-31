@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
       - name: scipion-firefox-{{ .Values.instance.name }}
-        image: hub.cerit.io/josef_handl/scipion-firefox:latest
+        image: hub.cerit.io/scipion/scipion-firefox:latest
         imagePullPolicy: Always
         env:
         - name: INSTANCE_NAME
