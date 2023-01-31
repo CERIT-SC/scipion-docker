@@ -1,6 +1,6 @@
-ARG TAG
+ARG RELEASE_CHANNEL
 
-FROM hub.cerit.io/scipion/scipion-base:${TAG}
+FROM hub.cerit.io/scipion/scipion-base:${RELEASE_CHANNEL}
 
 USER root
 ######################

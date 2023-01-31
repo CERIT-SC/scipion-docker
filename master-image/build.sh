@@ -11,7 +11,7 @@ if [ "$1" = "--base" ]; then
 fi
 
 #docker build -t jhandl/scipion-master:$tag .
-docker build --build-arg TAG="$tag" -t hub.cerit.io/scipion/scipion-master:$tag .
+docker build --build-arg RELEASE_CHANNEL="$tag" -t hub.cerit.io/scipion/scipion-master:$tag .
 
 #docker push jhandl/scipion-master:$tag
 docker push hub.cerit.io/scipion/scipion-master:$tag

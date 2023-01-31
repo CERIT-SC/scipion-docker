@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: scipion-tool-job-{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
-        image: hub.cerit.io/scipion/scipion-tool:{{ .Values.job.tool }}-latest
+        image: hub.cerit.io/scipion/scipion-tool:{{ .Values.job.tool }}-{{ .Values.instance.release_channel }}
         imagePullPolicy: Always
         env:
         - name: INSTANCE_NAME
