@@ -22,20 +22,20 @@ RUN apt update && apt upgrade -y
 
 RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y --no-install-recommends \
         apt-utils \
-	tzdata
+        tzdata
 
 # Install necessary packages
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
-	bash \
-	make \
-	curl \
-	wget \
-	openssh-client \
-	ca-certificates \
-	python3 \
-	bison \
-	flex \
-	git \
+        bash \
+        make \
+        curl \
+        wget \
+        openssh-client \
+        ca-certificates \
+        python3 \
+        bison \
+        flex \
+        git \
         gettext \
         strace \
         iputils-ping \
@@ -57,15 +57,38 @@ RUN cd /usr/local/cuda/samples/0_Simple/vectorAdd && make
 
 # Required by Scipion
 RUN apt update && apt install -y --no-install-recommends \
-	libxv1 \
-	openjdk-8-jdk \
-	libfftw3-dev \
-	libtiff-dev
+        libxv1 \
+        openjdk-8-jdk \
+        libfftw3-dev \
+        libtiff-dev
 
 # Required by Scipion for conda installation
-RUN apt install -y --no-install-recommends sudo wget gcc g++ libopenmpi-dev mesa-utils openssh-client cmake libnss3 libfontconfig1 libxrender1 libxtst6 xterm libasound2 libglu1 libxcursor1 libdbus-1-3 libxkbcommon-x11-0 libhdf5-dev
+RUN apt install -y --no-install-recommends \
+        sudo \
+        wget \
+        gcc \
+        g++ \
+        libopenmpi-dev \
+        mesa-utils \
+        openssh-client \
+        cmake \
+        libnss3 \
+        libfontconfig1 \
+        libxrender1 \
+        libxtst6 \
+        xterm \
+        libasound2 \
+        libglu1 \
+        libxcursor1 \
+        libdbus-1-3 \
+        libxkbcommon-x11-0 \
+        libhdf5-dev
 # Another MPI requirements
-RUN apt install -y --no-install-recommends libopenmpi-dev libopenmpi2 openmpi-bin openmpi-common
+RUN apt install -y --no-install-recommends \
+        libopenmpi-dev \
+        libopenmpi2 \
+        openmpi-bin \
+        openmpi-common
 
 # Clean apt
 RUN rm -rf /var/lib/apt/lists/*

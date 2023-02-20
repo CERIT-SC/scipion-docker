@@ -10,7 +10,7 @@ RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y --no-install-r
         tzdata
 
 RUN apt update && apt install -y --no-install-recommends \
-	firefox
+        firefox
 
 # Clean apt
 RUN rm -rf /var/lib/apt/lists/*

@@ -10,9 +10,9 @@ USER root
 
 # Required by Relion tool
 RUN apt update && apt install -y --no-install-recommends \
-      pkg-config \
-      libxft-dev \
-      libfreetype6-dev
+        pkg-config \
+        libxft-dev \
+        libfreetype6-dev
 
 # Clean apt
 RUN rm -rf /var/lib/apt/lists/*
@@ -31,8 +31,6 @@ RUN if [ ! -z "$SD_PLUGIN" ]; then \
             ${S_USER_HOME}/scipion3/scipion3 installb "$SD_BIN" -j $(nproc); \
         fi; \
     fi
-
-RUN export string="\ \ \ \ \ \ \ \ print(\"debugovacivypiszacatek-\" + str(self.getInputMicrographs()) + \"-debugovacivypiskonec\")" && sed -i "570 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/xmipp3/protocols/protocol_extract_particles_pairs.py
 
 USER root
 ######################
