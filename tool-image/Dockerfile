@@ -2,6 +2,9 @@ ARG RELEASE_CHANNEL
 
 FROM hub.cerit.io/scipion/scipion-base:${RELEASE_CHANNEL}
 
+ARG RELEASE_CHANNEL
+ENV RELEASE_CHANNEL=${RELEASE_CHANNEL}
+
 USER root
 ######################
 
