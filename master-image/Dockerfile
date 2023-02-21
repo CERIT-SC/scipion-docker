@@ -1,4 +1,9 @@
-FROM hub.cerit.io/josef_handl/scipion-base:latest
+ARG RELEASE_CHANNEL
+
+FROM hub.cerit.io/scipion/scipion-base:${RELEASE_CHANNEL}
+
+ARG RELEASE_CHANNEL
+ENV RELEASE_CHANNEL=${RELEASE_CHANNEL}
 
 ARG TURBOVNC_VERSION=3.0
 ARG VIRTUALGL_VERSION=3.0
@@ -14,42 +19,42 @@ USER root
 
 # xfce4, term, editor
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
-	dbus-x11 \
-	xfce4 \
-	xauth \
-	xterm \
-	konsole \
-	pluma \
-	thunar-archive-plugin \
-	xdotool
+        dbus-x11 \
+        xfce4 \
+        xauth \
+        xterm \
+        konsole \
+        pluma \
+        thunar-archive-plugin \
+        xdotool
 # xdotool - window manipulation
 
 # libjpeg-turbo requirements
 RUN apt update && apt install -y --no-install-recommends \
-	cmake \
-	gcc
+        cmake \
+        gcc
 
 # websockify requirements
 RUN apt update && apt install -y --no-install-recommends \
-	python3-numpy
+        python3-numpy
 
 # virtualgl requirements
 RUN apt update && apt install -y --no-install-recommends \
-    libxtst6:i386 \
-    libxv1:i386 \
-    libglu1-mesa:i386 \
-    libegl1-mesa:i386 \
-    libegl1-mesa
+        libxtst6:i386 \
+        libxv1:i386 \
+        libglu1-mesa:i386 \
+        libegl1-mesa:i386 \
+        libegl1-mesa
 
 # Install useful packages
 RUN apt update && apt install -y --no-install-recommends \
-	git \
-	vim \
-	sudo \
-	mesa-utils \
-	htop \
-	iperf \
-	screen
+        git \
+        vim \
+        sudo \
+        mesa-utils \
+        htop \
+        iperf \
+        screen
 # TODO iperf, screen - debuging
 
 # Install minimal prerequisites (Ubuntu 18.04 as reference)
@@ -90,7 +95,7 @@ RUN rm -rf /var/lib/apt/lists/*
 # Install TurboVNC, VirtualGL, noVNC
 #====================================
 
-# TurboVNC
+# TurboVNC + VirtualGl
 RUN cd /tmp && \
     curl -fsSL -O https://deac-fra.dl.sourceforge.net/project/turbovnc/${TURBOVNC_VERSION}/turbovnc_${TURBOVNC_VERSION}_amd64.deb \
         -O https://deac-fra.dl.sourceforge.net/project/libjpeg-turbo/${LIBJPEG_VERSION}/libjpeg-turbo-official_${LIBJPEG_VERSION}_amd64.deb \
@@ -228,8 +233,8 @@ RUN chmod +x /docker-entrypoint.sh
 USER ${S_USER}
 ###############
 
-RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_TOOL'] = protocol.getClassPlugin().getName()" && sed -i "156 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
-RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_REQUIRES_GPU'] = protocol.requiresGpu()" && sed -i "157 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
+RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_TOOL'] = protocol.getClassPlugin().getName()" && sed -i "160 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
+RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_REQUIRES_GPU'] = protocol.requiresGpu()" && sed -i "161 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
 
 #ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/docker-entrypoint.sh"]

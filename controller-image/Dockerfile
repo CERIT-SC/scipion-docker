@@ -4,8 +4,8 @@ ENV S_USER=scipionuser
 ENV S_USER_HOME=/home/${S_USER}
 
 RUN apt update && apt install -y --no-install-recommends \
-	bash \
-	rsync \
+        bash \
+        rsync \
         python3 \
         python3-pip \
         expect-dev
