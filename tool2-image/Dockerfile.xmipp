@@ -1,0 +1,163 @@
+# cannot compile xmipp using "runtime" image
+FROM nvidia/cudagl:10.2-devel-ubuntu18.04
+#FROM nvidia/cudagl:11.4.2-devel-ubuntu18.04
+
+ENV S_USER=scipionuser
+ENV S_USER_HOME=/home/${S_USER}
+
+# temporary workaround
+# https://developer.download.nvidia.com/compute/cuda/repos/
+RUN apt-key del 7fa2af80
+RUN rm /etc/apt/sources.list.d/cuda.list
+RUN rm /etc/apt/sources.list.d/nvidia-ml.list
+
+RUN apt update && apt upgrade -y
+
+RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y --no-install-recommends \
+	apt-utils \
+	tzdata
+
+# Install necessary packages
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+	bash \
+	make \
+	curl \
+	wget \
+	ca-certificates \
+	python3 \
+    python3-pip
+
+# gettext - envsubst
+# cuda-samples, strace, nmap - for testing and debuging purpose
+
+# temporary workaround
+# https://developer.download.nvidia.com/compute/cuda/repos/
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-keyring_1.0-1_all.deb && \
+    dpkg -i cuda-keyring_1.0-1_all.deb && \
+    rm cuda-keyring_1.0-1_all.deb
+
+RUN rm /usr/local/cuda && ln -s /usr/local/cuda-10.2 /usr/local/cuda
+
+# Another MPI requirements
+#RUN apt install -y --no-install-recommends libopenmpi-dev libopenmpi2 openmpi-bin openmpi-common
+
+# Clean apt
+RUN rm -rf /var/lib/apt/lists/*
+
+# Create scipionuser
+RUN groupadd --gid 1000 ${S_USER} && \
+	useradd --uid 1000 --create-home --home-dir ${S_USER_HOME} -s /bin/bash -g ${S_USER} ${S_USER} && \
+	usermod -aG sudo ${S_USER} && \
+	chown -R ${S_USER}:${S_USER} ${S_USER_HOME}
+
+ENV CUDA_HOME "/usr/local/cuda"
+#ENV PATH "${CUDA_HOME}/bin:$PATH"
+ENV CUDA_BIN "/usr/local/cuda/bin"
+
+ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV CUDA_VISIBLE_DEVICES=all
+
+# prepare working directory
+RUN mkdir ${S_USER_HOME}/ScipionUserData && \
+    chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/ScipionUserData && \
+    chown -R ${S_USER}:${S_USER} /mnt
+
+RUN mkdir /scipion-tool && \
+	chown ${S_USER}:${S_USER} /scipion-tool
+
+RUN ln -s /usr/bin/python3.6 /usr/bin/python
+
+# Required by the xmipp
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+	gcc-8 \
+	g++-8 && \
+	#update-alternatives --remove-all gcc && \
+	#update-alternatives --remove-all g++ && \
+	update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 50 && \
+	update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 50
+
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+	scons \
+	libfftw3-dev \
+	libopenmpi-dev \
+	libhdf5-dev \
+	python3-numpy \
+	python3-dev \
+	libtiff5-dev \
+	libsqlite3-dev \
+	default-jdk \
+	git \
+	cmake
+
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+	libopencv-dev
+
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+	unzip \
+	strace
+
+# Another MPI requirements
+RUN apt install -y --no-install-recommends \
+        libopenmpi-dev \
+        libopenmpi2 \
+        openmpi-bin \
+        openmpi-common \
+		openssh-client
+
+# ssh je potreba xmippem
+
+COPY xmipp.conf ${S_USER_HOME}/
+
+USER ${S_USER}
+
+RUN pip3 install scons numpy
+
+USER ${S_USER}
+WORKDIR ${S_USER_HOME}
+
+#ARG XMIPP_VERSION=v3.22.11-Iris
+#RUN wget https://github.com/I2PC/xmipp/archive/refs/tags/${XMIPP_VERSION}.zip && \
+#	unzip ${XMIPP_VERSION}.zip && \
+#	cd xmipp* && \
+#	./xmipp config noAsk && \
+#	./xmipp
+
+RUN git clone https://github.com/I2PC/xmipp.git && \
+	cd xmipp && \
+	./xmipp config noAsk && \
+	./xmipp
+
+ENV PATH=${S_USER_HOME}/xmipp/build/bin:${PATH}
+ENV LD_LIBRARY_PATH=${S_USER_HOME}/xmipp/build/lib:${LD_LIBRARY_PATH}
+
+#RUN cp ${S_USER_HOME}/xmipp.conf xmipp*/
+
+#RUN cd xmipp* && cat xmipp.conf && ./xmipp noAsk
+
+RUN ls ./
+
+USER root
+
+COPY docker-entrypoint-base.sh /
+RUN chmod +x /docker-entrypoint-base.sh
+COPY docker-entrypoint-new.sh /
+RUN chmod +x /docker-entrypoint-new.sh
+
+USER ${S_USER}
+#######################
+
+RUN ["/bin/bash", "-c", "echo $CUDA_HOME"]
+RUN ["/bin/bash", "-c", "echo $PATH"]
+
+RUN mkdir -p ${S_USER_HOME}/scipion3/data && \
+    ln -s ${S_USER_HOME}/ScipionUserData/projects ${S_USER_HOME}/scipion3/data
+
+#WORKDIR /scipion-tool
+#RUN wget https://cryoem.bcm.edu/cryoem/static/software/release-2.91/eman2.91_sphire1.4_sparx.linux64.sh
+#RUN bash eman2.91_sphire1.4_sparx.linux64.sh
+
+USER ${S_USER}
+#######################
+
+ENTRYPOINT ["/docker-entrypoint-new.sh"]
