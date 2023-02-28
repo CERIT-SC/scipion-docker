@@ -214,17 +214,6 @@ RUN chmod +x ${S_USER_HOME}/Desktop/controller-clone.desktop
 
 RUN chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop
 
-
-#COPY scipion-test-list.txt ${S_USER_HOME}/Desktop/
-#COPY scipion-test.sh ${S_USER_HOME}/Desktop/
-#RUN chmod +x ${S_USER_HOME}/Desktop/scipion-test.sh
-#RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop/scipion-test-list.txt
-#RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop/scipion-test.sh
-
-COPY res/rsync-benchmark /opt/rsync-benchmark
-RUN chown -R ${S_USER}:${S_USER} /opt/rsync-benchmark
-RUN chmod +x /opt/rsync-benchmark/*.sh
-
 # docker-entrypoint.sh
 #======================
 COPY docker-entrypoint.sh /
