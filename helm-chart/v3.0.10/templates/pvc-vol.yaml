@@ -4,9 +4,23 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-scipion-vol-dataset-{{ .Release.Name }}-{{ .Release.Namespace }}
-  #annotations:
-    #"helm.sh/resource-policy": keep
+  name: pvc-scipion-shared-{{ .Release.Name }}-{{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: nfs-csi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-scipion-vol-dataset-{{ .Release.Name }}-{{ .Release.Namespace }}-{{ .Values.od.dataset.spaceId }}
+{{ if .Values.instance.keepVolumes }}
+  annotations:
+    "helm.sh/resource-policy": keep
+{{ end }}
 spec:
   accessModes:
     - ReadWriteMany
@@ -18,9 +32,11 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pvc-scipion-vol-project-{{ .Release.Name }}-{{ .Release.Namespace }}
-  #annotations:
-    #"helm.sh/resource-policy": keep
+  name: pvc-scipion-vol-project-{{ .Release.Name }}-{{ .Release.Namespace }}-{{ .Values.od.project.spaceId }}
+{{ if .Values.instance.keepVolumes }}
+  annotations:
+    "helm.sh/resource-policy": keep
+{{ end }}
 spec:
   accessModes:
     - ReadWriteMany
