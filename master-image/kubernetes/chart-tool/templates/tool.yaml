@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: scipion-tool-job-{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
-        image: hub.cerit.io/scipion/scipion-tool:{{ .Values.job.tool }}-{{ .Values.instance.release_channel }}
+        image: hub.cerit.io/scipion/scipion-tool2:xmipp3-dev
         imagePullPolicy: Always
         env:
         - name: INSTANCE_NAME
@@ -29,9 +29,13 @@ spec:
           value: "-1"
         - name: XMIPP_IN_QUEUE
           value: {{ .Values.job.xmipp_in_queue | quote }}
+        - name: JOB_NAME
+          value: "{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}"
         - name: JOB_WORKDIR
           value: {{ .Values.job.workdir | quote }}
         volumeMounts:
+        - name: shared
+          mountPath: "/mnt/shared"
         - name: scipion-vol-dataset-rw
           mountPath: "/mnt/vol-dataset"
         - name: scipion-vol-project-rw
@@ -45,11 +49,15 @@ spec:
           runAsGroup: 1000
       restartPolicy: Never
       volumes:
-       - name: scipion-vol-dataset-rw
-         persistentVolumeClaim:
-           claimName: pvc-scipion-vol-dataset-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.dataset }}
 
-       - name: scipion-vol-project-rw
-         persistentVolumeClaim:
-           claimName: pvc-scipion-vol-project-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.project }}
+      - name: shared
+        persistentVolumeClaim:
+           claimName: pvc-scipion-shared-{{ .Values.instance.name }}-{{ .Release.Namespace }}
 
+      - name: scipion-vol-dataset-rw
+        persistentVolumeClaim:
+          claimName: pvc-scipion-vol-dataset-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.dataset }}
+
+      - name: scipion-vol-project-rw
+        persistentVolumeClaim:
+          claimName: pvc-scipion-vol-project-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.project }}
