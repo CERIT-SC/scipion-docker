@@ -138,7 +138,7 @@ USER ${S_USER}
 #######################
 
 RUN ln -s ${S_USER_HOME}/ScipionUserData/projects ${S_USER_HOME}/scipion3/data
-RUN /home/scipionuser/scipion3/scipion3 installp -p scipion-em-xmipp -j $(nproc)
+#RUN /home/scipionuser/scipion3/scipion3 installp -p scipion-em-xmipp -j $(nproc)
 
 ENV PATH "${PATH}:/home/scipionuser/scipion3"
 
