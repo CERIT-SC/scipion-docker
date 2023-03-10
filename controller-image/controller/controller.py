@@ -23,7 +23,7 @@ class ControllerPhase(Enum):
     STAGE_IN              = 1 # Clone and restore
     PRE_RUN               = 2 # Info print about starting the desktop environment... (master checks this REST API's phase to start the desktop env.)
     RUN                   = 3 # Auto save
-    PRE_STAGE_OUT         = 4 # Terminate running auto save, some info prints...
+    PRE_STAGE_OUT         = 4 # Delete other containers, terminate running auto save, some info prints...
     STAGE_OUT             = 5 # Final save
     END                   = 6 # Final save complete, unlock the project...
     CRITICAL_ERROR_UNLOCK = 7 # Special phase for failed STAGE_IN, PRE_RUN, PRE_STAGE_OUT, STAGE_OUT. This phase just unlocks the project. Next phase is CRITICAL_ERROR
@@ -99,7 +99,7 @@ class Controller:
         else: return "unknown"
 
     def get_health(self):
-        if self.kubectl.filter_masters(self.instance_name):
+        if self.kubectl.filter_masters():
             return ControllerHealth.OK
 
         return ControllerHealth.DEGRADED
@@ -109,10 +109,10 @@ class Controller:
         else: return "degraded"
 
     def get_master(self):
-        return self.kubectl.filter_masters(self.instance_name)
+        return self.kubectl.filter_masters()
 
     def get_tools(self):
-        return self.kubectl.filter_tools(self.instance_name)
+        return self.kubectl.filter_tools()
 
     def _switch_phase(self, phase):
         self.phase = phase
@@ -286,6 +286,9 @@ class Controller:
         logger.info("A stop signal has been received.")
         logger.info("The Scipion application will be terminated and the project saved to the Onedata.")
 
+        # If the deleting of the pods hang, it is necessary to keep the data saved.
+        # For this reason, the autosync is terminated only after the deletion.
+        self._delete_pods()
         self._terminate_syncs()
         return True
 
@@ -313,9 +316,26 @@ class Controller:
 
             if first_it:
                 first_it = False
-                logger.info("Terminating other still running threads...")
+                logger.info("Terminating other still running controller threads...")
 
-            logger.info("Waiting for other threads to terminate...")
+            logger.info("Waiting for other controller threads to be terminated...")
+            time.sleep(timer_waiting_to_end)
+
+    def _delete_pods(self):
+        self.kubectl.kill_master()
+        self.kubectl.kill_tools()
+        self.kubectl.kill_specials()
+
+        first_it = True
+        while self.kubectl.filter_masters() or \
+                self.kubectl.filter_tools() or \
+                self.kubectl.filter_specials():
+
+            if first_it:
+                first_it = False
+                logger.info("Deleting other still running containers...")
+
+            logger.info("Waiting for other containers to be deleted...")
             time.sleep(timer_waiting_to_end)
 
     def _check_mountpoint(self, mountpoint):
