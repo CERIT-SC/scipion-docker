@@ -17,4 +17,3 @@ master-image/build.sh
 tool-image/build.sh
 
 wait
-
