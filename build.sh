@@ -13,6 +13,7 @@ firefox-image/build.sh
 
 base-image/build.sh
 master-image/build.sh
+vnc-image/build.sh
 
 tool-image/build.sh
 
