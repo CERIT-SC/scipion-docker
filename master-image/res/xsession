@@ -9,18 +9,18 @@ file_log="/mnt/shared/instance.log"
 
 # Wait for the xorg (vnc container) (existency of xauthority means that xserver in the vnc container is running)
 while [ ! -f /mnt/shared/.Xauthority ]; do
-	sleep 2
+    sleep 2
 done
 cp /mnt/shared/.Xauthority ${S_USER_HOME}/
 
 # Opens xterm with a tail the logs. Is is useful before running the desktop environment to prevent user from doing any actions, but show him the instance log
 while true; do
-	xterm -bg black -fg gray -fa 'Monospace' -fs 11 -maximized -xrm 'XTerm.vt100.allowTitleOps: false' -T "Instance logs" -e /bin/bash -c "while true; do ls ${file_log} > /dev/null 2>&1; cat ${file_log} 2> /dev/null || echo 'Waiting for the controller...'; sleep 10; clear; done"
+    xterm -bg black -fg gray -fa 'Monospace' -fs 11 -maximized -xrm 'XTerm.vt100.allowTitleOps: false' -T "Instance logs" -e /bin/bash -c "while true; do ls ${file_log} > /dev/null 2>&1; cat ${file_log} 2> /dev/null || echo 'Waiting for the controller...'; sleep 10; clear; done"
 done &
 
-# Wait for the cloners ("clone" - clone dataset data, "restore" - restore project)
-while [ ! -f "${file_status}" ] || ! grep -q "ok" "${file_status}"; do
-	sleep 10
+# Wait for the "run" phase of the controller - cloners ("clone" - clone dataset data, "restore" - restore project)
+while [ ! $(curl scipion-controller-svc-rest-scipion:8000/phase) = '{"phase":"run"}' ]; do
+    sleep 5
 done
 
 # Disable screensaver
