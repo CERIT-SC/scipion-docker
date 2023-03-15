@@ -7,13 +7,13 @@ export DISPLAY=scipion-vnc-svc-x11-${INSTANCE_NAME}:1
 file_status="/mnt/shared/instance-status"
 file_log="/mnt/shared/instance.log"
 
-# Wait for the xorg (vnc container)
+# Wait for the xorg (vnc container) (existency of xauthority means that xserver in the vnc container is running)
 while [ ! -f /mnt/shared/.Xauthority ]; do
 	sleep 2
 done
 cp /mnt/shared/.Xauthority ${S_USER_HOME}/
 
-# Opens xterm with a tail the logs. Is is useful before running the desktop environment
+# Opens xterm with a tail the logs. Is is useful before running the desktop environment to prevent user from doing any actions, but show him the instance log
 while true; do
 	xterm -bg black -fg gray -fa 'Monospace' -fs 11 -maximized -xrm 'XTerm.vt100.allowTitleOps: false' -T "Instance logs" -e /bin/bash -c "while true; do ls ${file_log} > /dev/null 2>&1; cat ${file_log} 2> /dev/null || echo 'Waiting for the controller...'; sleep 10; clear; done"
 done &
@@ -31,5 +31,5 @@ cd ${S_USER_HOME}
 xfce4-session &
 
 # minimize the xterm
-sleep 1
+sleep 3
 xdotool getactivewindow windowminimize || true
