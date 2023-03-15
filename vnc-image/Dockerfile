@@ -118,10 +118,6 @@ RUN chmod go-rw /etc/turbovncserver.conf /etc/turbovncserver-security.conf
 RUN mkdir /tmp/.X11-unix || true
 RUN chmod -R ugo+rwx /tmp/.X11-unix
 
-# Set screensaver to black screen
-COPY .xscreensaver ${S_USER_HOME}/
-RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/.xscreensaver
-
 # Copy xsession file
 COPY xsession /tmp/
 RUN chmod +x /tmp/xsession
