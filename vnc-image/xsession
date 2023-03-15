@@ -2,7 +2,7 @@
 
 set -ex
 
-DISPLAY=:1 xhost +
+export DISPLAY=:1
 
 pid_vncserver=""
 while [ -z "$pid_vncserver" ]; do
