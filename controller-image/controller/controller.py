@@ -21,7 +21,7 @@ class ControllerHealth(Enum):
 class ControllerPhase(Enum):
     PRE_STAGE_IN          = 0 # Checking the mounts, lock the project...
     STAGE_IN              = 1 # Clone and restore
-    PRE_RUN               = 2 # Send signal to start desktop environment...
+    PRE_RUN               = 2 # Info print about starting the desktop environment... (master checks this REST API's phase to start the desktop env.)
     RUN                   = 3 # Auto save
     PRE_STAGE_OUT         = 4 # Terminate running auto save, some info prints...
     STAGE_OUT             = 5 # Final save
@@ -278,13 +278,6 @@ class Controller:
         return True
 
     def _pre_run(self):
-        # TODO try-except
-        # Send a "signal" to the master container that desktop environment can be started
-        if not os.path.exists(f_instance_status):
-            Path(f_instance_status).touch()
-
-        with open(f_instance_status, "w") as f:
-            f.write("ok")
         logger.info("Starting the desktop environment...")
 
         return True
