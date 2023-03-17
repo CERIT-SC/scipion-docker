@@ -33,7 +33,7 @@ class Kubectl:
         return list(filter(lambda master: master.startswith(self._get_x_name("master")), self._list_deployments()))
 
     def filter_tools(self):
-        return list(filter(lambda tool: tool.startswith(self._get_x_name("tool-job")), self._list_jobs()))
+        return list(filter(lambda tool: tool.startswith(self._get_x_name("tool")), self._list_jobs()))
 
     def filter_specials(self):
         return list(filter(lambda tool: tool.startswith(self._get_x_name("firefox")), self._list_jobs()))
