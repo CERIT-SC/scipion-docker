@@ -29,40 +29,57 @@ class Kubectl:
         items = self.api_batch.list_namespaced_job(self.namespace).items
         return list(map(lambda job: job.metadata.name, items))
 
-    def filter_masters(self):
-        return list(filter(lambda master: master.startswith(self._get_x_name("master")), self._list_deployments()))
+    def filter_main(self, include_controller = True):
+        result = list()
+        for d in self._list_deployments():
+            if include_controller and \
+                    d.startswith(self._get_x_name("controller")):
+                result.append(d)
+
+            if d.startswith(self._get_x_name("vnc")) or \
+                    d.startswith(self._get_x_name("master")):
+                result.append(d)
+        return result
 
     def filter_tools(self):
-        return list(filter(lambda tool: tool.startswith(self._get_x_name("tool")), self._list_jobs()))
+        result = list()
+        for j in self._list_jobs():
+            if j.startswith(self._get_x_name("tool")):
+                result.append(j)
+        return result
 
     def filter_specials(self):
-        return list(filter(lambda tool: tool.startswith(self._get_x_name("firefox")), self._list_jobs()))
+        result = list()
+        for j in self._list_jobs():
+            if j.startswith(self._get_x_name("firefox")):
+                result.append(j)
+        return result
 
-    def kill_master(self):
-        masters = self.filter_masters()
-        if not masters or len(masters) != 1:
+    def delete_main(self):
+        deployments = self.filter_main(include_controller=False)
+        if not deployments:
             return False
 
-        self.api_apps.delete_namespaced_deployment(masters[0], self.namespace)
+        for d in deployments:
+            self.api_apps.delete_namespaced_deployment(d, self.namespace)
         return True
 
-    def kill_tools(self):
-        tools = self.filter_tools()
-        if not tools:
+    def delete_tools(self):
+        jobs = self.filter_tools()
+        if not jobs:
             return False
 
-        for t in tools:
-            self.api_batch.delete_namespaced_job(t, self.namespace)
+        for j in jobs:
+            self.api_batch.delete_namespaced_job(j, self.namespace)
 
         return True
 
-    def kill_specials(self):
-        specials = self.filter_specials()
-        if not specials:
+    def delete_specials(self):
+        jobs = self.filter_specials()
+        if not jobs:
             return False
 
-        for s in specials:
-            # specials contains only jobs in this version
-            self.api_batch.delete_namespaced_job(s, self.namespace)
+        for j in jobs:
+            self.api_batch.delete_namespaced_job(j, self.namespace)
 
         return True

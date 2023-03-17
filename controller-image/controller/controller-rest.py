@@ -34,22 +34,23 @@ async def clone():
 @app.get("/phase")
 async def phase():
     return {
-        "phase": controller.get_phase_str()
+        "phase": controller.get_phase().name.lower()
     }
 
 @app.get("/health")
 async def health():
     return {
-        "health": controller.get_health_str()
+        "health": controller.get_health().name.lower()
     }
 
 @app.get("/info")
 async def info():
     return {
-        "health": controller.get_health_str(),
-        "phase": controller.get_phase_str(),
-        "master": controller.get_master(),
-        "tools": controller.get_tools()
+        "health":   controller.get_health().name.lower(),
+        "phase":    controller.get_phase().name.lower(),
+        "main":     controller.kubectl.filter_main(),
+        "tools":    controller.kubectl.filter_tools(),
+        "specials": controller.kubectl.filter_specials()
     }
 
 @app.get("/")
