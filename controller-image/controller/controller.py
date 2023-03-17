@@ -23,7 +23,7 @@ class ControllerPhase(Enum):
     STAGE_IN              = 1 # Clone and restore
     PRE_RUN               = 2 # Info print about starting the desktop environment... (master checks this REST API's phase to start the desktop env.)
     RUN                   = 3 # Auto save
-    PRE_STAGE_OUT         = 4 # Delete other containers, terminate running auto save, some info prints...
+    PRE_STAGE_OUT         = 4 # Delete other containers (Deployments and Jobs), terminate running auto save, some info prints...
     STAGE_OUT             = 5 # Final save
     END                   = 6 # Final save complete, unlock the project...
     CRITICAL_ERROR_UNLOCK = 7 # Special phase for failed STAGE_IN, PRE_RUN, PRE_STAGE_OUT, STAGE_OUT. This phase just unlocks the project. Next phase is CRITICAL_ERROR
@@ -85,34 +85,28 @@ class Controller:
     def send_sig_finalsave(self):
         self.sig_finalsave = True
 
-    def get_phase_str(self):
-        if   (self.phase == ControllerPhase.PRE_STAGE_IN):          return "pre-stage-in"
-        elif (self.phase == ControllerPhase.STAGE_IN):              return "stage-in"
-        elif (self.phase == ControllerPhase.PRE_RUN):               return "pre-run"
-        elif (self.phase == ControllerPhase.RUN):                   return "run"
-        elif (self.phase == ControllerPhase.PRE_STAGE_OUT):         return "pre-stage-out"
-        elif (self.phase == ControllerPhase.STAGE_OUT):             return "stage-out"
-        elif (self.phase == ControllerPhase.END):                   return "end"
-        elif (self.phase == ControllerPhase.CRITICAL_ERROR_UNLOCK): return "critical-error-unlock"
-        elif (self.phase == ControllerPhase.CRITICAL_ERROR):        return "critical-error"
-        elif (self.phase == ControllerPhase.EXIT):                  return "exit"
-        else: return "unknown"
+    def get_phase(self):
+        return self.phase
 
     def get_health(self):
-        if self.kubectl.filter_masters():
-            return ControllerHealth.OK
+        components_alive = self.kubectl.filter_main()
+        components_required = [
+            "controller",
+            "master",
+            "vnc"
+        ]
 
-        return ControllerHealth.DEGRADED
+        for cr in components_required:
+            cr_ok = False
+            for ca in components_alive:
+                if cr == ca:
+                    cr_ok = True
+                    break
 
-    def get_health_str(self):
-        if self.get_health() == ControllerHealth.OK: return "ok"
-        else: return "degraded"
+            if not cr_ok:
+                return ControllerHealth.DEGRADED
 
-    def get_master(self):
-        return self.kubectl.filter_masters()
-
-    def get_tools(self):
-        return self.kubectl.filter_tools()
+        return ControllerHealth.OK
 
     def _switch_phase(self, phase):
         self.phase = phase
@@ -297,11 +291,12 @@ class Controller:
         return True
 
     def _critical_error_unlock(self):
-        logger.error("TODO some prints in _critical_error_unlock")
+        #logger.error("TODO some prints in _critical_error_unlock")
         self._lock_remove()
 
     def _critical_error(self):
-        logger.error("TODO some prints in _critical_error")
+        #logger.error("TODO some prints in _critical_error")
+        pass
 
     def _terminate_syncs(self):
         # terminate still running Clone, Restore, Autosave
@@ -322,12 +317,12 @@ class Controller:
             time.sleep(timer_waiting_to_end)
 
     def _delete_pods(self):
-        self.kubectl.kill_master()
-        self.kubectl.kill_tools()
-        self.kubectl.kill_specials()
+        self.kubectl.delete_main()
+        self.kubectl.delete_tools()
+        self.kubectl.delete_specials()
 
         first_it = True
-        while self.kubectl.filter_masters() or \
+        while self.kubectl.filter_main(include_controller=False) or \
                 self.kubectl.filter_tools() or \
                 self.kubectl.filter_specials():
 
