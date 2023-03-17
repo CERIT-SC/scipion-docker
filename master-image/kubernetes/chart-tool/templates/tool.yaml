@@ -52,7 +52,7 @@ spec:
 
       - name: shared
         persistentVolumeClaim:
-           claimName: pvc-scipion-shared-{{ .Values.instance.name }}-{{ .Release.Namespace }}
+           claimName: pvc-scipion-shared-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}
 
       - name: scipion-vol-dataset-rw
         persistentVolumeClaim:

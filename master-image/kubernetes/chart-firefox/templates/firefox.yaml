@@ -20,6 +20,8 @@ spec:
         - name: FIREFOX_ARGS
           value: {{ .Values.firefox.args | quote }}
         volumeMounts:
+        - name: shared
+          mountPath: "/mnt/shared"
         - name: scipion-vol-dataset-rw
           mountPath: "/mnt/vol-dataset"
         - name: scipion-vol-project-rw
@@ -37,11 +39,15 @@ spec:
           runAsGroup: 1000
       restartPolicy: Never
       volumes:
-       - name: scipion-vol-dataset-rw
-         persistentVolumeClaim:
-           claimName: pvc-scipion-vol-dataset-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.dataset }}
 
-       - name: scipion-vol-project-rw
-         persistentVolumeClaim:
-           claimName: pvc-scipion-vol-project-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.project }}
+      - name: shared
+        persistentVolumeClaim:
+          claimName: pvc-scipion-shared-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}
 
+      - name: scipion-vol-dataset-rw
+        persistentVolumeClaim:
+          claimName: pvc-scipion-vol-dataset-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.dataset }}
+
+      - name: scipion-vol-project-rw
+        persistentVolumeClaim:
+          claimName: pvc-scipion-vol-project-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.project }}
