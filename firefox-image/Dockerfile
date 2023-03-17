@@ -10,6 +10,7 @@ RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y --no-install-r
         tzdata
 
 RUN apt update && apt install -y --no-install-recommends \
+        xauth \
         firefox
 
 # Clean apt
