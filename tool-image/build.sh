@@ -13,19 +13,6 @@ docker-build-push () {
 }
 
 build-tool () {
-<<<<<<< HEAD
-    docker-build-push "appion"     --build-arg SD_PLUGIN="scipion-em-appion"                                 #&
-    docker-build-push "cistem"     --build-arg SD_PLUGIN="scipion-em-cistem"                                 #&
-    docker-build-push "eman2"      --build-arg SD_PLUGIN="scipion-em-eman2"                                  #&
-    docker-build-push "gautomatch" --build-arg SD_PLUGIN="scipion-em-gautomatch"                             #&
-    docker-build-push "gctf"       --build-arg SD_PLUGIN="scipion-em-gctf" --build-arg SD_BIN="gctf-1.18"    #&
-    docker-build-push "motioncorr" --build-arg SD_PLUGIN="scipion-em-motioncorr"                             #&
-    docker-build-push "phenix"     --build-arg SD_PLUGIN="scipion-em-phenix"                                 #&
-    docker-build-push "pwem"                                                                                 #&
-    docker-build-push "relion"     --build-arg SD_PLUGIN="scipion-em-relion" --build-arg SD_BIN="relion-4.0" #&
-    docker-build-push "spider"     --build-arg SD_PLUGIN="scipion-em-spider"                                 #&
-    docker-build-push "xmipp3"                                                                               #&
-=======
 	docker-build-push "appion"     --build-arg SD_PLUGIN="scipion-em-appion"                                 #&
 	docker-build-push "cistem"     --build-arg SD_PLUGIN="scipion-em-cistem"                                 #&
 	docker-build-push "eman2"      --build-arg SD_PLUGIN="scipion-em-eman2"                                  #&
@@ -37,7 +24,6 @@ build-tool () {
 	docker-build-push "relion"     --build-arg SD_PLUGIN="scipion-em-relion" --build-arg SD_BIN="relion-4.0" #&
 	docker-build-push "spider"     --build-arg SD_PLUGIN="scipion-em-spider"                                 #&
 	docker-build-push "xmipp3"     --build-arg SD_PLUGIN="scipion-em-xmipp"                                  #&
->>>>>>> save
 }
 
 cd "$(dirname "$0")"
