@@ -70,7 +70,7 @@ class Kubectl:
             return False
 
         for j in jobs:
-            self.api_batch.delete_namespaced_job(j, self.namespace)
+            self.api_batch.delete_namespaced_job(j, self.namespace, propagation_policy = "Background")
 
         return True
 
@@ -80,6 +80,6 @@ class Kubectl:
             return False
 
         for j in jobs:
-            self.api_batch.delete_namespaced_job(j, self.namespace)
+            self.api_batch.delete_namespaced_job(j, self.namespace, propagation_policy = "Background")
 
         return True
