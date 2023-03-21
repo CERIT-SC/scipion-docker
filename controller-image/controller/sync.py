@@ -59,7 +59,7 @@ class Sync(ABC):
         if progress:
             t_progress = MortalThread(target = self._print_progress, args = (self.t, progress_print_head, src, dest))
             t_progress.start()
-        
+
         # rsync
         result = False
         try:
@@ -92,7 +92,7 @@ class Sync(ABC):
             while not t.is_terminate_signal() and i < 100:
                 time.sleep(timer_print_progress / 100)
                 i += 1
-    
+
         return True
 
 class SyncClone(Sync):
@@ -148,7 +148,7 @@ class SyncRestore(Sync):
                     else:
                         pass
                         #logger.debug("Symbolic link already exists and refers to the right target.")
-            
+
             f_symlink.close()
 
         logger.info("Restore is complete.")
@@ -160,14 +160,14 @@ class SyncSave(Sync):
         p_sym = f"{d_vol_project}/{f_symlink_dump}"
         if os.path.exists(p_sym):
             os.remove(p_sym)
-    
+
         Path(p_sym).touch()
         p_symlink = open(p_sym, 'a')
-    
+
         # Create symlinks dump
         for line in symlink_search(d_vol_project):
             p_symlink.write(f"{line}\n")
-    
+
         p_symlink.close()
 
         p_vol_project_lock = f"{d_vol_project}/{f_project_lock}"
@@ -175,7 +175,7 @@ class SyncSave(Sync):
             logger.warning("The project lock was recreated because it was missing. Please do not remove the lock.")
             Path(p_vol_project_lock).touch()
 
-    	# rsync vol-project > od-project
+        # rsync vol-project > od-project
         return super()._run_rsync(d_vol_project, self.controller.p_od_project, progress, progress_print_head)
 
 class SyncAutoSave(SyncSave):
@@ -204,7 +204,7 @@ class SyncFinalSave(SyncSave):
         for i in range(3):
             logger.info("Final saving the project...")
             ok = self._helper_save(progress = True, progress_print_head = "Final save")
-            
+
             if ok:
                 logger.info("Final save is complete.")
                 result = True
