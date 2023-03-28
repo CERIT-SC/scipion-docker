@@ -1,8 +1,3 @@
-# noVNC + TurboVNC + VirtualGL
-# http://novnc.com
-# https://turbovnc.org
-# https://virtualgl.org
-
 #FROM nvidia/cudagl:10.1-runtime-ubuntu18.04
 
 # cannot compile xmipp using "runtime" image
@@ -12,20 +7,18 @@ FROM nvidia/cudagl:10.2-devel-ubuntu18.04
 ENV S_USER=scipionuser
 ENV S_USER_HOME=/home/${S_USER}
 
+ENV DEBIAN_FRONTEND noninteractive
+
 # temporary workaround
 # https://developer.download.nvidia.com/compute/cuda/repos/
 RUN apt-key del 7fa2af80
-RUN rm /etc/apt/sources.list.d/cuda.list
-RUN rm /etc/apt/sources.list.d/nvidia-ml.list
-
-RUN apt update && apt upgrade -y
-
-RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y --no-install-recommends \
-        apt-utils \
-        tzdata
+RUN rm /etc/apt/sources.list.d/cuda.list || true
+RUN rm /etc/apt/sources.list.d/nvidia-ml.list || true
 
 # Install necessary packages
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+RUN apt update && apt install -y --no-install-recommends \
+        apt-utils \
+        tzdata \
         bash \
         make \
         curl \
@@ -39,31 +32,37 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-rec
         gettext \
         strace \
         iputils-ping \
-        nmap
+        nmap && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # gettext - envsubst
 # cuda-samples, strace, nmap - for testing and debuging purpose
 
 # temporary workaround
 # https://developer.download.nvidia.com/compute/cuda/repos/
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-keyring_1.0-1_all.deb
-RUN dpkg -i cuda-keyring_1.0-1_all.deb
-
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
-        cuda-samples-10-2
-
-RUN rm /usr/local/cuda && ln -s /usr/local/cuda-10.2 /usr/local/cuda
-RUN cd /usr/local/cuda/samples/0_Simple/vectorAdd && make
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-keyring_1.0-1_all.deb && \
+    dpkg -i cuda-keyring_1.0-1_all.deb && \
+    apt update && apt install -y --no-install-recommends \
+        cuda-samples-10-2 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm /usr/local/cuda && \
+    ln -s /usr/local/cuda-10.2 /usr/local/cuda && \
+    cd /usr/local/cuda/samples/0_Simple/vectorAdd && \
+    make
 
 # Required by Scipion
 RUN apt update && apt install -y --no-install-recommends \
         libxv1 \
         openjdk-8-jdk \
         libfftw3-dev \
-        libtiff-dev
+        libtiff-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Required by Scipion for conda installation
-RUN apt install -y --no-install-recommends \
+RUN apt update && apt install -y --no-install-recommends \
         sudo \
         wget \
         gcc \
@@ -82,16 +81,18 @@ RUN apt install -y --no-install-recommends \
         libxcursor1 \
         libdbus-1-3 \
         libxkbcommon-x11-0 \
-        libhdf5-dev
+        libhdf5-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Another MPI requirements
-RUN apt install -y --no-install-recommends \
+RUN apt update && apt install -y --no-install-recommends \
         libopenmpi-dev \
         libopenmpi2 \
         openmpi-bin \
-        openmpi-common
-
-# Clean apt
-RUN rm -rf /var/lib/apt/lists/*
+        openmpi-common && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create scipionuser
 RUN groupadd --gid 1000 ${S_USER} && \

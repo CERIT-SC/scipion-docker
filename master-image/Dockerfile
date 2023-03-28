@@ -12,7 +12,7 @@ USER root
 #============================
 
 # xfce4, term, editor
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
+RUN apt update && apt install -y \
         dbus-x11 \
         xfce4 \
         xauth \
@@ -20,7 +20,9 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
         konsole \
         pluma \
         thunar-archive-plugin \
-        xdotool
+        xdotool && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 # xdotool - window manipulation
 
 # Install useful packages
@@ -31,7 +33,9 @@ RUN apt update && apt install -y --no-install-recommends \
         mesa-utils \
         htop \
         iperf \
-        screen
+        screen && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 # TODO iperf, screen - debuging
 
 # Install minimal prerequisites (Ubuntu 18.04 as reference)
@@ -56,18 +60,19 @@ RUN apt update && apt install -y --no-install-recommends \
     curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list&& \
     apt update && apt install -y --no-install-recommends \
-        kubectl
+        kubectl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Helm
-RUN apt install -y --no-install-recommends \
+RUN apt update && apt install -y --no-install-recommends \
         apt-transport-https && \
     curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list && \
     apt update && apt install -y --no-install-recommends \
-        helm
-
-# Clean apt
-RUN rm -rf /var/lib/apt/lists/*
+        helm && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility,display
 

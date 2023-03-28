@@ -1,6 +1,6 @@
 ARG RELEASE_CHANNEL
 
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ARG RELEASE_CHANNEL
 ENV RELEASE_CHANNEL=${RELEASE_CHANNEL}
@@ -14,38 +14,48 @@ ARG NOVNC_VERSION=1.4.0
 ENV S_USER=scipionuser
 ENV S_USER_HOME=/home/${S_USER}
 
-RUN apt update && apt upgrade -y
+ENV DEBIAN_FRONTEND noninteractive
 
 # Install necessary packages
 #============================
 
-# TODO nejaky X
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
+# Some X11-related basics
+RUN apt update && apt install -y --no-install-recommends \
         dbus-x11 \
         xauth \
         xorg \
-        curl
+        curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 # xdotool - window manipulation
 
 # Turbovnc requirements
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
+RUN apt update && apt install -y --no-install-recommends \
         libxt6 \
         x11-xkb-utils \
-        xkb-data
+        xkb-data && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # noVNC requirements
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
+RUN apt update && apt install -y --no-install-recommends \
         make \
-        libc-dev
+        libc-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # libjpeg-turbo requirements
 RUN apt update && apt install -y --no-install-recommends \
         cmake \
-        gcc
+        gcc && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # websockify requirements
 RUN apt update && apt install -y --no-install-recommends \
-        python3-numpy
+        python3-numpy && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # virtualgl requirements
 #RUN dpkg --add-architecture i386
@@ -54,7 +64,9 @@ RUN apt update && apt install -y --no-install-recommends \
 #        libxv1:i386 \
 #        libglu1-mesa:i386 \
 #        libegl1-mesa:i386 \
-#        libegl1-mesa
+#        libegl1-mesa && \
+#    apt-get clean && \
+#    rm -rf /var/lib/apt/lists/*
 
 # Install useful packages
 RUN apt update && apt install -y --no-install-recommends \
@@ -66,11 +78,10 @@ RUN apt update && apt install -y --no-install-recommends \
         iperf \
         screen \
         nmap \
-        strace
+        strace && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 # TODO iperf, screen - debuging
-
-# Clean apt
-RUN rm -rf /var/lib/apt/lists/*
 
 # Install TurboVNC, VirtualGL, noVNC
 #====================================
@@ -86,7 +97,7 @@ RUN cd /tmp && \
     sed -i 's/$host:/unix:/g' /opt/TurboVNC/bin/vncserver
 
 # /opt/VirtualGL/bin
-ENV PATH ${PATH}::/opt/TurboVNC/bin
+ENV PATH ${PATH}:/opt/TurboVNC/bin
 
 # noVNC
 RUN curl -fsSL https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz | tar -xzf - -C /opt && \

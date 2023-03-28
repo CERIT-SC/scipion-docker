@@ -1,20 +1,17 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV S_USER=scipionuser
 ENV S_USER_HOME=/home/${S_USER}
 
-RUN apt update && apt upgrade -y
-
-RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y --no-install-recommends \
-        apt-utils \
-        tzdata
+ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update && apt install -y --no-install-recommends \
+        apt-utils \
+        tzdata \
         xauth \
-        firefox
-
-# Clean apt
-RUN rm -rf /var/lib/apt/lists/*
+        firefox && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create scipionuser
 RUN groupadd --gid 1000 ${S_USER} && \
