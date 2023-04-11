@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:20.04
 
 ENV S_USER=scipionuser
 ENV S_USER_HOME=/home/${S_USER}
