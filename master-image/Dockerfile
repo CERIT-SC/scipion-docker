@@ -103,6 +103,8 @@ USER root
 
 # Scipion hosts.conf
 #====================
+
+# Add hosts.conf
 COPY scipion/hosts.conf ${S_USER_HOME}/scipion3/config/hosts.conf
 RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/hosts.conf
 
@@ -134,6 +136,9 @@ COPY wrappers/controller /opt/controller
 COPY wrappers/firefox /opt/firefox
 COPY kubernetes /opt/kubernetes
 COPY scipion /opt/scipion
+
+# Add dictionary of a binaries of the installed tools to find the right tool name
+COPY tool-dictionary.csv /opt/scipion/tool-dictionary.csv
 
 # Set the wrappers as executable
 RUN chmod +x /opt/controller/controller-clone
