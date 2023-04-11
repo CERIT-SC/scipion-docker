@@ -1,0 +1,30 @@
+
+FROM hub.cerit.io/scipion/scipion-tool2:all-dev AS all
+
+#RUN ${SC_LOC} installp -p "scipion-em-xmipp" -j $(nproc);
+
+
+FROM hub.cerit.io/scipion/scipion-tool2:base-dev
+
+# Required by Xmipp
+RUN apt update && apt install -y --no-install-recommends \
+        libfftw3-dev \
+        libopenmpi-dev \
+        libhdf5-dev \
+        python3-numpy \
+        python3-dev \
+        libpython3.8-dev \
+        libtiff5-dev \
+        libsqlite3-dev \
+        default-jdk \
+        git \
+        cmake
+
+USER ${USER}
+
+COPY --from=all /home/scipionuser/scipion3/software/em/xmipp /scipion-tool/xmipp3
+
+ENV LD_LIBRARY_PATH "/scipion-tool/xmipp3/lib/:${LD_LIBRARY_PATH}"
+ENV PATH "/scipion-tool/xmipp3/bin/:${PATH}"
+
+ENTRYPOINT [ "/docker-entrypoint.sh" ]

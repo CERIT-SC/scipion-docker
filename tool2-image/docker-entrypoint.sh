@@ -19,10 +19,11 @@ export DISPLAY=scipion-master-svc-x11-${INSTANCE_NAME}:1
 
 #export PATH="/scipion-tool/relion/bin:${S_USER_HOME}/eman2-sphire-sparx/bin:${PATH}"
 
-cd "$JOB_WORKDIR"
+cd "$JOB_WORKDIR" #TODO <-----------
 
 #${S_USER_HOME}/scipion3/scipion3 run $TOOL_COMMAND
 echo "$TOOL_COMMAND"
+
 #sleep infinity
 $TOOL_COMMAND
 

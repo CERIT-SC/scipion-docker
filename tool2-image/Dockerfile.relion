@@ -1,0 +1,33 @@
+
+FROM hub.cerit.io/scipion/scipion-tool2:all-dev AS all
+
+#RUN ${SC_LOC} installp -p "scipion-em-relion" -j $(nproc);
+
+
+FROM hub.cerit.io/scipion/scipion-tool2:base-dev
+
+# Required by Relion
+RUN apt update && apt install -y --no-install-recommends \
+        cmake \
+        git \
+        build-essential \
+        mpi-default-bin \
+        mpi-default-dev \
+        libfftw3-dev \
+        libtiff-dev \
+        libpng-dev \
+        ghostscript \
+        libxft-dev
+
+USER ${USER}
+
+COPY --from=all /home/scipionuser/scipion3/software/em/relion-4.0 /scipion-tool/relion
+COPY --from=all /home/scipionuser/scipion3/software/em/relion_python-4.0 /scipion-tool/relion_python
+
+ENV LD_LIBRARY_PATH "/scipion-tool/relion/lib/:${LD_LIBRARY_PATH}"
+ENV PATH "/scipion-tool/relion/bin/:${PATH}"
+ENV LD_LIBRARY_PATH "/scipion-tool/relion_python/lib/:${LD_LIBRARY_PATH}"
+ENV PATH "/scipion-tool/relion_python/bin/:${PATH}"
+
+ENTRYPOINT [ "/docker-entrypoint.sh" ]
+
