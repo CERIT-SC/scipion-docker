@@ -2,7 +2,7 @@
 Version=1.0
 Type=Application
 Exec=exo-open --launch WebBrowser %u
-Icon=web-browser
+Icon=/opt/firefox/logo.png
 StartupNotify=true
 Terminal=false
 Categories=Network;X-XFCE;X-Xfce-Toplevel;
