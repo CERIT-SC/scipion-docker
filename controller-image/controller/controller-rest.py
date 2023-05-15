@@ -27,6 +27,11 @@ async def event_shutdown():
 async def autosave():
     controller.send_sig_autosave()
 
+@app.on_event("startup")
+@repeat_every(seconds=timer_lock_refresh)
+async def lock_refresh():
+    controller.send_sig_lock_refresh()
+
 @app.post("/clone")
 async def clone():
     controller.send_sig_clone()

@@ -61,6 +61,7 @@ class Controller:
         self.sig_clone = False
         self.sig_restore = False
         self.sig_autosave = False
+        self.sig_lock_refresh = False
         self.sig_finalsave = False
 
         self.autosave_print = True
@@ -81,6 +82,9 @@ class Controller:
 
     def send_sig_autosave(self):
         self.sig_autosave = True
+
+    def send_sig_lock_refresh(self):
+        self.sig_lock_refresh = True
 
     def send_sig_finalsave(self):
         self.sig_finalsave = True
@@ -146,6 +150,11 @@ class Controller:
                 self.sig_restore = False
                 self.sync_restore.run()
 
+            # refresh lock
+            if self.sig_lock_refresh:
+                self.sig_lock_refresh = False
+                self._lock_refresh()
+
             # switch to PRE_RUN phase
             if self.sync_clone.is_status(SyncStatus.COMPLETE) and \
                     self.sync_restore.is_status(SyncStatus.COMPLETE):
@@ -184,6 +193,11 @@ class Controller:
                         self.sync_autosave.is_status(SyncStatus.ERROR):
                     self.sync_autosave = SyncAutoSave(self)
                     self.sync_autosave.run()
+
+            # refresh lock
+            if self.sig_lock_refresh:
+                self.sig_lock_refresh = False
+                self._lock_refresh()
 
             # switch to PRE_STAGE_OUT phase
             if self.sig_finalsave:
@@ -348,21 +362,57 @@ class Controller:
 
         return f"{mountpoint}/{dirs[0]}"
 
+    def _lock_refresh(self):
+        unix_time = str(int(time.time()))
+
+        # create lock in OD project mount
+        with open(f"{self.p_od_project}/{f_project_lock}", "w") as f:
+            f.write(unix_time)
+
+        # create lock in staged-in project volume mount
+        # The creation must be done on both side, because the autosave rewrites the refreshed lock in OD project mount.
+        # The creation before the autosave is complicated bacause the autosave is active after the RUN phase is reached,
+        # but the lock refresh is active in STAGE-IN and RUN phases.
+        p_vol_scipion_dir = f"{d_vol_project}/{d_scipion}"
+        if not os.path.isdir(p_vol_scipion_dir):
+            os.mkdir(p_vol_scipion_dir)
+        with open(f"{d_vol_project}/{f_project_lock}", "w") as f:
+            f.write(unix_time)
+
     def _lock_create(self):
-        Path(f"{self.p_od_project}/{f_project_lock}").touch()
+        self._lock_refresh()
         logger.info("The project has been locked to prevent modifications from another instance.")
 
     def _lock_remove(self):
         p_od_project_lock = f"{self.p_od_project}/{f_project_lock}"
         if not os.path.exists(p_od_project_lock):
-            logger.warning("Unlocking the project is not needed. The project lock is missing. This should not happen.")
+            logger.warning("There is no need to unlock the project, because the project lock is missing. This should not happen.")
         else:
             os.remove(p_od_project_lock)
             logger.info("The project has been unlocked.")
 
     def _lock_check(self):
-        if os.path.exists(f"{self.p_od_project}/{f_project_lock}"):
-            logger.error("The project is already opened in another Scipion instance")
+        lock_file = f"{self.p_od_project}/{f_project_lock}"
+
+        # check existency of the lock file
+        if os.path.exists(lock_file):
+            # check freshness of the lock file
+            current_unix_time = int(time.time())
+
+            try:
+                lock_unix_time = current_unix_time
+                with open(lock_file, "r") as f:
+                    lock_unix_time = int(f.read())
+
+                if (current_unix_time - lock_unix_time) > lock_freshness_threshold:
+                    # return False (/project is not locked/) if the unix time stored in the lock file is outdated
+                    logger.warning("The project has been opened (locked) in another Scipion instance, but the instance seems to be dead.")
+                    return False
+            except:
+                logger.error("The project has been opened (locked) in another Scipion instance, but the lock is damaged")
+                return True
+
+            logger.error("The project is already opened (locked) in another Scipion instance")
             return True
 
         return False

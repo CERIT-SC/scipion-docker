@@ -17,5 +17,8 @@ f_project_lock = f"{d_scipion}/project.lock"
 
 timer_print_progress = 60*0.5
 timer_autosave = 60*2
+timer_lock_refresh = 60*2
 timer_status_checking = 1
 timer_waiting_to_end = 3
+
+lock_freshness_threshold = timer_lock_refresh*5
