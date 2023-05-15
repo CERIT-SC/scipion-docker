@@ -11,7 +11,7 @@ dir_project="/mnt/vol-project"
 ln -s "${dir_dataset}/" "${S_USER_HOME}/ScipionUserData/dataset"
 ln -s "${dir_project}/" "${S_USER_HOME}/ScipionUserData/projects" # this should be the only occurence of the word "projects" (plural) instead of "project". Scipion requires this directory
 
-export DISPLAY=scipion-vnc-svc-x11-${INSTANCE_NAME}:1
+export DISPLAY="${INSTANCE_PREFIX}-${INSTANCE_NAME}-x11:1"
 
 # Wait for the xorg (vnc container) (existency of xauthority means that xserver in the vnc container is running)
 while [ ! -f /mnt/shared/.Xauthority ]; do

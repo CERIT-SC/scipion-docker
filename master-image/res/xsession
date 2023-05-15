@@ -2,8 +2,8 @@
 
 set -ex
 
-export svc_controller="scipion-controller-svc-rest-${INSTANCE_NAME}"
-export svc_vnc="scipion-vnc-svc-x11-${INSTANCE_NAME}"
+export svc_controller="${INSTANCE_PREFIX}-${INSTANCE_NAME}-rest"
+export svc_vnc="${INSTANCE_PREFIX}-${INSTANCE_NAME}-x11"
 
 export DISPLAY="${svc_vnc}:1"
 

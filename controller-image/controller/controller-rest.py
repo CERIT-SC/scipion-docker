@@ -10,9 +10,10 @@ from controller import *
 
 namespace = os.environ["NAMESPACE"]
 instance_name = os.environ["INSTANCE_NAME"]
+instance_prefix = os.environ["INSTANCE_PREFIX"]
 
 app = FastAPI()
-controller = Controller(namespace, instance_name)
+controller = Controller(namespace, instance_name, instance_prefix)
 
 @app.on_event("startup")
 async def event_startup():

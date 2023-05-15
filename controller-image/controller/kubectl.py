@@ -7,10 +7,11 @@ from constants import *
 # TODO try except
 
 class Kubectl:
-    def __init__(self, config, namespace, instance_name):
+    def __init__(self, config, namespace, instance_name, instance_prefix):
         self.config = config
         self.namespace = namespace
         self.instance_name = instance_name
+        self.instance_prefix = instance_prefix
 
         self.api_apps = client.AppsV1Api(client.ApiClient(config))
         self.api_batch = client.BatchV1Api(client.ApiClient(config))
@@ -19,7 +20,7 @@ class Kubectl:
         self.api_apps.list_namespaced_deployment(self.namespace)
 
     def _get_x_name(self, x_name):
-        return f"scipion-{x_name}-{self.instance_name}"
+        return f"{self.instance_prefix}-{self.instance_name}-{x_name}"
 
     def _list_deployments(self):
         items = self.api_apps.list_namespaced_deployment(self.namespace).items

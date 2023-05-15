@@ -3,14 +3,14 @@ kind: Job
 #apiVersion: apps/v1
 #kind: Deployment
 metadata:
-  name: scipion-tool-{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
+  name: {{ .Values.instance.prefix }}-{{ .Values.instance.name }}-tool-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
 spec:
   ttlSecondsAfterFinished: 30
   backoffLimit: 0
   template:
     metadata:
       labels:
-        name: scipion-tool-{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
+        name: {{ .Values.instance.prefix }}-{{ .Values.instance.name }}-tool-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
     spec:
 
       securityContext:
@@ -19,8 +19,8 @@ spec:
           type: RuntimeDefault
 
       containers:
-      - name: scipion-tool-{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
-        image: hub.cerit.io/scipion/scipion-tool2:{{ .Values.job.tool }}-{{ .Values.instance.release_channel }}
+      - name: {{ .Values.instance.prefix }}-{{ .Values.instance.name }}-tool-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
+        image: hub.cerit.io/scipion/scipion-tool2:{{ .Values.job.tool }}-{{ .Values.instance.releaseChannel }}
         imagePullPolicy: Always
 
         securityContext:
@@ -35,6 +35,8 @@ spec:
         env:
         - name: INSTANCE_NAME
           value: {{ .Values.instance.name | quote }}
+        - name: INSTANCE_PREFIX
+          value: {{ .Values.instance.prefix | quote }}
         - name: ROOT_PASS
           value: "abc"
         - name: USER_PASS
@@ -44,7 +46,7 @@ spec:
         - name: SUBMIT_PID
           value: "-1"
         - name: XMIPP_IN_QUEUE
-          value: {{ .Values.job.xmipp_in_queue | quote }}
+          value: {{ .Values.job.xmippInQueue | quote }}
         - name: JOB_NAME
           value: "{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}"
         - name: JOB_WORKDIR
@@ -69,12 +71,12 @@ spec:
 
       - name: shared
         persistentVolumeClaim:
-           claimName: pvc-scipion-shared-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}
+          claimName: pvc-{{ .Values.instance.prefix }}-{{ .Values.instance.name }}-shared-{{ .Release.Namespace }}
 
       - name: scipion-vol-dataset-rw
         persistentVolumeClaim:
-          claimName: pvc-scipion-vol-dataset-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.dataset }}
+          claimName: pvc-{{ .Values.instance.prefix }}-{{ .Values.instance.name }}-vol-dataset-{{ .Release.Namespace }}-{{ .Values.od.dataset.spaceIdShort }}
 
       - name: scipion-vol-project-rw
         persistentVolumeClaim:
-          claimName: pvc-scipion-vol-project-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.project }}
+          claimName: pvc-{{ .Values.instance.prefix }}-{{ .Values.instance.name }}-vol-project-{{ .Release.Namespace }}-{{ .Values.od.project.spaceIdShort }}

@@ -31,8 +31,8 @@ class ControllerPhase(Enum):
     EXIT                  = 9
 
 class Controller:
-    def __init__(self, namespace, instance_name):
-        # these variables are modified while checking the mountpoints
+    def __init__(self, namespace, instance_name, instance_prefix):
+        # these two variables are modified while checking the mountpoints
         self.p_od_dataset = d_od_dataset
         self.p_od_project = d_od_project
 
@@ -40,8 +40,9 @@ class Controller:
 
         self.namespace = namespace
         self.instance_name = instance_name
+        self.instance_prefix = instance_prefix
 
-        self.kubectl = Kubectl(KubeSaAutoConfig(), namespace, instance_name)
+        self.kubectl = Kubectl(KubeSaAutoConfig(), namespace, instance_name, instance_prefix)
 
         # init final signal to end the loop of the state machine
         self.exit = False
@@ -103,7 +104,7 @@ class Controller:
         for cr in components_required:
             cr_ok = False
             for ca in components_alive:
-                if cr == ca:
+                if cr in ca:
                     cr_ok = True
                     break
 
