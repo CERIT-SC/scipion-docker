@@ -113,6 +113,9 @@ RUN groupadd --gid 1000 ${S_USER} && \
     usermod -aG sudo ${S_USER} && \
     chown -R ${S_USER}:${S_USER} ${S_USER_HOME}
 
+RUN echo "${S_USER}:abc" | chpasswd
+RUN echo "root:abc" | chpasswd
+
 # prepare working directory
 RUN chown -R ${S_USER}:${S_USER} /mnt
 

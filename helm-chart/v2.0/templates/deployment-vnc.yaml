@@ -22,7 +22,7 @@ spec:
       containers:
 
       - name: vnc
-        image: hub.cerit.io/scipion/scipion-vnc:dev
+        image: hub.cerit.io/scipion/scipion-vnc:latest
         imagePullPolicy: Always
 
         securityContext:
