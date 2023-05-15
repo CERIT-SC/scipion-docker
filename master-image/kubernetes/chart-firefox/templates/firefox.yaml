@@ -10,10 +10,26 @@ spec:
       labels:
         name: scipion-firefox-{{ .Values.instance.name }}
     spec:
+
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
       - name: scipion-firefox-{{ .Values.instance.name }}
         image: hub.cerit.io/scipion/scipion-firefox:{{ .Values.instance.release_channel }}
         imagePullPolicy: Always
+
+        securityContext:
+          privileged: false
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+
         env:
         - name: INSTANCE_NAME
           value: {{ .Values.instance.name | quote }}

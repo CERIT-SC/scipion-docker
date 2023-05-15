@@ -12,10 +12,26 @@ spec:
       labels:
         name: scipion-tool-{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
     spec:
+
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
       - name: scipion-tool-{{ .Values.instance.name }}-{{ .Values.job.name }}-{{ .Values.instance.submitpid }}
         image: hub.cerit.io/scipion/scipion-tool2:{{ .Values.job.tool }}-{{ .Values.instance.release_channel }}
         imagePullPolicy: Always
+
+        securityContext:
+          privileged: false
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+
         env:
         - name: INSTANCE_NAME
           value: {{ .Values.instance.name | quote }}
