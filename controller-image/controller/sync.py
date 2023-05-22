@@ -83,10 +83,13 @@ class Sync(ABC):
         time.sleep(timer_print_progress / 10)
 
         while not t.is_terminate_signal() and (sync_t.is_running()):
-            size_src  = get_dir_size(dir_src)
-            size_dest = get_dir_size(dir_dest)
-            progress = 1 if size_dest > size_src else size_dest / size_src
-            logger.info(f"{print_head} progress: {str(round(progress * 100))} %")
+            try:
+                size_src  = get_dir_size(dir_src)
+                size_dest = get_dir_size(dir_dest)
+                progress = 1 if size_dest > size_src else size_dest / size_src
+                logger.info(f"{print_head} progress: {str(round(progress * 100))} %")
+            except:
+                pass
 
             i = 0
             while not t.is_terminate_signal() and i < 100:
