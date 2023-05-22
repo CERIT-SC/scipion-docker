@@ -1,5 +1,6 @@
 
 import os
+import time
 
 def symlink_search(path):
     result = list()
@@ -32,3 +33,12 @@ def get_dir_size(path):
         elif it.is_dir():
             size += get_dir_size(it.path)
     return size
+
+def get_unix_timestamp():
+    return int(time.time())
+
+def second_convert(s):
+    hours = int(s // 3600)
+    minutes = int((s % 3600) // 60)
+    seconds = int(s % 60)
+    return (hours, minutes, seconds)

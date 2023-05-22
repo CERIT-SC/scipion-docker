@@ -8,6 +8,7 @@ from pathlib import Path
 from loguru import logger
 from enum import Enum
 
+from utils import get_unix_timestamp
 from mortal_thread import MortalThread, MortalThreadState
 from sync import SyncStatus, Sync, SyncClone, SyncRestore, SyncSave, SyncAutoSave, SyncFinalSave
 from constants import *
@@ -364,7 +365,7 @@ class Controller:
         return f"{mountpoint}/{dirs[0]}"
 
     def _lock_refresh(self):
-        unix_time = str(int(time.time()))
+        unix_time = str(get_unix_timestamp())
 
         # create lock in OD project mount
         with open(f"{self.p_od_project}/{f_project_lock}", "w") as f:
@@ -398,7 +399,7 @@ class Controller:
         # check existency of the lock file
         if os.path.exists(lock_file):
             # check freshness of the lock file
-            current_unix_time = int(time.time())
+            current_unix_time = get_unix_timestamp()
 
             try:
                 lock_unix_time = current_unix_time

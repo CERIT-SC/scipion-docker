@@ -22,3 +22,5 @@ timer_status_checking = 1
 timer_waiting_to_end = 3
 
 lock_freshness_threshold = timer_lock_refresh*5
+
+eta_values_num = 3

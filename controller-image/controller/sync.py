@@ -8,6 +8,7 @@ from pathlib import Path
 from loguru import logger
 from enum import Enum
 from abc import ABC, abstractmethod
+from collections import deque
 
 from mortal_thread import MortalThread, MortalThreadState
 from constants import *
@@ -82,12 +83,38 @@ class Sync(ABC):
     def _print_progress(self, t, sync_t, print_head, dir_src, dir_dest):
         time.sleep(timer_print_progress / 10)
 
+        q_size_src  = deque(maxlen=eta_values_num)
+        q_size_dest = deque(maxlen=eta_values_num)
+
         while not t.is_terminate_signal() and (sync_t.is_running()):
             try:
                 size_src  = get_dir_size(dir_src)
                 size_dest = get_dir_size(dir_dest)
+
+                # compute progress
                 progress = 1 if size_dest > size_src else size_dest / size_src
-                logger.info(f"{print_head} progress: {str(round(progress * 100))} %")
+
+                # compute ETA
+                current_time = get_unix_timestamp()
+                q_size_src.append((size_src, current_time))
+                q_size_dest.append((size_dest, current_time))
+
+                if len(q_size_src) >= 2 \
+                        and q_size_src[0][0] != q_size_src[1][0]:
+                    logger.warning(f"{print_head} sync - The source data changes during synchronization. Something is manipulating with the data.")
+
+                if len(q_size_src) < eta_values_num: # ETA is not yet available
+                    eta = ""
+                else: # ETA is available
+                    difference_size = q_size_dest[eta_values_num-1][0] - q_size_dest[0][0]
+                    difference_time = q_size_dest[eta_values_num-1][1] - q_size_dest[0][1]
+                    speed = difference_size / difference_time # size per second
+                    eta_sec = (q_size_src[0][0] - q_size_dest[eta_values_num-1][0]) / speed # number of seconds until the end
+                    eta_converted = second_convert(eta_sec)
+                    eta = f"- ETA {eta_converted[0]}h {eta_converted[1]}m {eta_converted[2]}s"
+
+                # print progress with ETA (if available)
+                logger.info(f"{print_head} progress: {str(round(progress * 100))} % {eta}")
             except:
                 pass
 
