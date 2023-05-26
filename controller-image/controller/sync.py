@@ -25,6 +25,7 @@ class Sync(ABC):
         self.status = SyncStatus.READY
         self.t = MortalThread(target = self._run, args = ())
         self.controller = controller_obj
+        self.eta = "n/a"
 
     def get_status(self):
         if self.t.get_status() == MortalThreadState.COMPLETE:
@@ -104,17 +105,22 @@ class Sync(ABC):
                     logger.warning(f"{print_head} sync - The source data changes during synchronization. Something is manipulating with the data.")
 
                 if len(q_size_src) < eta_values_num: # ETA is not yet available
-                    eta = ""
+                    eta_api = "n/a" # information for the REST API
+                    eta_log = "" # information for this log printer
                 else: # ETA is available
                     difference_size = q_size_dest[eta_values_num-1][0] - q_size_dest[0][0]
                     difference_time = q_size_dest[eta_values_num-1][1] - q_size_dest[0][1]
                     speed = difference_size / difference_time # size per second
                     eta_sec = (q_size_src[0][0] - q_size_dest[eta_values_num-1][0]) / speed # number of seconds until the end
                     eta_converted = second_convert(eta_sec)
-                    eta = f"- ETA {eta_converted[0]}h {eta_converted[1]}m {eta_converted[2]}s"
+
+                    eta_api = f"{eta_converted[0]}h {eta_converted[1]}m {eta_converted[2]}s" # information for the REST API
+                    eta_log = f"- ETA {eta_api}" # information for this log printer
+
+                self.eta = eta_api
 
                 # print progress with ETA (if available)
-                logger.info(f"{print_head} progress: {str(round(progress * 100))} % {eta}")
+                logger.info(f"{print_head} progress: {str(round(progress * 100))} % {eta_log}")
             except:
                 pass
 

@@ -92,7 +92,7 @@ class Controller:
         self.sig_finalsave = True
 
     def get_phase(self):
-        return self.phase
+        return self.phase.name.lower()
 
     def get_health(self):
         components_alive = self.kubectl.filter_main()
@@ -110,9 +110,23 @@ class Controller:
                     break
 
             if not cr_ok:
-                return ControllerHealth.DEGRADED
+                return ControllerHealth.DEGRADED.name.lower()
 
-        return ControllerHealth.OK
+        return ControllerHealth.OK.name.lower()
+
+    def _get_sync_json(self, sync):
+        return {
+            "status": sync.status.name.lower(),
+            "eta": sync.eta
+        }
+
+    def get_syncs(self):
+        return {
+            "clone":     self._get_sync_json(self.sync_clone),
+            "restore":   self._get_sync_json(self.sync_restore),
+            "autosave":  self._get_sync_json(self.sync_autosave),
+            "finalsave": self._get_sync_json(self.sync_finalsave)
+        }
 
     def _switch_phase(self, phase):
         self.phase = phase
