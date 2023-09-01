@@ -11,6 +11,7 @@ from controller import *
 namespace = os.environ["NAMESPACE"]
 instance_name = os.environ["INSTANCE_NAME"]
 instance_prefix = os.environ["INSTANCE_PREFIX"]
+instance_link = os.environ["INSTANCE_LINK"]
 
 app = FastAPI()
 controller = Controller(namespace, instance_name, instance_prefix)
@@ -55,6 +56,7 @@ async def info():
         "health":   controller.get_health(),
         "phase":    controller.get_phase(),
         "syncs":    controller.get_syncs(),
+        "link":     instance_link,
         "main":     controller.kubectl.filter_main(),
         "tools":    controller.kubectl.filter_tools(),
         "specials": controller.kubectl.filter_specials()
