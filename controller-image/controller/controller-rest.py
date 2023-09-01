@@ -56,6 +56,7 @@ async def info():
         "health":   controller.get_health(),
         "phase":    controller.get_phase(),
         "syncs":    controller.get_syncs(),
+        "name":     instance_name,
         "link":     instance_link,
         "main":     controller.kubectl.filter_main(),
         "tools":    controller.kubectl.filter_tools(),
