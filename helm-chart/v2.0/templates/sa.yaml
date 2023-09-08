@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: {{ .Values.instance.prefix }}-{{ .Release.Name }}-tool-spawner-sa
-  annotations:
-    "helm.sh/resource-policy": keep
-automountServiceAccountToken: true
