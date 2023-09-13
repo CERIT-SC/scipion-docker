@@ -49,6 +49,7 @@ build_base_image:
   only:
     - master
     - dev
+    - gitlab-ci
 
 build_master_image:
   stage: build_node_image
@@ -60,15 +61,17 @@ build_master_image:
   only:
     - master
     - dev
+    - gitlab-ci
 
-build_worker_image:
+build_tool_image:
   stage: build_node_image
   variables:
-    NODE_TYPE: worker-image
+    NODE_TYPE: tool-image
     BUILD_STAGE: node
   script:
     *build_image
   only:
     - master
     - dev
+    - gitlab-ci
 
