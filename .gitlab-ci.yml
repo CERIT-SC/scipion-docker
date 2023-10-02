@@ -3,46 +3,37 @@ image: docker:latest
 services:
   - docker:dind
 
+variables:
+  SCIPION_REGISTRY_PREFIX: "hub.cerit.io/scipion/scipion-"
+
 before_script:
-  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  - docker login -u 'robot$scipion+gitlab_cicd' -p "$SCIPION_REGISTRY_PASSWORD" "$SCIPION_REGISTRY_PREFIX"
 
 stages:
-  - build_base_image
-  - build_node_image
+  # independent - base, controller, firefox
+  # post_base - master, tool
+  - build_independent
+  - build_post_base
 
 .build_image:
   script: &build_image
-    # replace tag for a base image with branch name
-    # IF "node" build stage
-    - |
-        if [ "${BUILD_STAGE}" = "node" ]; then
-            sed -i -E "s/^FROM\s+(.+):.+$/FROM \1:${CI_COMMIT_REF_NAME}/" ${NODE_TYPE}/Dockerfile
-        fi
-
-    # add priv key for the MN
-    # IF "master-image" node image
-    - |
-        if [ "${NODE_TYPE}" = "master-image" ]; then
-            echo "$PRIV_KEY" > master-image/self.pem;
-        fi
-
-    # build and push the base-image / MN-image / WN-image
-    - docker pull ${CI_REGISTRY_IMAGE}/${NODE_TYPE}:${CI_COMMIT_REF_NAME} || true
-    - docker build --cache-from ${CI_REGISTRY_IMAGE}/${NODE_TYPE}:${CI_COMMIT_REF_NAME} -t "${CI_REGISTRY_IMAGE}/${NODE_TYPE}:${CI_COMMIT_REF_NAME}" ${NODE_TYPE}/.
-    - docker push "${CI_REGISTRY_IMAGE}/${NODE_TYPE}:${CI_COMMIT_REF_NAME}"
-
-    # build and tag the image for master branch also with the string "latest"
-    # IF "master" branch
+    # build and tag the image for master branch with the string "latest"
     - |
         if [ "${CI_COMMIT_REF_NAME}" = "master" ]; then
-            docker build --pull -t "${CI_REGISTRY_IMAGE}/${NODE_TYPE}:latest" ${NODE_TYPE}/.
-            docker push "${CI_REGISTRY_IMAGE}/${NODE_TYPE}:latest"
+            RELEASE_CHANNEL=latest
+        else
+            RELEASE_CHANNEL=${CI_COMMIT_REF_NAME}
         fi
 
-build_base_image:
-  stage: build_base_image
+    # build and push
+    - docker pull ${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL} || true
+    - docker build --build-arg RELEASE_CHANNEL=${CI_COMMIT_REF_NAME} --cache-from ${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL} -t "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}" ${IMAGE_TYPE}-image/.
+    - docker push "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}"
+
+build_base:
+  stage: build_independent
   variables:
-    NODE_TYPE: base-image
+    IMAGE_TYPE: base
     BUILD_STAGE: base
   script:
     *build_image
@@ -51,11 +42,11 @@ build_base_image:
     - dev
     - gitlab-ci
 
-build_master_image:
-  stage: build_node_image
+build_controller:
+  stage: build_independent
   variables:
-    NODE_TYPE: master-image
-    BUILD_STAGE: node
+    IMAGE_TYPE: controller
+    BUILD_STAGE: base
   script:
     *build_image
   only:
@@ -63,11 +54,35 @@ build_master_image:
     - dev
     - gitlab-ci
 
-build_tool_image:
-  stage: build_node_image
+build_firefox:
+  stage: build_independent
   variables:
-    NODE_TYPE: tool-image
-    BUILD_STAGE: node
+    IMAGE_TYPE: firefox
+    BUILD_STAGE: base
+  script:
+    *build_image
+  only:
+    - master
+    - dev
+    - gitlab-ci
+
+build_master:
+  stage: build_post_base
+  variables:
+    IMAGE_TYPE: master
+    BUILD_STAGE: base
+  script:
+    *build_image
+  only:
+    - master
+    - dev
+    - gitlab-ci
+
+build_tool:
+  stage: build_post_base
+  variables:
+    IMAGE_TYPE: tool
+    BUILD_STAGE: base
   script:
     *build_image
   only:
