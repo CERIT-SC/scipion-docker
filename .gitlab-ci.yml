@@ -4,6 +4,7 @@ services:
   - docker:dind
 
 variables:
+  DOCKER_TLS_CERTDIR: ""
   SCIPION_REGISTRY: "hub.cerit.io/scipion"
   SCIPION_REGISTRY_PREFIX: "${SCIPION_REGISTRY}/scipion"
 
@@ -13,10 +14,12 @@ stages:
   - build_independent
   - build_post_base
 
+before_script:
+  - docker info
+  - docker login -u "$SCIPION_REGISTRY_USER" -p "$SCIPION_REGISTRY_PASSWORD" "$SCIPION_REGISTRY"
+
 .build_image:
   script: &build_image
-    - docker login -u "$SCIPION_REGISTRY_USER" -p "$SCIPION_REGISTRY_PASSWORD" "$SCIPION_REGISTRY"
-
     # build and tag the image for master branch with the string "latest"
     - |
         if [ "${CI_COMMIT_REF_NAME}" = "master" ]; then
@@ -29,8 +32,6 @@ stages:
     - docker pull ${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL} || true
     - docker build --build-arg RELEASE_CHANNEL=${CI_COMMIT_REF_NAME} --cache-from ${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL} -t "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}" ${IMAGE_TYPE}-image/.
     - docker push "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}"
-
-    - docker logout
 
 build_base:
   stage: build_independent
