@@ -30,6 +30,8 @@ stages:
     - docker build --build-arg RELEASE_CHANNEL=${CI_COMMIT_REF_NAME} --cache-from ${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL} -t "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}" ${IMAGE_TYPE}-image/.
     - docker push "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}"
 
+    - docker logout
+
 build_base:
   stage: build_independent
   variables:

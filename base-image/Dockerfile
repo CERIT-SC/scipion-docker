@@ -12,12 +12,6 @@ FROM nvidia/cudagl:10.2-devel-ubuntu18.04
 ENV S_USER=scipionuser
 ENV S_USER_HOME=/home/${S_USER}
 
-# temporary workaround
-# https://developer.download.nvidia.com/compute/cuda/repos/
-RUN apt-key del 7fa2af80
-RUN rm /etc/apt/sources.list.d/cuda.list
-RUN rm /etc/apt/sources.list.d/nvidia-ml.list
-
 RUN apt update && apt upgrade -y
 
 RUN apt update && DEBIAN_FRONTEND="noninteractive" apt install -y --no-install-recommends \
@@ -43,11 +37,6 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-rec
 
 # gettext - envsubst
 # cuda-samples, strace, nmap - for testing and debuging purpose
-
-# temporary workaround
-# https://developer.download.nvidia.com/compute/cuda/repos/
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-keyring_1.0-1_all.deb
-RUN dpkg -i cuda-keyring_1.0-1_all.deb
 
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
         cuda-samples-10-2
