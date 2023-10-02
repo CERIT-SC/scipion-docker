@@ -5,7 +5,7 @@ services:
 
 variables:
   DOCKER_DRIVER: overlay2
-  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_TLS_CERTDIR: ""
   SCIPION_REGISTRY: "hub.cerit.io/scipion"
   SCIPION_REGISTRY_PREFIX: "${SCIPION_REGISTRY}/scipion"
 
