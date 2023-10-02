@@ -7,9 +7,6 @@ variables:
   SCIPION_REGISTRY: "hub.cerit.io/scipion"
   SCIPION_REGISTRY_PREFIX: "${SCIPION_REGISTRY}/scipion"
 
-before_script:
-  - docker login -u "$SCIPION_REGISTRY_USER" -p "$SCIPION_REGISTRY_PASSWORD" "$SCIPION_REGISTRY"
-
 stages:
   # independent - base, controller, firefox
   # post_base - master, tool
@@ -18,6 +15,8 @@ stages:
 
 .build_image:
   script: &build_image
+    - docker login -u "$SCIPION_REGISTRY_USER" -p "$SCIPION_REGISTRY_PASSWORD" "$SCIPION_REGISTRY"
+
     # build and tag the image for master branch with the string "latest"
     - |
         if [ "${CI_COMMIT_REF_NAME}" = "master" ]; then
