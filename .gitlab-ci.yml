@@ -4,10 +4,11 @@ services:
   - docker:dind
 
 variables:
-  SCIPION_REGISTRY_PREFIX: "hub.cerit.io/scipion/scipion-"
+  SCIPION_REGISTRY: "hub.cerit.io/scipion"
+  SCIPION_REGISTRY_PREFIX: "${SCIPION_REGISTRY}/scipion"
 
 before_script:
-  - docker login -u 'robot$scipion+gitlab_cicd' -p "$SCIPION_REGISTRY_PASSWORD" "$SCIPION_REGISTRY_PREFIX"
+  - docker login -u '$SCIPION_REGISTRY_USER' -p "$SCIPION_REGISTRY_PASSWORD" "$SCIPION_REGISTRY_PREFIX"
 
 stages:
   # independent - base, controller, firefox
