@@ -4,7 +4,7 @@ services:
   - docker:dind
 
 variables:
-  DOCKER_TLS_CERTDIR: ""
+  DOCKER_TLS_CERTDIR: "/certs"
   SCIPION_REGISTRY: "hub.cerit.io/scipion"
   SCIPION_REGISTRY_PREFIX: "${SCIPION_REGISTRY}/scipion"
 
