@@ -30,10 +30,11 @@ before_script:
         fi
 
     # build with cache or without cache
-    - |
-        docker pull ${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL} && \
-        docker build --build-arg RELEASE_CHANNEL=${CI_COMMIT_REF_NAME} --cache-from ${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL} -t "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}" ${IMAGE_TYPE}-image/. || \
-        docker build --build-arg RELEASE_CHANNEL=${CI_COMMIT_REF_NAME} -t "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}" ${IMAGE_TYPE}-image/.
+#    - |
+#        docker pull ${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL} && \
+#        docker build --build-arg RELEASE_CHANNEL=${CI_COMMIT_REF_NAME} --cache-from ${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL} -t "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}" ${IMAGE_TYPE}-image/. || \
+#        docker build --build-arg RELEASE_CHANNEL=${CI_COMMIT_REF_NAME} -t "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}" ${IMAGE_TYPE}-image/.
+    - docker build --build-arg RELEASE_CHANNEL=${CI_COMMIT_REF_NAME} -t "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}" ${IMAGE_TYPE}-image/.
 
     - docker push "${SCIPION_REGISTRY_PREFIX}-${IMAGE_TYPE}:${RELEASE_CHANNEL}"
 
