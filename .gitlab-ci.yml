@@ -50,18 +50,18 @@ build_base:
     - dev
     - gitlab-ci
 
-#build_controller:
-#  stage: build_independent
-#  variables:
-#    IMAGE_TYPE: controller
-#    BUILD_STAGE: base
-#  script:
-#    *build_image
-#  only:
-#    - master
-#    - dev
-#    - gitlab-ci
-#
+build_controller:
+  stage: build_independent
+  variables:
+    IMAGE_TYPE: controller
+    BUILD_STAGE: base
+  script:
+    *build_image
+  only:
+    - master
+    - dev
+    - gitlab-ci
+
 #build_firefox:
 #  stage: build_independent
 #  variables:
