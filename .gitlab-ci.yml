@@ -50,51 +50,51 @@ build_base:
     - dev
     - gitlab-ci
 
-build_controller:
-  stage: build_independent
-  variables:
-    IMAGE_TYPE: controller
-    BUILD_STAGE: base
-  script:
-    *build_image
-  only:
-    - master
-    - dev
-    - gitlab-ci
-
-build_firefox:
-  stage: build_independent
-  variables:
-    IMAGE_TYPE: firefox
-    BUILD_STAGE: base
-  script:
-    *build_image
-  only:
-    - master
-    - dev
-    - gitlab-ci
-
-build_master:
-  stage: build_post_base
-  variables:
-    IMAGE_TYPE: master
-    BUILD_STAGE: base
-  script:
-    *build_image
-  only:
-    - master
-    - dev
-    - gitlab-ci
-
-build_tool:
-  stage: build_post_base
-  variables:
-    IMAGE_TYPE: tool
-    BUILD_STAGE: base
-  script:
-    *build_image
-  only:
-    - master
-    - dev
-    - gitlab-ci
+#build_controller:
+#  stage: build_independent
+#  variables:
+#    IMAGE_TYPE: controller
+#    BUILD_STAGE: base
+#  script:
+#    *build_image
+#  only:
+#    - master
+#    - dev
+#    - gitlab-ci
+#
+#build_firefox:
+#  stage: build_independent
+#  variables:
+#    IMAGE_TYPE: firefox
+#    BUILD_STAGE: base
+#  script:
+#    *build_image
+#  only:
+#    - master
+#    - dev
+#    - gitlab-ci
+#
+#build_master:
+#  stage: build_post_base
+#  variables:
+#    IMAGE_TYPE: master
+#    BUILD_STAGE: base
+#  script:
+#    *build_image
+#  only:
+#    - master
+#    - dev
+#    - gitlab-ci
+#
+#build_tool:
+#  stage: build_post_base
+#  variables:
+#    IMAGE_TYPE: tool
+#    BUILD_STAGE: base
+#  script:
+#    *build_image
+#  only:
+#    - master
+#    - dev
+#    - gitlab-ci
 
