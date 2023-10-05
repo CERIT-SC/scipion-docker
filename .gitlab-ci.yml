@@ -40,7 +40,7 @@ before_script:
 
 build_base:
   stage: build_independent
-  resource_group: rg_scipion-independent
+  resource_group: rg_scipion_independent
   variables:
     IMAGE_TYPE: base
     BUILD_STAGE: base
@@ -53,7 +53,7 @@ build_base:
 
 build_controller:
   stage: build_independent
-  resource_group: rg_scipion-independent
+  resource_group: rg_scipion_independent
   variables:
     IMAGE_TYPE: controller
     BUILD_STAGE: base
@@ -64,39 +64,42 @@ build_controller:
     - dev
     - gitlab-ci
 
-#build_firefox:
-#  stage: build_independent
-#  variables:
-#    IMAGE_TYPE: firefox
-#    BUILD_STAGE: base
-#  script:
-#    *build_image
-#  only:
-#    - master
-#    - dev
-#    - gitlab-ci
-#
-#build_master:
-#  stage: build_post_base
-#  variables:
-#    IMAGE_TYPE: master
-#    BUILD_STAGE: base
-#  script:
-#    *build_image
-#  only:
-#    - master
-#    - dev
-#    - gitlab-ci
-#
-#build_tool:
-#  stage: build_post_base
-#  variables:
-#    IMAGE_TYPE: tool
-#    BUILD_STAGE: base
-#  script:
-#    *build_image
-#  only:
-#    - master
-#    - dev
-#    - gitlab-ci
+build_firefox:
+  stage: build_independent
+  resource_group: rg_scipion_independent
+  variables:
+    IMAGE_TYPE: firefox
+    BUILD_STAGE: base
+  script:
+    *build_image
+  only:
+    - master
+    - dev
+    - gitlab-ci
+
+build_master:
+  stage: build_post_base
+  resource_group: rg_scipion_post_base
+  variables:
+    IMAGE_TYPE: master
+    BUILD_STAGE: base
+  script:
+    *build_image
+  only:
+    - master
+    - dev
+    - gitlab-ci
+
+build_tool:
+  stage: build_post_base
+  resource_group: rg_scipion_post_base
+  variables:
+    IMAGE_TYPE: tool
+    BUILD_STAGE: base
+  script:
+    *build_image
+  only:
+    - master
+    - dev
+    - gitlab-ci
 
