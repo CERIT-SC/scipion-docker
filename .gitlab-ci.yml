@@ -45,7 +45,6 @@ build_base:
   only:
     - master
     - dev
-    - gitlab-ci
 
 build_controller:
   stage: build_independent
@@ -58,7 +57,6 @@ build_controller:
   only:
     - master
     - dev
-    - gitlab-ci
 
 build_firefox:
   stage: build_independent
@@ -71,7 +69,6 @@ build_firefox:
   only:
     - master
     - dev
-    - gitlab-ci
 
 build_master:
   stage: build_post_base
@@ -84,7 +81,6 @@ build_master:
   only:
     - master
     - dev
-    - gitlab-ci
 
 build_tool:
   stage: build_post_base
@@ -97,5 +93,4 @@ build_tool:
   only:
     - master
     - dev
-    - gitlab-ci
 
