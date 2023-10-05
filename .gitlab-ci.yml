@@ -39,7 +39,6 @@ build_base:
   resource_group: rg_scipion_independent
   variables:
     IMAGE_TYPE: base
-    BUILD_STAGE: base
   script:
     *build_image
   only:
@@ -51,7 +50,6 @@ build_controller:
   resource_group: rg_scipion_independent
   variables:
     IMAGE_TYPE: controller
-    BUILD_STAGE: base
   script:
     *build_image
   only:
@@ -63,7 +61,6 @@ build_firefox:
   resource_group: rg_scipion_independent
   variables:
     IMAGE_TYPE: firefox
-    BUILD_STAGE: base
   script:
     *build_image
   only:
@@ -75,7 +72,6 @@ build_master:
   resource_group: rg_scipion_post_base
   variables:
     IMAGE_TYPE: master
-    BUILD_STAGE: base
   script:
     *build_image
   only:
@@ -87,7 +83,6 @@ build_tool:
   resource_group: rg_scipion_post_base
   variables:
     IMAGE_TYPE: tool
-    BUILD_STAGE: base
   script:
     *build_image
   only:
