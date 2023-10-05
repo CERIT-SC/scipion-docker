@@ -44,6 +44,7 @@ build_base:
   only:
     - master
     - dev
+    - cicd
 
 build_controller:
   stage: build_independent
@@ -55,6 +56,7 @@ build_controller:
   only:
     - master
     - dev
+    - cicd
 
 build_firefox:
   stage: build_independent
@@ -66,6 +68,7 @@ build_firefox:
   only:
     - master
     - dev
+    - cicd
 
 build_master:
   stage: build_post_base
@@ -77,6 +80,7 @@ build_master:
   only:
     - master
     - dev
+    - cicd
 
 build_tool:
   stage: build_post_base
@@ -88,4 +92,5 @@ build_tool:
   only:
     - master
     - dev
+    - cicd
 
