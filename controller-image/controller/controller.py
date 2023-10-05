@@ -8,6 +8,7 @@ from pathlib import Path
 from loguru import logger
 from enum import Enum
 
+from utils import get_unix_timestamp
 from mortal_thread import MortalThread, MortalThreadState
 from sync import SyncStatus, Sync, SyncClone, SyncRestore, SyncSave, SyncAutoSave, SyncFinalSave
 from constants import *
@@ -21,9 +22,9 @@ class ControllerHealth(Enum):
 class ControllerPhase(Enum):
     PRE_STAGE_IN          = 0 # Checking the mounts, lock the project...
     STAGE_IN              = 1 # Clone and restore
-    PRE_RUN               = 2 # Send signal to start desktop environment...
+    PRE_RUN               = 2 # Info print about starting the desktop environment... (master checks this REST API's phase to start the desktop env.)
     RUN                   = 3 # Auto save
-    PRE_STAGE_OUT         = 4 # Terminate running auto save, some info prints...
+    PRE_STAGE_OUT         = 4 # Delete other containers (Deployments and Jobs), terminate running auto save, some info prints...
     STAGE_OUT             = 5 # Final save
     END                   = 6 # Final save complete, unlock the project...
     CRITICAL_ERROR_UNLOCK = 7 # Special phase for failed STAGE_IN, PRE_RUN, PRE_STAGE_OUT, STAGE_OUT. This phase just unlocks the project. Next phase is CRITICAL_ERROR
@@ -31,8 +32,8 @@ class ControllerPhase(Enum):
     EXIT                  = 9
 
 class Controller:
-    def __init__(self, namespace, instance_name):
-        # these variables are modified while checking the mountpoints
+    def __init__(self, namespace, instance_name, instance_prefix):
+        # these two variables are modified while checking the mountpoints
         self.p_od_dataset = d_od_dataset
         self.p_od_project = d_od_project
 
@@ -40,8 +41,9 @@ class Controller:
 
         self.namespace = namespace
         self.instance_name = instance_name
+        self.instance_prefix = instance_prefix
 
-        self.kubectl = Kubectl(KubeSaAutoConfig(), namespace, instance_name)
+        self.kubectl = Kubectl(KubeSaAutoConfig(), namespace, instance_name, instance_prefix)
 
         # init final signal to end the loop of the state machine
         self.exit = False
@@ -61,6 +63,7 @@ class Controller:
         self.sig_clone = False
         self.sig_restore = False
         self.sig_autosave = False
+        self.sig_lock_refresh = False
         self.sig_finalsave = False
 
         self.autosave_print = True
@@ -82,37 +85,48 @@ class Controller:
     def send_sig_autosave(self):
         self.sig_autosave = True
 
+    def send_sig_lock_refresh(self):
+        self.sig_lock_refresh = True
+
     def send_sig_finalsave(self):
         self.sig_finalsave = True
 
-    def get_phase_str(self):
-        if   (self.phase == ControllerPhase.PRE_STAGE_IN):          return "pre-stage-in"
-        elif (self.phase == ControllerPhase.STAGE_IN):              return "stage-in"
-        elif (self.phase == ControllerPhase.PRE_RUN):               return "pre-run"
-        elif (self.phase == ControllerPhase.RUN):                   return "run"
-        elif (self.phase == ControllerPhase.PRE_STAGE_OUT):         return "pre-stage-out"
-        elif (self.phase == ControllerPhase.STAGE_OUT):             return "stage-out"
-        elif (self.phase == ControllerPhase.END):                   return "end"
-        elif (self.phase == ControllerPhase.CRITICAL_ERROR_UNLOCK): return "critical-error-unlock"
-        elif (self.phase == ControllerPhase.CRITICAL_ERROR):        return "critical-error"
-        elif (self.phase == ControllerPhase.EXIT):                  return "exit"
-        else: return "unknown"
+    def get_phase(self):
+        return self.phase.name.lower()
 
     def get_health(self):
-        if self.kubectl.filter_masters(self.instance_name):
-            return ControllerHealth.OK
+        components_alive = self.kubectl.filter_main()
+        components_required = [
+            "controller",
+            "master",
+            "vnc"
+        ]
 
-        return ControllerHealth.DEGRADED
+        for cr in components_required:
+            cr_ok = False
+            for ca in components_alive:
+                if cr in ca:
+                    cr_ok = True
+                    break
 
-    def get_health_str(self):
-        if self.get_health() == ControllerHealth.OK: return "ok"
-        else: return "degraded"
+            if not cr_ok:
+                return ControllerHealth.DEGRADED.name.lower()
 
-    def get_master(self):
-        return self.kubectl.filter_masters(self.instance_name)
+        return ControllerHealth.OK.name.lower()
 
-    def get_tools(self):
-        return self.kubectl.filter_tools(self.instance_name)
+    def _get_sync_json(self, sync):
+        return {
+            "status": sync.status.name.lower(),
+            "eta": sync.eta
+        }
+
+    def get_syncs(self):
+        return {
+            "clone":     self._get_sync_json(self.sync_clone),
+            "restore":   self._get_sync_json(self.sync_restore),
+            "autosave":  self._get_sync_json(self.sync_autosave),
+            "finalsave": self._get_sync_json(self.sync_finalsave)
+        }
 
     def _switch_phase(self, phase):
         self.phase = phase
@@ -152,6 +166,11 @@ class Controller:
                 self.sig_restore = False
                 self.sync_restore.run()
 
+            # refresh lock
+            if self.sig_lock_refresh:
+                self.sig_lock_refresh = False
+                self._lock_refresh()
+
             # switch to PRE_RUN phase
             if self.sync_clone.is_status(SyncStatus.COMPLETE) and \
                     self.sync_restore.is_status(SyncStatus.COMPLETE):
@@ -190,6 +209,11 @@ class Controller:
                         self.sync_autosave.is_status(SyncStatus.ERROR):
                     self.sync_autosave = SyncAutoSave(self)
                     self.sync_autosave.run()
+
+            # refresh lock
+            if self.sig_lock_refresh:
+                self.sig_lock_refresh = False
+                self._lock_refresh()
 
             # switch to PRE_STAGE_OUT phase
             if self.sig_finalsave:
@@ -278,13 +302,6 @@ class Controller:
         return True
 
     def _pre_run(self):
-        # TODO try-except
-        # Send a "signal" to the master container that desktop environment can be started
-        if not os.path.exists(f_instance_status):
-            Path(f_instance_status).touch()
-
-        with open(f_instance_status, "w") as f:
-            f.write("ok")
         logger.info("Starting the desktop environment...")
 
         return True
@@ -293,6 +310,9 @@ class Controller:
         logger.info("A stop signal has been received.")
         logger.info("The Scipion application will be terminated and the project saved to the Onedata.")
 
+        # If the deleting of the pods hang, it is necessary to keep the data saved.
+        # For this reason, the autosync is terminated only after the deletion.
+        self._delete_pods()
         self._terminate_syncs()
         return True
 
@@ -301,11 +321,12 @@ class Controller:
         return True
 
     def _critical_error_unlock(self):
-        logger.error("TODO some prints in _critical_error_unlock")
+        #logger.error("TODO some prints in _critical_error_unlock")
         self._lock_remove()
 
     def _critical_error(self):
-        logger.error("TODO some prints in _critical_error")
+        #logger.error("TODO some prints in _critical_error")
+        pass
 
     def _terminate_syncs(self):
         # terminate still running Clone, Restore, Autosave
@@ -320,9 +341,26 @@ class Controller:
 
             if first_it:
                 first_it = False
-                logger.info("Terminating other still running threads...")
+                logger.info("Terminating other still running controller threads...")
 
-            logger.info("Waiting for other threads to terminate...")
+            logger.info("Waiting for other controller threads to be terminated...")
+            time.sleep(timer_waiting_to_end)
+
+    def _delete_pods(self):
+        self.kubectl.delete_main()
+        self.kubectl.delete_tools()
+        self.kubectl.delete_specials()
+
+        first_it = True
+        while self.kubectl.filter_main(include_controller=False) or \
+                self.kubectl.filter_tools() or \
+                self.kubectl.filter_specials():
+
+            if first_it:
+                first_it = False
+                logger.info("Deleting other still running containers...")
+
+            logger.info("Waiting for other containers to be deleted...")
             time.sleep(timer_waiting_to_end)
 
     def _check_mountpoint(self, mountpoint):
@@ -340,21 +378,57 @@ class Controller:
 
         return f"{mountpoint}/{dirs[0]}"
 
+    def _lock_refresh(self):
+        unix_time = str(get_unix_timestamp())
+
+        # create lock in OD project mount
+        with open(f"{self.p_od_project}/{f_project_lock}", "w") as f:
+            f.write(unix_time)
+
+        # create lock in staged-in project volume mount
+        # The creation must be done on both side, because the autosave rewrites the refreshed lock in OD project mount.
+        # The creation before the autosave is complicated bacause the autosave is active after the RUN phase is reached,
+        # but the lock refresh is active in STAGE-IN and RUN phases.
+        p_vol_scipion_dir = f"{d_vol_project}/{d_scipion}"
+        if not os.path.isdir(p_vol_scipion_dir):
+            os.mkdir(p_vol_scipion_dir)
+        with open(f"{d_vol_project}/{f_project_lock}", "w") as f:
+            f.write(unix_time)
+
     def _lock_create(self):
-        Path(f"{self.p_od_project}/{f_project_lock}").touch()
+        self._lock_refresh()
         logger.info("The project has been locked to prevent modifications from another instance.")
 
     def _lock_remove(self):
         p_od_project_lock = f"{self.p_od_project}/{f_project_lock}"
         if not os.path.exists(p_od_project_lock):
-            logger.warning("Unlocking the project is not needed. The project lock is missing. This should not happen.")
+            logger.warning("There is no need to unlock the project, because the project lock is missing. This should not happen.")
         else:
             os.remove(p_od_project_lock)
             logger.info("The project has been unlocked.")
 
     def _lock_check(self):
-        if os.path.exists(f"{self.p_od_project}/{f_project_lock}"):
-            logger.error("The project is already opened in another Scipion instance")
+        lock_file = f"{self.p_od_project}/{f_project_lock}"
+
+        # check existency of the lock file
+        if os.path.exists(lock_file):
+            # check freshness of the lock file
+            current_unix_time = get_unix_timestamp()
+
+            try:
+                lock_unix_time = current_unix_time
+                with open(lock_file, "r") as f:
+                    lock_unix_time = int(f.read())
+
+                if (current_unix_time - lock_unix_time) > lock_freshness_threshold:
+                    # return False (/project is not locked/) if the unix time stored in the lock file is outdated
+                    logger.warning("The project has been opened (locked) in another Scipion instance, but the instance seems to be dead.")
+                    return False
+            except:
+                logger.error("The project has been opened (locked) in another Scipion instance, but the lock is damaged")
+                return True
+
+            logger.error("The project is already opened (locked) in another Scipion instance")
             return True
 
         return False

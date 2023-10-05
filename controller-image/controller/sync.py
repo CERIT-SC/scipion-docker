@@ -8,6 +8,7 @@ from pathlib import Path
 from loguru import logger
 from enum import Enum
 from abc import ABC, abstractmethod
+from collections import deque
 
 from mortal_thread import MortalThread, MortalThreadState
 from constants import *
@@ -24,6 +25,7 @@ class Sync(ABC):
         self.status = SyncStatus.READY
         self.t = MortalThread(target = self._run, args = ())
         self.controller = controller_obj
+        self.eta = "n/a"
 
     def get_status(self):
         if self.t.get_status() == MortalThreadState.COMPLETE:
@@ -59,7 +61,7 @@ class Sync(ABC):
         if progress:
             t_progress = MortalThread(target = self._print_progress, args = (self.t, progress_print_head, src, dest))
             t_progress.start()
-        
+
         # rsync
         result = False
         try:
@@ -82,17 +84,51 @@ class Sync(ABC):
     def _print_progress(self, t, sync_t, print_head, dir_src, dir_dest):
         time.sleep(timer_print_progress / 10)
 
+        q_size_src  = deque(maxlen=eta_values_num)
+        q_size_dest = deque(maxlen=eta_values_num)
+
         while not t.is_terminate_signal() and (sync_t.is_running()):
-            size_src  = get_dir_size(dir_src)
-            size_dest = get_dir_size(dir_dest)
-            progress = 1 if size_dest > size_src else size_dest / size_src
-            logger.info(f"{print_head} progress: {str(round(progress * 100))} %")
+            try:
+                size_src  = get_dir_size(dir_src)
+                size_dest = get_dir_size(dir_dest)
+
+                # compute progress
+                progress = 1 if size_dest > size_src else size_dest / size_src
+
+                # compute ETA
+                current_time = get_unix_timestamp()
+                q_size_src.append((size_src, current_time))
+                q_size_dest.append((size_dest, current_time))
+
+                if len(q_size_src) >= 2 \
+                        and q_size_src[0][0] != q_size_src[1][0]:
+                    logger.warning(f"{print_head} sync - The source data changes during synchronization. Something is manipulating with the data.")
+
+                if len(q_size_src) < eta_values_num: # ETA is not yet available
+                    eta_api = "n/a" # information for the REST API
+                    eta_log = "" # information for this log printer
+                else: # ETA is available
+                    difference_size = q_size_dest[eta_values_num-1][0] - q_size_dest[0][0]
+                    difference_time = q_size_dest[eta_values_num-1][1] - q_size_dest[0][1]
+                    speed = difference_size / difference_time # size per second
+                    eta_sec = (q_size_src[0][0] - q_size_dest[eta_values_num-1][0]) / speed # number of seconds until the end
+                    eta_converted = second_convert(eta_sec)
+
+                    eta_api = f"{eta_converted[0]}h {eta_converted[1]}m {eta_converted[2]}s" # information for the REST API
+                    eta_log = f"- ETA {eta_api}" # information for this log printer
+
+                self.eta = eta_api
+
+                # print progress with ETA (if available)
+                logger.info(f"{print_head} progress: {str(round(progress * 100))} % {eta_log}")
+            except:
+                pass
 
             i = 0
             while not t.is_terminate_signal() and i < 100:
                 time.sleep(timer_print_progress / 100)
                 i += 1
-    
+
         return True
 
 class SyncClone(Sync):
@@ -148,7 +184,7 @@ class SyncRestore(Sync):
                     else:
                         pass
                         #logger.debug("Symbolic link already exists and refers to the right target.")
-            
+
             f_symlink.close()
 
         logger.info("Restore is complete.")
@@ -160,14 +196,14 @@ class SyncSave(Sync):
         p_sym = f"{d_vol_project}/{f_symlink_dump}"
         if os.path.exists(p_sym):
             os.remove(p_sym)
-    
+
         Path(p_sym).touch()
         p_symlink = open(p_sym, 'a')
-    
+
         # Create symlinks dump
         for line in symlink_search(d_vol_project):
             p_symlink.write(f"{line}\n")
-    
+
         p_symlink.close()
 
         p_vol_project_lock = f"{d_vol_project}/{f_project_lock}"
@@ -175,7 +211,7 @@ class SyncSave(Sync):
             logger.warning("The project lock was recreated because it was missing. Please do not remove the lock.")
             Path(p_vol_project_lock).touch()
 
-    	# rsync vol-project > od-project
+        # rsync vol-project > od-project
         return super()._run_rsync(d_vol_project, self.controller.p_od_project, progress, progress_print_head)
 
 class SyncAutoSave(SyncSave):
@@ -204,7 +240,7 @@ class SyncFinalSave(SyncSave):
         for i in range(3):
             logger.info("Final saving the project...")
             ok = self._helper_save(progress = True, progress_print_head = "Final save")
-            
+
             if ok:
                 logger.info("Final save is complete.")
                 result = True

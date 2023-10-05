@@ -1,0 +1,20 @@
+
+FROM hub.cerit.io/scipion/scipion-tool2:all-dev AS all
+
+#RUN ${SC_LOC} installp -p "scipion-em-eman2" -j $(nproc);
+
+
+FROM hub.cerit.io/scipion/scipion-tool2:base-dev
+
+# Required by Eman2
+#RUN apt update && apt install -y --no-install-recommends \
+
+USER ${USER}
+
+COPY --from=all /home/scipionuser/scipion3/software/em/eman-2.99 /scipion-tool/eman2
+
+ENV LD_LIBRARY_PATH "/scipion-tool/eman2/lib/:${LD_LIBRARY_PATH}"
+ENV PATH "/scipion-tool/eman2/bin/:${PATH}"
+
+ENTRYPOINT [ "/docker-entrypoint.sh" ]
+

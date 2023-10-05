@@ -8,6 +8,9 @@ ENV RELEASE_CHANNEL=${RELEASE_CHANNEL}
 USER root
 ######################
 
+RUN apt update && apt install -y --no-install-recommends \
+        xauth
+
 # Required by Relion tool
 RUN apt update && apt install -y --no-install-recommends \
         pkg-config \

@@ -1,0 +1,40 @@
+FROM hub.cerit.io/scipion/scipion-base:dev
+
+USER root
+######################
+
+# Required by Relion tool
+RUN apt update && apt install -y --no-install-recommends \
+    pkg-config \
+    libxft-dev \
+    libfreetype6-dev
+
+# Clean apt
+RUN rm -rf /var/lib/apt/lists/*
+
+USER ${S_USER}
+######################
+
+#ARG SD_PLUGIN
+#ARG SD_BIN
+#ARG SD_DIR
+
+ENV SC_LOC "${S_USER_HOME}/scipion3/scipion3"
+
+RUN ${SC_LOC} installp -p "scipion-em-xmipp"      -j $(nproc);
+RUN ${SC_LOC} installp -p "scipion-em-appion"     -j $(nproc);
+RUN ${SC_LOC} installp -p "scipion-em-eman2"      -j $(nproc);
+RUN ${SC_LOC} installp -p "scipion-em-gautomatch" -j $(nproc);
+RUN ${SC_LOC} installp -p "scipion-em-motioncorr" -j $(nproc);
+RUN ${SC_LOC} installp -p "scipion-em-phenix"     -j $(nproc);
+RUN ${SC_LOC} installp -p "scipion-em-spider"     -j $(nproc);
+
+RUN ${SC_LOC} installp -p "scipion-em-cistem"     -j $(nproc);
+RUN ${SC_LOC} installb "ctffind4-4.1.14" -j $(nproc);
+RUN ${SC_LOC} installp -p "scipion-em-gctf"       -j $(nproc);
+RUN ${SC_LOC} installb "gctf-1.18" -j $(nproc);
+RUN ${SC_LOC} installp -p "scipion-em-relion"     -j $(nproc);
+RUN ${SC_LOC} installb "relion-4.0" -j $(nproc);
+
+RUN ls -la /home/scipionuser/scipion3/software/em/
+ENTRYPOINT [ "ls", "-la", "/home/scipionuser/scipion3/software/em/" ]

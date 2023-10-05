@@ -10,9 +10,11 @@ from controller import *
 
 namespace = os.environ["NAMESPACE"]
 instance_name = os.environ["INSTANCE_NAME"]
+instance_prefix = os.environ["INSTANCE_PREFIX"]
+instance_link = os.environ["INSTANCE_LINK"]
 
 app = FastAPI()
-controller = Controller(namespace, instance_name)
+controller = Controller(namespace, instance_name, instance_prefix)
 
 @app.on_event("startup")
 async def event_startup():
@@ -27,6 +29,11 @@ async def event_shutdown():
 async def autosave():
     controller.send_sig_autosave()
 
+@app.on_event("startup")
+@repeat_every(seconds=timer_lock_refresh)
+async def lock_refresh():
+    controller.send_sig_lock_refresh()
+
 @app.post("/clone")
 async def clone():
     controller.send_sig_clone()
@@ -34,22 +41,26 @@ async def clone():
 @app.get("/phase")
 async def phase():
     return {
-        "phase": controller.get_phase_str()
+        "phase": controller.get_phase()
     }
 
 @app.get("/health")
 async def health():
     return {
-        "health": controller.get_health_str()
+        "health": controller.get_health()
     }
 
 @app.get("/info")
 async def info():
     return {
-        "health": controller.get_health_str(),
-        "phase": controller.get_phase_str(),
-        "master": controller.get_master(),
-        "tools": controller.get_tools()
+        "health":   controller.get_health(),
+        "phase":    controller.get_phase(),
+        "syncs":    controller.get_syncs(),
+        "name":     instance_name,
+        "link":     instance_link,
+        "main":     controller.kubectl.filter_main(),
+        "tools":    controller.kubectl.filter_tools(),
+        "specials": controller.kubectl.filter_specials()
     }
 
 @app.get("/")

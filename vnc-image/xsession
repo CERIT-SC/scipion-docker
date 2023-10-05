@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -ex
+
+export DISPLAY=:1
+
+pid_vncserver=""
+while [ -z "$pid_vncserver" ]; do
+	pid_vncserver=$(pgrep -f "/opt/TurboVNC/bin/vncserver")
+	sleep 2
+done
+
+cp ${S_USER_HOME}/.Xauthority /mnt/shared/

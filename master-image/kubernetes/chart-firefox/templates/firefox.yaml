@@ -1,25 +1,45 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: scipion-firefox-{{ .Values.instance.name }}
+  name: {{ .Values.instance.prefix }}-{{ .Values.instance.name }}-firefox
 spec:
   ttlSecondsAfterFinished: 0
   backoffLimit: 0
   template:
     metadata:
       labels:
-        name: scipion-firefox-{{ .Values.instance.name }}
+        name: {{ .Values.instance.prefix }}-{{ .Values.instance.name }}-firefox
     spec:
+
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
-      - name: scipion-firefox-{{ .Values.instance.name }}
-        image: hub.cerit.io/scipion/scipion-firefox:{{ .Values.instance.release_channel }}
+      - name: {{ .Values.instance.prefix }}-{{ .Values.instance.name }}-firefox
+        image: hub.cerit.io/scipion/scipion-firefox:{{ .Values.instance.releaseChannel }}
         imagePullPolicy: Always
+
+        securityContext:
+          privileged: false
+          runAsUser: 1000
+          runAsGroup: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+
         env:
         - name: INSTANCE_NAME
           value: {{ .Values.instance.name | quote }}
+        - name: INSTANCE_PREFIX
+          value: {{ .Values.instance.prefix | quote }}
         - name: FIREFOX_ARGS
           value: {{ .Values.firefox.args | quote }}
         volumeMounts:
+        - name: shared
+          mountPath: "/mnt/shared"
         - name: scipion-vol-dataset-rw
           mountPath: "/mnt/vol-dataset"
         - name: scipion-vol-project-rw
@@ -37,11 +57,15 @@ spec:
           runAsGroup: 1000
       restartPolicy: Never
       volumes:
-       - name: scipion-vol-dataset-rw
-         persistentVolumeClaim:
-           claimName: pvc-scipion-vol-dataset-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.dataset }}
 
-       - name: scipion-vol-project-rw
-         persistentVolumeClaim:
-           claimName: pvc-scipion-vol-project-{{ .Values.instance.name }}-{{ .Values.instance.namespace }}-{{ .Values.od.sid.project }}
+      - name: shared
+        persistentVolumeClaim:
+          claimName: pvc-{{ .Values.instance.prefix }}-{{ .Values.instance.name }}-shared-{{ .Release.Namespace }}
 
+      - name: scipion-vol-dataset-rw
+        persistentVolumeClaim:
+          claimName: pvc-{{ .Values.instance.prefix }}-{{ .Values.instance.name }}-vol-dataset-{{ .Release.Namespace }}-{{ .Values.od.dataset.spaceIdShort }}
+
+      - name: scipion-vol-project-rw
+        persistentVolumeClaim:
+          claimName: pvc-{{ .Values.instance.prefix }}-{{ .Values.instance.name }}-vol-project-{{ .Release.Namespace }}-{{ .Values.od.project.spaceIdShort }}

@@ -3,25 +3,29 @@ FROM ubuntu:22.04
 ENV S_USER=scipionuser
 ENV S_USER_HOME=/home/${S_USER}
 
+ENV DEBIAN_FRONTEND noninteractive
+
+# Install required basics
 RUN apt update && apt install -y --no-install-recommends \
         bash \
         rsync \
         python3 \
         python3-pip \
-        expect-dev
+        expect-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install kubectl
 RUN apt update && apt install -y --no-install-recommends \
         apt-transport-https \
         ca-certificates \
-        curl
-RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-RUN echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list
-RUN apt update && apt install -y \
-        kubectl
-
-# Clean apt
-RUN rm -rf /var/lib/apt/lists/*
+        curl && \
+    curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | tee /etc/apt/sources.list.d/kubernetes.list && \
+    apt update && apt install -y \
+        kubectl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create scipionuser
 RUN groupadd --gid 1000 ${S_USER} && \

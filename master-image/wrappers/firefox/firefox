@@ -5,9 +5,9 @@ notify-send --icon /opt/firefox/logo.png "Container with the Firefox will start 
 helm template \
     --set instance.namespace=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace) \
     --set instance.name="$INSTANCE_NAME" \
-    --set instance.release_channel="$RELEASE_CHANNEL" \
+    --set instance.prefix="$INSTANCE_PREFIX" \
+    --set instance.releaseChannel="$RELEASE_CHANNEL" \
     --set firefox.args="$@" \
-    --set od.sid.dataset="$OD_DATASET_SPACEID" \
-    --set od.sid.project="$OD_PROJECT_SPACEID" \
+    --set od.dataset.spaceIdShort="$OD_DATASET_SPACEIDSHORT" \
+    --set od.project.spaceIdShort="$OD_PROJECT_SPACEIDSHORT" \
 /opt/kubernetes/chart-firefox/ | kubectl apply -f -
-
