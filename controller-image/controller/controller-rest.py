@@ -44,6 +44,12 @@ async def phase():
         "phase": controller.get_phase()
     }
 
+@app.get("/friendly-phase")
+async def phase():
+    return {
+        "friendly_phase": controller.get_friendly_phase()
+    }
+
 @app.get("/health")
 async def health():
     return {
@@ -53,14 +59,15 @@ async def health():
 @app.get("/info")
 async def info():
     return {
-        "health":   controller.get_health(),
-        "phase":    controller.get_phase(),
-        "syncs":    controller.get_syncs(),
-        "name":     instance_name,
-        "link":     instance_link,
-        "main":     controller.kubectl.filter_main(),
-        "tools":    controller.kubectl.filter_tools(),
-        "specials": controller.kubectl.filter_specials()
+        "health":         controller.get_health(),
+        "phase":          controller.get_phase(),
+        "friendly_phase": controller.get_friendly_phase(),
+        "syncs":          controller.get_syncs(),
+        "name":           instance_name,
+        "link":           instance_link,
+        "main":           controller.kubectl.filter_main(),
+        "tools":          controller.kubectl.filter_tools(),
+        "specials":       controller.kubectl.filter_specials()
     }
 
 @app.get("/")

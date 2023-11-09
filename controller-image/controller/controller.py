@@ -98,7 +98,20 @@ class Controller:
         self.sig_finalsave = True
 
     def get_phase(self):
-        return self.phase.name.lower()
+        return get_enum_value(self.phase)
+
+    def get_friendly_phase(self):
+        if   self.phase == ControllerPhase.PRE_STAGE_IN \
+            or self.phase == ControllerPhase.STAGE_IN \
+            or self.phase == ControllerPhase.PRE_RUN:
+            return "staging-in"
+        if self.phase == ControllerPhase.RUN:
+            return "running"
+        if self.phase == ControllerPhase.PRE_STAGE_OUT \
+            or self.phase == ControllerPhase.STAGE_OUT:
+            return "staging-out"
+
+        return "end"
 
     def get_health(self):
         # Check for the occurence of an error
@@ -127,7 +140,7 @@ class Controller:
 
     def _get_sync_json(self, sync):
         return {
-            "status": sync.status.name.lower(),
+            "status": get_enum_value(sync.status),
             "eta": sync.eta
         }
 
