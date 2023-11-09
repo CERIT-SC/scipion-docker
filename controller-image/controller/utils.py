@@ -24,7 +24,6 @@ def symlink_search(path):
 
     return result
 
-
 def get_dir_size(path):
     size = 0
     for it in os.scandir(path):
@@ -42,3 +41,6 @@ def second_convert(s):
     minutes = int((s % 3600) // 60)
     seconds = int(s % 60)
     return (hours, minutes, seconds)
+
+def get_enum_value(enum):
+    return enum.name.lower()

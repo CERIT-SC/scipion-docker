@@ -8,7 +8,7 @@ from pathlib import Path
 from loguru import logger
 from enum import Enum
 
-from utils import get_unix_timestamp
+from utils import get_unix_timestamp, get_enum_value
 from mortal_thread import MortalThread, MortalThreadState
 from sync import SyncStatus, Sync, SyncClone, SyncRestore, SyncSave, SyncAutoSave, SyncFinalSave
 from constants import *
@@ -18,6 +18,12 @@ from kubectl import Kubectl
 class ControllerHealth(Enum):
     OK       = 0
     DEGRADED = 1
+
+class ControllerError(Enum):
+    NONE           = 0
+    FAILED_MOUNT   = 1
+    PROJECT_LOCKED = 2
+    SYNC_ERROR     = 3
 
 class ControllerPhase(Enum):
     PRE_STAGE_IN          = 0 # Checking the mounts, lock the project...
@@ -48,7 +54,7 @@ class Controller:
         # init final signal to end the loop of the state machine
         self.exit = False
 
-        self.success = False
+        self.error = ControllerError.NONE
 
         # init loop thread
         self.t_loop = threading.Thread(target = self._loop, args = ())
@@ -95,6 +101,11 @@ class Controller:
         return self.phase.name.lower()
 
     def get_health(self):
+        # Check for the occurence of an error
+        if self.error != ControllerError.NONE:
+            return get_enum_value(self.error)
+
+        # Check existency of the all required components
         components_alive = self.kubectl.filter_main()
         components_required = [
             "controller",
@@ -110,9 +121,9 @@ class Controller:
                     break
 
             if not cr_ok:
-                return ControllerHealth.DEGRADED.name.lower()
+                return get_enum_value(ControllerHealth.DEGRADED)
 
-        return ControllerHealth.OK.name.lower()
+        return get_enum_value(ControllerHealth.OK)
 
     def _get_sync_json(self, sync):
         return {
@@ -178,6 +189,7 @@ class Controller:
             # ...or to CRITICAL_ERROR_UNLOCK
             elif self.sync_clone.is_status(SyncStatus.ERROR) or \
                 self.sync_restore.is_status(SyncStatus.ERROR):
+                self.error = ControllerError.SYNC_ERROR
                 self._switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
         # phase PRE_RUN
@@ -246,7 +258,6 @@ class Controller:
         elif self.phase == ControllerPhase.END:
             if self._end():
                 self._switch_phase(ControllerPhase.EXIT)
-                self.success = True
             else:
                 self._switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
@@ -274,11 +285,13 @@ class Controller:
         # 2. Get the spaces names
         ret = self._check_mountpoint(self.p_od_dataset)
         if not ret:
+            self.error = ControllerError.FAILED_MOUNT
             return False
         self.p_od_dataset = ret
 
         ret = self._check_mountpoint(self.p_od_project)
         if not ret:
+            self.error = ControllerError.FAILED_MOUNT
             return False
         self.p_od_project = ret
 
@@ -286,6 +299,7 @@ class Controller:
         os.chdir(d_vol_project)
 
         if self._lock_check():
+            self.error = ControllerError.PROJECT_LOCKED
             return False
 
         # Create work dir
@@ -326,7 +340,7 @@ class Controller:
 
     def _critical_error(self):
         #logger.error("TODO some prints in _critical_error")
-        pass
+        return
 
     def _terminate_syncs(self):
         # terminate still running Clone, Restore, Autosave
@@ -434,7 +448,7 @@ class Controller:
         return False
 
     def _c_exit(self):
-        if self.success:
-            logger.info("Terminating...")
-        else:
+        if self.error != ControllerError.NONE:
             logger.error("It is not possible to continue.")
+        else:
+            logger.info("Terminating...")
