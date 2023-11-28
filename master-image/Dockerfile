@@ -144,8 +144,12 @@ COPY plugin-list.txt ${S_USER_HOME}/
 # Copy the auxiliary files
 COPY wrappers/controller /opt/controller
 COPY wrappers/firefox /opt/firefox
-COPY kubernetes /opt/kubernetes
 COPY scipion /opt/scipion
+
+# Add kubernetes helm charts for spawning tools, firefox...
+RUN git clone https://github.com/CERIT-SC/scipion-helm-charts /tmp/helm-charts \
+        && cp -r /tmp/helm-charts/scipion-docker-master-image/v2.0/ /opt/kubernetes/ \
+        && rm -rf /tmp/helm-charts/
 
 # Add dictionary of a binaries of the installed tools to find the right tool name
 COPY tool-dictionary.csv /opt/scipion/tool-dictionary.csv

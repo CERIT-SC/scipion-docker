@@ -10,4 +10,4 @@ helm template \
     --set firefox.args="$@" \
     --set od.dataset.spaceIdShort="$OD_DATASET_SPACEIDSHORT" \
     --set od.project.spaceIdShort="$OD_PROJECT_SPACEIDSHORT" \
-/opt/kubernetes/chart-firefox/ | kubectl apply -f -
+/opt/kubernetes/firefox/ | kubectl apply -f -
