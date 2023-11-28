@@ -77,6 +77,15 @@ RUN apt update && apt install -y --no-install-recommends \
 
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility,display
 
+# TODO required by xmipp from scipion v3.3.0 (skip from v3.0.12). Maybe this should be in the base-image because of the tools.
+RUN apt update && apt install -y --no-install-recommends \
+        nvidia-utils-545
+RUN apt update && apt install -y --no-install-recommends \
+        cuda-nvcc-11-4 \
+        libcufft-dev-11-4 \
+        nvidia-cuda-toolkit \
+        rsync
+
 ###############
 USER ${S_USER}
 ###############
@@ -180,9 +189,8 @@ USER ${S_USER}
 ###############
 
 # TODO tmp workarounds
-RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_TOOL'] = protocol.getClassPlugin().getName()" && sed -i "164 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
-RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_REQUIRES_GPU'] = protocol.requiresGpu()" && sed -i "165 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
-RUN export string="\ \ \ \ \ \ \ \ out = out.decode()" && sed -i "324 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/executor.py
+#RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_TOOL'] = protocol.getClassPlugin().getName()" && sed -i "164 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
+#RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_REQUIRES_GPU'] = protocol.requiresGpu()" && sed -i "165 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
 
 #ENTRYPOINT ["sleep", "infinity"]
 ENTRYPOINT ["/docker-entrypoint.sh"]

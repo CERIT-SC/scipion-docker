@@ -1,19 +1,10 @@
-#FROM nvidia/cudagl:10.1-runtime-ubuntu18.04
 
-# cannot compile xmipp using "runtime" image
-FROM nvidia/cudagl:10.2-devel-ubuntu18.04
-#FROM nvidia/cudagl:11.4.2-devel-ubuntu18.04
+FROM nvidia/cudagl:11.4.2-runtime-ubuntu20.04
 
 ENV S_USER=scipionuser
 ENV S_USER_HOME=/home/${S_USER}
 
 ENV DEBIAN_FRONTEND noninteractive
-
-# temporary workaround
-# https://developer.download.nvidia.com/compute/cuda/repos/
-RUN apt-key del 7fa2af80
-RUN rm /etc/apt/sources.list.d/cuda.list || true
-RUN rm /etc/apt/sources.list.d/nvidia-ml.list || true
 
 # Install necessary packages
 RUN apt update && apt install -y --no-install-recommends \
@@ -35,22 +26,8 @@ RUN apt update && apt install -y --no-install-recommends \
         nmap && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
 # gettext - envsubst
-# cuda-samples, strace, nmap - for testing and debuging purpose
-
-# temporary workaround
-# https://developer.download.nvidia.com/compute/cuda/repos/
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-keyring_1.0-1_all.deb && \
-    dpkg -i cuda-keyring_1.0-1_all.deb && \
-    apt update && apt install -y --no-install-recommends \
-        cuda-samples-10-2 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    rm /usr/local/cuda && \
-    ln -s /usr/local/cuda-10.2 /usr/local/cuda && \
-    cd /usr/local/cuda/samples/0_Simple/vectorAdd && \
-    make
+# strace, nmap - for testing and debuging purpose
 
 # Required by Scipion
 RUN apt update && apt install -y --no-install-recommends \
@@ -61,13 +38,12 @@ RUN apt update && apt install -y --no-install-recommends \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Required by Scipion for conda installation
+# Required by Scipion for conda installation - basics
 RUN apt update && apt install -y --no-install-recommends \
         sudo \
         wget \
-        gcc \
-        g++ \
-        libopenmpi-dev \
+        gcc-10 \
+        g++-10 \
         mesa-utils \
         openssh-client \
         cmake \
@@ -85,10 +61,9 @@ RUN apt update && apt install -y --no-install-recommends \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Another MPI requirements
+# Required by Scipion for conda installation - MPI
 RUN apt update && apt install -y --no-install-recommends \
         libopenmpi-dev \
-        libopenmpi2 \
         openmpi-bin \
         openmpi-common && \
     apt-get clean && \
