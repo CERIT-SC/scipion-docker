@@ -32,7 +32,9 @@ while [ ! "$(curl ${svc_controller}:8000/phase)" = '{"phase":"run"}' ]; do
 done
 
 # Disable screensaver
-#xset s off -dpms
+xset s off
+xset s noblank
+xset s noexpose
 
 # Start xfce4
 cd ${S_USER_HOME}

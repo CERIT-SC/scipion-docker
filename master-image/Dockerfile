@@ -128,12 +128,8 @@ RUN chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/.config/xfce4
 # Disable logout from xfce4
 #RUN sed -ie 's/^Exec=.*/Exec=notify-send "Logout is disabled"/' /usr/share/applications/xfce4-session-logout.desktop
 
-# Set screensaver to blank screen
-COPY res/.xscreensaver ${S_USER_HOME}/
-RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/.xscreensaver
-
 # Copy xsession file
-COPY res/xsession /tmp/
+COPY x11/xsession /tmp/
 RUN chmod +x /tmp/xsession
 
 COPY plugin-list.txt ${S_USER_HOME}/
