@@ -1,0 +1,17 @@
+name: Docker Build
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - cicd
+      - dockerfiles-consolidation
+
+jobs:
+  build_controller:
+    uses: ./.github/workflows/build-template.yml
+    with:
+      image-name: controller
+      tag: ${GITHUB_REF#refs/heads/}
+    secrets: inherit
