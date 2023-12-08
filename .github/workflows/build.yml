@@ -15,3 +15,33 @@ jobs:
       image-name: controller
       tag: ${GITHUB_REF#refs/heads/}
     secrets: inherit
+
+  build_vnc:
+    uses: ./.github/workflows/build-template.yml
+    with:
+      image-name: vnc
+      tag: ${GITHUB_REF#refs/heads/}
+    secrets: inherit
+
+  build_firefox:
+    uses: ./.github/workflows/build-template.yml
+    with:
+      image-name: firefox
+      tag: ${GITHUB_REF#refs/heads/}
+    secrets: inherit
+
+  build_base:
+    uses: ./.github/workflows/build-template.yml
+    with:
+      image-name: base
+      tag: ${GITHUB_REF#refs/heads/}
+    secrets: inherit
+
+  build_master:
+    needs:
+      - build_base
+    uses: ./.github/workflows/build-template.yml
+    with:
+      image-name: master
+      tag: ${GITHUB_REF#refs/heads/}
+    secrets: inherit
