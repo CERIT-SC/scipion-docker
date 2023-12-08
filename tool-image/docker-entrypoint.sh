@@ -5,23 +5,11 @@ set -xe
 S_USER=scipionuser
 S_USER_HOME=/home/${S_USER}
 
-# run base-image's docker-entrypoint-base.sh
-/docker-entrypoint-base.sh
+/opt/shared-scripts/run/prepare-links.sh
 
 export PATH="/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/VirtualGL/bin:/opt/TurboVNC/bin"
 
-export DISPLAY=scipion-vnc-svc-x11-${INSTANCE_NAME}:1
-
-# Wait for the xorg (vnc container) (existency of xauthority means that xserver in the vnc container is running)
-while [ ! -f /mnt/shared/.Xauthority ]; do
-    sleep 2
-done
-# set target to the shared xauthority and extract cookie
-export XAUTHORITY=/mnt/shared/.Xauthority
-x11_cookie="$(echo $(xauth list) | awk '{print $3}')"
-# set target to the correct path of the local xauthority and create new entry with the cookie
-export XAUTHORITY=${S_USER_HOME}/.Xauthority
-xauth add "${DISPLAY}" "MIT-MAGIC-COOKIE-1" "${x11_cookie}"
+source /opt/shared-scripts/run/set-xauth.sh
 
 
 #echo "$TOOL_COMMAND" > ${S_USER_HOME}/ScipionUserData/`date +%s`.txt

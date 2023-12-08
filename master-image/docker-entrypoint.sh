@@ -17,8 +17,7 @@ _trap () {
 	kill -s SIGTERM $(pgrep -f "/bin/sh /tmp/xsession")
 }
 
-# run base-image's docker-entrypoint-base.sh
-/docker-entrypoint-base.sh
+/opt/shared-scripts/run/prepare-links.sh
 
 /tmp/xsession
 

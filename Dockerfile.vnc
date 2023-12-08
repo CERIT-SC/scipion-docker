@@ -13,6 +13,7 @@ ARG NOVNC_VERSION=1.4.0
 
 ENV S_USER=scipionuser
 ENV S_USER_HOME=/home/${S_USER}
+ENV BUILD_HOME_PATH=vnc-image
 
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -107,11 +108,12 @@ RUN curl -fsSL https://github.com/novnc/noVNC/archive/v${NOVNC_VERSION}.tar.gz |
     ln -s /opt/noVNC/vnc.html /opt/noVNC/index.html && \
     cd /opt/websockify && make
 
+# Add shared files
+COPY shared-scripts /opt/shared-scripts
+RUN chmod -R +x /opt/shared-scripts/
+
 # Create scipionuser
-RUN groupadd --gid 1000 ${S_USER} && \
-    useradd --uid 1000 --create-home --home-dir ${S_USER_HOME} -s /bin/bash -g ${S_USER} ${S_USER} && \
-    usermod -aG sudo ${S_USER} && \
-    chown -R ${S_USER}:${S_USER} ${S_USER_HOME}
+RUN /opt/shared-scripts/build/add-user.sh
 
 RUN echo "${S_USER}:abc" | chpasswd
 RUN echo "root:abc" | chpasswd

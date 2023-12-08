@@ -1,16 +1,21 @@
 #!/bin/bash
 
-tag=${tag:-dev}
-
 set -e
 
+# Change dir to project workdir
 cd "$(dirname "$0")"
 
-export tag "$tag"
+# Check if the correct number of arguments is provided
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <tag> <image>"
+    echo "Example: $0 dev controller"
+    exit 1
+fi
 
-controller-image/build.sh
-firefox-image/build.sh
+image=$2
+tag=$1
 
+# Update dictionary with available tools for the master to know what tool image should be started
 rm "master-image/tool-dictionary.csv" || true
 for f_bin_list in $(ls "tool2-image/bin/"); do
     for line in $(cat "tool2-image/bin/${f_bin_list}"); do
@@ -18,10 +23,5 @@ for f_bin_list in $(ls "tool2-image/bin/"); do
     done
 done
 
-base-image/build.sh
-master-image/build.sh
-vnc-image/build.sh
-
-tool-image/build.sh
-
-wait
+docker build --build-arg RELEASE_CHANNEL="${tag}" -t hub.cerit.io/scipion/scipion-${image}:${tag} -f "Dockerfile.${image}" .
+docker push hub.cerit.io/scipion/scipion-${image}:${tag}
