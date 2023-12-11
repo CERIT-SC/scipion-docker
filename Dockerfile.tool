@@ -4,6 +4,7 @@ FROM hub.cerit.io/scipion/scipion-base:${RELEASE_CHANNEL}
 
 ARG RELEASE_CHANNEL
 ENV RELEASE_CHANNEL=${RELEASE_CHANNEL}
+ENV BUILD_HOME_PATH=tool-image
 
 USER root
 ######################
@@ -38,7 +39,7 @@ RUN if [ ! -z "$SD_PLUGIN" ]; then \
 USER root
 ######################
 
-COPY docker-entrypoint.sh /
+COPY ${BUILD_HOME_PATH}/docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
 
 USER ${S_USER}

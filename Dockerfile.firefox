@@ -22,7 +22,7 @@ RUN chmod -R +x /opt/shared-scripts/
 RUN /opt/shared-scripts/build/add-user.sh
 
 # Prepare working directory
-RUN /opt/shared-scripts/build/prepare-workdir,sh
+RUN /opt/shared-scripts/build/prepare-workdir.sh
 
 COPY ${BUILD_HOME_PATH}/docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh

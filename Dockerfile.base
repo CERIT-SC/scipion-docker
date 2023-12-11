@@ -86,10 +86,10 @@ ENV NVIDIA_VISIBLE_DEVICES=0
 ENV CUDA_VISIBLE_DEVICES=0
 
 # Prepare working directory
-RUN /opt/shared-scripts/build/prepare-workdir,sh
+RUN /opt/shared-scripts/build/prepare-workdir.sh
 
-COPY ${BUILD_HOME_PATH}/docker-entrypoint-base.sh /
-RUN chmod +x /docker-entrypoint-base.sh
+COPY ${BUILD_HOME_PATH}/docker-entrypoint.sh /
+RUN chmod +x /docker-entrypoint.sh
 
 USER ${S_USER}
 #######################

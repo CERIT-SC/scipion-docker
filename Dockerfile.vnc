@@ -123,8 +123,8 @@ RUN chown -R ${S_USER}:${S_USER} /mnt
 
 # Create TurboVNC config
 #========================
-COPY turbovncserver.conf /etc/turbovncserver.conf
-COPY turbovncserver-security.conf /etc/turbovncserver-security.conf
+COPY ${BUILD_HOME_PATH}/turbovncserver.conf /etc/turbovncserver.conf
+COPY ${BUILD_HOME_PATH}/turbovncserver-security.conf /etc/turbovncserver-security.conf
 RUN chmod go-rw /etc/turbovncserver.conf /etc/turbovncserver-security.conf
 
 # Prepare the desktop environment
@@ -135,12 +135,12 @@ RUN mkdir /tmp/.X11-unix || true
 RUN chmod -R ugo+rwx /tmp/.X11-unix
 
 # Copy xsession file
-COPY xsession /tmp/
+COPY ${BUILD_HOME_PATH}/xsession /tmp/
 RUN chmod +x /tmp/xsession
 
 # docker-entrypoint.sh
 #======================
-COPY docker-entrypoint.sh /
+COPY ${BUILD_HOME_PATH}/docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
 
 USER ${S_USER}

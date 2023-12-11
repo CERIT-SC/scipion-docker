@@ -4,6 +4,7 @@ FROM hub.cerit.io/scipion/scipion-base:${RELEASE_CHANNEL}
 
 ARG RELEASE_CHANNEL
 ENV RELEASE_CHANNEL=${RELEASE_CHANNEL}
+ENV BUILD_HOME_PATH=master-image
 
 USER root
 ###############
@@ -94,7 +95,7 @@ USER ${S_USER}
 #=================
 
 # Install plugins
-COPY plugin-list.txt ${S_USER_HOME}/
+COPY ${BUILD_HOME_PATH}/plugin-list.txt ${S_USER_HOME}/
 RUN for pl in $(cat ${S_USER_HOME}/plugin-list.txt); do ${S_USER_HOME}/scipion3/scipion3 installp -p $pl -j $(nproc) --noBin; done
 
 RUN ${S_USER_HOME}/scipion3/scipion3 installp -p scipion-em-xmipp -j $(nproc)
@@ -115,32 +116,32 @@ USER root
 #====================
 
 # Add hosts.conf
-COPY scipion/hosts.conf ${S_USER_HOME}/scipion3/config/hosts.conf
+COPY ${BUILD_HOME_PATH}/scipion/hosts.conf ${S_USER_HOME}/scipion3/config/hosts.conf
 RUN chown ${S_USER}:${S_USER} ${S_USER_HOME}/scipion3/config/hosts.conf
 
 # Prepare the desktop environment
 #=================================
 
 # Copy basic xfce4 configuration
-COPY xfce4 ${S_USER_HOME}/.config/xfce4/
+COPY ${BUILD_HOME_PATH}/xfce4 ${S_USER_HOME}/.config/xfce4/
 RUN chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/.config/xfce4
 
 # Disable logout from xfce4
 #RUN sed -ie 's/^Exec=.*/Exec=notify-send "Logout is disabled"/' /usr/share/applications/xfce4-session-logout.desktop
 
 # Copy xsession file
-COPY x11/xsession /tmp/
+COPY ${BUILD_HOME_PATH}/x11/xsession /tmp/
 RUN chmod +x /tmp/xsession
 
-COPY plugin-list.txt ${S_USER_HOME}/
+COPY ${BUILD_HOME_PATH}/plugin-list.txt ${S_USER_HOME}/
 
 # Prepare wrappers and other useful files
 #=========================================
 
 # Copy the auxiliary files
-COPY wrappers/controller /opt/controller
-COPY wrappers/firefox /opt/firefox
-COPY scipion /opt/scipion
+COPY ${BUILD_HOME_PATH}/wrappers/controller /opt/controller
+COPY ${BUILD_HOME_PATH}/wrappers/firefox /opt/firefox
+COPY ${BUILD_HOME_PATH}/scipion /opt/scipion
 
 # Add kubernetes helm charts for spawning tools, firefox...
 RUN git clone https://github.com/CERIT-SC/scipion-helm-charts /tmp/helm-charts \
@@ -148,7 +149,7 @@ RUN git clone https://github.com/CERIT-SC/scipion-helm-charts /tmp/helm-charts \
         && rm -rf /tmp/helm-charts/
 
 # Add dictionary of a binaries of the installed tools to find the right tool name
-COPY tool-dictionary.csv /opt/scipion/tool-dictionary.csv
+COPY ${BUILD_HOME_PATH}/tool-dictionary.csv /opt/scipion/tool-dictionary.csv
 
 # Set the wrappers as executable
 RUN chmod +x /opt/controller/controller-clone
@@ -170,19 +171,19 @@ RUN chown -R ${S_USER}:${S_USER} /opt
 RUN mkdir ${S_USER_HOME}/Desktop || true
 
 # Create Scipion icon
-ADD scipion/scipion_logo.png ${S_USER_HOME}/scipion3/
-COPY desktop/scipion.desktop ${S_USER_HOME}/Desktop/scipion.desktop
+COPY ${BUILD_HOME_PATH}/scipion/scipion_logo.png ${S_USER_HOME}/scipion3/
+COPY ${BUILD_HOME_PATH}/desktop/scipion.desktop ${S_USER_HOME}/Desktop/scipion.desktop
 RUN chmod +x ${S_USER_HOME}/Desktop/scipion.desktop
 
 # Create Controller clone icon
-COPY desktop/controller-clone.desktop ${S_USER_HOME}/Desktop/controller-clone.desktop
+COPY ${BUILD_HOME_PATH}/desktop/controller-clone.desktop ${S_USER_HOME}/Desktop/controller-clone.desktop
 RUN chmod +x ${S_USER_HOME}/Desktop/controller-clone.desktop
 
 RUN chown -R ${S_USER}:${S_USER} ${S_USER_HOME}/Desktop
 
 # docker-entrypoint.sh
 #======================
-COPY docker-entrypoint.sh /
+COPY ${BUILD_HOME_PATH}/docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
 
 USER ${S_USER}
