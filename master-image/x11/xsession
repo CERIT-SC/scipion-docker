@@ -10,16 +10,7 @@ export DISPLAY="${svc_vnc}:1"
 file_status="/mnt/shared/instance-status"
 file_log="/mnt/shared/instance.log"
 
-# Wait for the xorg (vnc container) (existency of xauthority means that xserver in the vnc container is running)
-while [ ! -f /mnt/shared/.Xauthority ]; do
-    sleep 2
-done
-# set target to the shared xauthority and extract cookie
-export XAUTHORITY=/mnt/shared/.Xauthority
-x11_cookie="$(echo $(xauth list) | awk '{print $3}')"
-# set target to the correct path of the local xauthority and create new entry with the cookie
-export XAUTHORITY=${S_USER_HOME}/.Xauthority
-xauth add "${DISPLAY}" "MIT-MAGIC-COOKIE-1" "${x11_cookie}"
+source /opt/shared-scripts/run/set-xauth.sh
 
 # Opens xterm with a tail the logs. Is is useful before running the desktop environment to prevent user from doing any actions, but show him the instance log
 while true; do
