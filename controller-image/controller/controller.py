@@ -23,7 +23,8 @@ class ControllerError(Enum):
     NONE           = 0
     FAILED_MOUNT   = 1
     PROJECT_LOCKED = 2
-    SYNC_ERROR     = 3
+    LOCK_ERROR     = 3
+    SYNC_ERROR     = 4
 
 class ControllerPhase(Enum):
     PRE_STAGE_IN          = 0 # Checking the mounts, lock the project...
@@ -193,7 +194,9 @@ class Controller:
             # refresh lock
             if self.sig_lock_refresh:
                 self.sig_lock_refresh = False
-                self._lock_refresh()
+                if not self._lock_refresh():
+                    self.error = ControllerError.LOCK_ERROR
+                    self._switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
             # switch to PRE_RUN phase
             if self.sync_clone.is_status(SyncStatus.COMPLETE) and \
@@ -238,7 +241,9 @@ class Controller:
             # refresh lock
             if self.sig_lock_refresh:
                 self.sig_lock_refresh = False
-                self._lock_refresh()
+                if not self._lock_refresh():
+                    self.error = ControllerError.LOCK_ERROR
+                    self._switch_phase(ControllerPhase.CRITICAL_ERROR_UNLOCK)
 
             # switch to PRE_STAGE_OUT phase
             if self.sig_finalsave:
@@ -324,8 +329,11 @@ class Controller:
         else:
             self.project_empty = False
 
-        self._lock_create()
+        if not self._lock_refresh():
+            self.error = ControllerError.LOCK_ERROR
+            return False
 
+        logger.info("The project has been locked to prevent modifications from another instance.")
         return True
 
     def _pre_run(self):
@@ -408,23 +416,25 @@ class Controller:
     def _lock_refresh(self):
         unix_time = str(get_unix_timestamp())
 
-        # create lock in OD project mount
-        with open(f"{self.p_od_project}/{f_project_lock}", "w") as f:
-            f.write(unix_time)
+        try:
+            # create lock in OD project mount
+            with open(f"{self.p_od_project}/{f_project_lock}", "w") as f:
+                f.write(unix_time)
 
-        # create lock in staged-in project volume mount
-        # The creation must be done on both side, because the autosave rewrites the refreshed lock in OD project mount.
-        # The creation before the autosave is complicated bacause the autosave is active after the RUN phase is reached,
-        # but the lock refresh is active in STAGE-IN and RUN phases.
-        p_vol_scipion_dir = f"{d_vol_project}/{d_scipion}"
-        if not os.path.isdir(p_vol_scipion_dir):
-            os.mkdir(p_vol_scipion_dir)
-        with open(f"{d_vol_project}/{f_project_lock}", "w") as f:
-            f.write(unix_time)
+            # create lock in staged-in project volume mount
+            # The creation must be done on both side, because the autosave rewrites the refreshed lock in OD project mount.
+            # The creation before the autosave is complicated bacause the autosave is active after the RUN phase is reached,
+            # but the lock refresh is active in STAGE-IN and RUN phases.
+            p_vol_scipion_dir = f"{d_vol_project}/{d_scipion}"
+            if not os.path.isdir(p_vol_scipion_dir):
+                os.mkdir(p_vol_scipion_dir)
+            with open(f"{d_vol_project}/{f_project_lock}", "w") as f:
+                f.write(unix_time)
+        except Exception as ex:
+            logger.error(f"An exception occurred while creating/refreshing a project lock. Ex: \"{str(ex)}\"")
+            return False
 
-    def _lock_create(self):
-        self._lock_refresh()
-        logger.info("The project has been locked to prevent modifications from another instance.")
+        return True
 
     def _lock_remove(self):
         p_od_project_lock = f"{self.p_od_project}/{f_project_lock}"
