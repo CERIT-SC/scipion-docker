@@ -13,6 +13,9 @@ instance_name = os.environ["INSTANCE_NAME"]
 instance_prefix = os.environ["INSTANCE_PREFIX"]
 instance_link = os.environ["INSTANCE_LINK"]
 
+dataset_spaceid = os.environ["OD_DATASET_SPACEID"]
+project_spaceid = os.environ["OD_PROJECT_SPACEID"]
+
 app = FastAPI()
 controller = Controller(namespace, instance_name, instance_prefix)
 
@@ -59,15 +62,17 @@ async def health():
 @app.get("/info")
 async def info():
     return {
-        "health":         controller.get_health(),
-        "phase":          controller.get_phase(),
-        "friendly_phase": controller.get_friendly_phase(),
-        "syncs":          controller.get_syncs(),
-        "name":           instance_name,
-        "link":           instance_link,
-        "main":           controller.kubectl.filter_main(),
-        "tools":          controller.kubectl.filter_tools(),
-        "specials":       controller.kubectl.filter_specials()
+        "health":          controller.get_health(),
+        "phase":           controller.get_phase(),
+        "friendly_phase":  controller.get_friendly_phase(),
+        "syncs":           controller.get_syncs(),
+        "name":            instance_name,
+        "link":            instance_link,
+        "main":            controller.kubectl.filter_main(),
+        "tools":           controller.kubectl.filter_tools(),
+        "specials":        controller.kubectl.filter_specials(),
+        "dataset_spaceid": dataset_spaceid,
+        "project_spaceid": project_spaceid
     }
 
 @app.get("/")
