@@ -112,7 +112,7 @@ class Controller:
             or self.phase == ControllerPhase.STAGE_OUT:
             return "staging-out"
 
-        return "end"
+        return "finished"
 
     def get_health(self):
         # Check for the occurence of an error
