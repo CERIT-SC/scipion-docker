@@ -6,3 +6,5 @@ This project deals with the use of the [Scipion](https://scipion.i2pc.es/) appli
 This application is available on [Rancher](rancher.cloud.e-infra.cz/) of the e-INFRA infrastructure and uses [Datahub](https://datahub.egi.eu/) as a Onedata installation.
 
 For more info about running the application, check the Rancher e-INFRA cloud [documentation](https://docs.cerit.io/docs/scipion/scipion.html).
+
+[Developer documentation](https://github.com/CERIT-SC/scipion-docker/tree/master/docs) is available in the `docs` directory.
