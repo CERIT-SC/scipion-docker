@@ -90,6 +90,8 @@ $ Container necessary for the instance to run properly. Created at instance star
 
 ## Overview of Kubernetes objects and Helm chart
 
+![Schema of Kubernetes objects of the deployed instance](images/sd-k8s-diagram.png?raw=true "Schema of Kubernetes objects of the deployed instance")
+
 **These *source codes* are located in the `scipion-helm-charts` repository.**
 
 - **Deployments** for necessary containers (`controller`, `master`, `vnc`)
