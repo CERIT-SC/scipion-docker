@@ -189,8 +189,12 @@ RUN chmod +x /docker-entrypoint.sh
 USER ${S_USER}
 ###############
 
-# TODO tmp workarounds
+# TODO Temporary workaround of getting of the plugin name that is required.
+# Workaround doesn't work for enabled QUEUE_FOR_JOB. It is autdated and useless.
 #RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_TOOL'] = protocol.getClassPlugin().getName()" && sed -i "164 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
+
+# TODO Temporary workaround of getting info whether the protocol requires GPU.
+# Workaround doesn't work for some plugins (e.g. relion) because the way of setting the GPU is not uniform.
 #RUN export string="\ \ \ \ \ \ \ \ submitDict['JOB_REQUIRES_GPU'] = protocol.requiresGpu()" && sed -i "165 i $string" /home/scipionuser/miniconda3/envs/scipion3/lib/python3.8/site-packages/pyworkflow/protocol/launch.py
 
 #ENTRYPOINT ["sleep", "infinity"]
